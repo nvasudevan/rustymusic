@@ -1,4 +1,4 @@
-use crate::raagas::{swars, bhupali};
+use crate::raagas::swars;
 use std::fmt;
 use std::time;
 use std::thread::sleep;
@@ -20,7 +20,7 @@ pub struct Beat {
 
 impl fmt::Display for Beat {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let dash = (0..(self.long-1)).map(|_| "-").collect::<String>();
+        let dash = (0..(self.long-1)).map(|_| " - ").collect::<String>();
         let mut _s = ".".to_string();
         match &self.swar {
             Some(sw) => {
@@ -95,7 +95,7 @@ impl Raag {
     fn play_avroha(&self, dev: &Device) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         for bt in self.avroha() {
-            print!("{} ", bt.swar.as_ref().unwrap());
+            print!("{} ", bt);
             std::io::stdout().flush();
             play_swar(&dev, &bt);
         }

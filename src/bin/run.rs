@@ -2,21 +2,13 @@ extern crate getopts;
 
 use std::env;
 use getopts::Options;
-use rand;
-use rand::{Rng, random};
 use rodio::{Sink, source::SineWave, default_output_device, output_devices, Device};
-use rustymusic::raagas::{elements, bhupali, durga, swars};
+use rustymusic::raagas::{elements, raag, swars};
 use rustymusic::raagas::swars::Pitch;
 use rustymusic::raagas::elements::{Melody, Raag, SwarBlock, Beat};
 use std::error::Error;
+use rustymusic::raagas::random::randomiser;
 
-
-fn rand_next() -> Option<u8> {
-    let mut rnd_num = rand::thread_rng();
-    let n: u8 = rnd_num.gen();
-
-    Some(n)
-}
 
 fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
@@ -30,20 +22,38 @@ fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melody>, 
         }
     };
 
+    // play N random notes
+    match matches.opt_str("z") {
+        Some(n) => {
+            let beats = randomiser(n.parse::<u32>().unwrap());
+            let swarblk = SwarBlock(beats);
+            return Ok(Box::new(swarblk));
+        }
+        _ => {}
+    }
+
     // playing swars from the file
     match matches.opt_str("f") {
         Some(fp) => {
             println!("Playing swars from the file {}", fp);
             let s = std::fs::read_to_string(fp).unwrap();
             let _s = s.replace("\n", "");
-            let swars: Vec<String> = _s.split(" ").map(|x| x.to_string().to_ascii_uppercase()).collect();
+            let swars: Vec<String> = _s.split(" ").map(|x| x.to_ascii_uppercase()).collect();
             println!("swars: {:?}", swars);
             let mut beats: Vec<Beat> = vec![];
             for swr in swars {
-                beats.push(
-                    Beat { swar: Some(Pitch::new(swr)),
-                                long: swars::BASE_SWAR_INTERVAL }
-                );
+                if swr.eq("-") {
+                    let prev = beats.pop().unwrap();
+                    let long = prev.long + 1;
+
+                    beats.push(Beat {swar: prev.swar, long: long});
+
+                } else {
+                    beats.push(
+                        Beat { swar: Some(Pitch::new(swr)),
+                            long: swars::BASE_SWAR_INTERVAL }
+                    );
+                }
             }
             let swarblk = SwarBlock(beats);
             return Ok(Box::new(swarblk));
@@ -57,11 +67,13 @@ fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melody>, 
             println!("playing raag: {}", r);
             match r.as_ref() {
                 "durga" => {
-                    let raag = durga::durga();
+                    let fp = format!("./config/durga");
+                    let raag = raag::raag("Durga".to_string(), fp);
                     Ok(Box::new(raag))
                 }
                 "bhupali" => {
-                    let raag = bhupali::bhupali();
+                    let fp = format!("./config/bhupali");
+                    let raag = raag::raag("Bhupali".to_string(), fp);
                     Ok(Box::new(raag))
                 }
                 _ => {
@@ -82,6 +94,7 @@ fn main() {
     let dev = default_output_device().unwrap();
 
     let mut opts = getopts::Options::new();
+    opts.optopt("z", "rand", "how many notes", "RAND");
     opts.optopt("r", "raag", "which raag to play", "RAAG");
     opts.optopt("f", "play", "play sars from file", "FILE");
     opts.optflag("h", "help", "usage");
@@ -91,6 +104,4 @@ fn main() {
         Ok(r) => { r.play(&dev)},
         Err(e) => { print_usage(&e.to_string(), &opts)}
     }
-
-    // play_sargam(&dev);
 }
