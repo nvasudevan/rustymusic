@@ -10,20 +10,21 @@ use std::fmt::Formatter;
 use std::error::Error;
 use rodio::source::Buffered;
 use crate::BEEP;
+use std::str::FromStr;
 
 #[derive(Debug, Clone)]
-pub struct Beat<'a> {
-    pub swar: Option<Pitch<'a>>,
+pub struct Beat {
+    pub swar: Option<Pitch>,
     pub long: u64,
 }
 
-impl<'a> fmt::Display for Beat<'a> {
+impl fmt::Display for Beat {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let dash = (0..(self.long-1)).map(|_| "-").collect::<String>();
         let mut _s = ".".to_string();
         match &self.swar {
             Some(sw) => {
-                _s  = format!("{}{}", self.swar.unwrap(), dash);
+                _s  = format!("{}{}", sw, dash);
             },
             _ => {}
         }
@@ -31,19 +32,33 @@ impl<'a> fmt::Display for Beat<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct SwarBlock<'a>(pub Vec<Beat<'a>>);
-
-#[derive(Debug, Clone)]
-pub struct Raag<'a> {
-    name: String,
-    aroha: Vec<Beat<'a>>,
-    avroha: Vec<Beat<'a>>,
-    pakad: Vec<SwarBlock<'a>>
+pub trait Melody {
+    fn play(&self, dev: &Device);
 }
 
-impl<'a> Raag<'a> {
-    pub fn new(name: String, aroha: Vec<Beat<'a>>, avroha: Vec<Beat<'a>>, pakad: Vec<SwarBlock<'a>>) -> Raag<'a> {
+#[derive(Debug, Clone)]
+pub struct SwarBlock(pub Vec<Beat>);
+
+impl Melody for SwarBlock {
+    fn play(&self, dev: &Device) {
+       for bt in &self.0 {
+           print!("{} ", bt);
+           std::io::stdout().flush();
+           play_swar(&dev, &bt);
+       }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Raag {
+    name: String,
+    aroha: Vec<Beat>,
+    avroha: Vec<Beat>,
+    pakad: Vec<SwarBlock>
+}
+
+impl Raag {
+    pub fn new(name: String, aroha: Vec<Beat>, avroha: Vec<Beat>, pakad: Vec<SwarBlock>) -> Raag {
         Raag {
             name,
             aroha,
@@ -67,23 +82,8 @@ impl<'a> Raag<'a> {
     pub fn pakad(&self) -> &Vec<SwarBlock> {
         &self.pakad
     }
-}
 
-pub trait Melody {
-    fn play_aroha(&self, dev: &Device);
-    fn play_avroha(&self, dev: &Device);
-    fn play_pakad(&self, dev: &Device);
-    fn play(&self, dev: &Device) {
-        self.play_aroha(dev);
-        delay(2);
-        self.play_avroha(&dev);
-        delay(2);
-        self.play_pakad(&dev);
-    }
-}
-
-impl<'a> Melody for Raag<'a> {
-     fn play_aroha(&self, dev: &Device) {
+    fn play_aroha(&self, dev: &Device) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         for bt in self.aroha() {
             print!("{} ", bt);
@@ -95,7 +95,7 @@ impl<'a> Melody for Raag<'a> {
     fn play_avroha(&self, dev: &Device) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         for bt in self.avroha() {
-            print!("{} ", bt.swar.unwrap());
+            print!("{} ", bt.swar.as_ref().unwrap());
             std::io::stdout().flush();
             play_swar(&dev, &bt);
         }
@@ -119,6 +119,17 @@ impl<'a> Melody for Raag<'a> {
     }
 }
 
+
+impl Melody for Raag {
+    fn play(&self, dev: &Device) {
+        self.play_aroha(dev);
+        delay(2);
+        self.play_avroha(&dev);
+        delay(2);
+        self.play_pakad(&dev);
+    }
+}
+
 pub fn delay(t: u64) {
     sleep(Duration::from_secs(t));
 }
@@ -127,7 +138,7 @@ pub fn play_swar(dev: &Device, bt: &Beat) {
     let sink = Sink::new(&dev);
     match &bt.swar {
         Some(p) =>  {
-            let sw = SineWave::from(*p);
+            let sw = SineWave::from(p.to_owned());
             sink.append(sw);
             sink.play();
             delay(bt.long);

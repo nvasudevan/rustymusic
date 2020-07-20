@@ -54,34 +54,34 @@ impl From<f64> for Hertz {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Pitch<'a>(&'a str);
+#[derive(Debug, Clone, PartialEq)]
+pub struct Pitch(String);
 
-impl<'a> Pitch<'a> {
-    pub fn new(name: &'a str) -> Self {
+impl Pitch {
+    pub fn new(name: String) -> Self {
         Self(name)
     }
 
-    pub fn hertz(&self) -> Option<&Hertz> {
-        let _hz = SWARS.get(self.0);
-
-        _hz.clone()
+    pub fn hertz(&self) -> Option<Hertz> {
+        let hz = SWARS.get(&*self.0);
+        let _hz = hz.unwrap();
+        Some(_hz.to_owned())
     }
 }
 
-impl<'a> Default for Pitch<'a> {
+impl Default for Pitch {
     fn default() -> Self {
-        Self("SA")
+        Self("SA".to_string())
     }
 }
 
-impl<'a> From<Pitch<'a>> for SineWave {
+impl From<Pitch> for SineWave {
     fn from(p: Pitch) -> Self {
         SineWave::new(p.hertz().unwrap().0 as u32)
     }
 }
 
-impl<'a> fmt::Display for Pitch<'a> {
+impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "{}", self.0)
     }
