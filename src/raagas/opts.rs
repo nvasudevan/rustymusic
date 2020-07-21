@@ -1,9 +1,8 @@
 use getopts::Options;
 
-use crate::raagas::elements::{Melody, SwarBlock, Beat};
+use crate::raagas::elements::{Melody, SwarBlock, Beat, Pitch, BASE_SWAR_INTERVAL};
 use std::error::Error;
 use crate::raagas::random::randomiser;
-use crate::raagas::swars;
 use crate::raagas::raag;
 
 pub fn print_usage(msg: &str, opts: &Options) {
@@ -46,8 +45,8 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
 
                 } else {
                     beats.push(
-                        Beat { swar: Some(swars::Pitch::new(swr)),
-                            long: swars::BASE_SWAR_INTERVAL }
+                        Beat { swar: Some(Pitch::new(swr)),
+                            long: BASE_SWAR_INTERVAL }
                     );
                 }
             }

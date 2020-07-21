@@ -1,9 +1,8 @@
 extern crate getopts;
 
 use std::env;
-use rodio::{Sink, source::SineWave, default_output_device, output_devices, Device};
 
-
+use rodio::default_output_device;
 use rustymusic::raagas::opts;
 
 

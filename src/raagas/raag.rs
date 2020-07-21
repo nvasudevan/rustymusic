@@ -1,7 +1,5 @@
 use std::path::Path;
-use crate::raagas::swars;
-use crate::raagas::elements::{Raag, Beat, SwarBlock};
-use crate::raagas::swars::Pitch;
+use crate::raagas::elements::{Raag, Beat, SwarBlock, Pitch, BASE_SWAR_INTERVAL};
 
 fn aroha(fp: &Path) -> Vec<Beat> {
     let s = std::fs::read_to_string(fp).unwrap();
@@ -11,9 +9,9 @@ fn aroha(fp: &Path) -> Vec<Beat> {
     let mut _aroha: Vec<Beat> = vec![];
     for swar in swars {
         if swar.eq("SA+") {
-            _aroha.push(Beat { swar: Some(Pitch::new(swar)), long: 2*swars::BASE_SWAR_INTERVAL });
+            _aroha.push(Beat { swar: Some(Pitch::new(swar)), long: 2 * BASE_SWAR_INTERVAL });
         } else {
-            _aroha.push(Beat { swar: Some(Pitch::new(swar)), long: swars::BASE_SWAR_INTERVAL });
+            _aroha.push(Beat { swar: Some(Pitch::new(swar)), long: BASE_SWAR_INTERVAL });
         }
     }
 
@@ -28,9 +26,9 @@ fn avroha(fp: &Path) -> Vec<Beat> {
     let mut _avroha: Vec<Beat> = vec![];
     for swar in swars {
         if swar.eq("SA") {
-            _avroha.push(Beat { swar: Some(Pitch::new(swar)), long: 2*swars::BASE_SWAR_INTERVAL });
+            _avroha.push(Beat { swar: Some(Pitch::new(swar)), long: 2 * BASE_SWAR_INTERVAL });
         } else {
-            _avroha.push(Beat { swar: Some(Pitch::new(swar)), long: swars::BASE_SWAR_INTERVAL });
+            _avroha.push(Beat { swar: Some(Pitch::new(swar)), long: BASE_SWAR_INTERVAL });
         }
     }
 
@@ -52,7 +50,7 @@ fn pakad(fp: &Path) -> Vec<SwarBlock> {
 
                 _blk.push(Beat { swar: prev.swar, long: long });
             } else {
-                _blk.push(Beat { swar: Some(Pitch::new(swar)), long: swars::BASE_SWAR_INTERVAL });
+                _blk.push(Beat { swar: Some(Pitch::new(swar)), long: BASE_SWAR_INTERVAL });
             }
         }
 
