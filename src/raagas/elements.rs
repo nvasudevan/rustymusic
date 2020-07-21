@@ -1,9 +1,8 @@
 use crate::raagas::swars;
 use std::fmt;
-use std::time;
 use std::thread::sleep;
 use std::time::Duration;
-use rodio::{Sink, source::SineWave, default_output_device, output_devices, Device};
+use rodio::{Sink, source::SineWave, Device};
 use crate::raagas::swars::{Pitch, BASE_SWAR_INTERVAL};
 use std::io::{Read, Write, BufReader};
 use std::fmt::Formatter;

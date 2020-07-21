@@ -1,11 +1,9 @@
 use std::path::Path;
-use std::fs::File;
 use crate::raagas::swars;
 use crate::raagas::elements::{Raag, Beat, SwarBlock};
-use rodio::Device;
 use crate::raagas::swars::Pitch;
 
-pub fn aroha(fp: &Path) -> Vec<Beat> {
+fn aroha(fp: &Path) -> Vec<Beat> {
     let s = std::fs::read_to_string(fp).unwrap();
     let _s = s.replace("\n", "");
     let swars: Vec<String> = _s.split(" ").map(|x| x.to_ascii_uppercase()).collect();
@@ -22,7 +20,7 @@ pub fn aroha(fp: &Path) -> Vec<Beat> {
     _aroha
 }
 
-pub fn avroha(fp: &Path) -> Vec<Beat> {
+fn avroha(fp: &Path) -> Vec<Beat> {
     let s = std::fs::read_to_string(fp).unwrap();
     let _s = s.replace("\n", "");
     let swars: Vec<String> = _s.split(" ").map(|x| x.to_ascii_uppercase()).collect();
@@ -39,7 +37,7 @@ pub fn avroha(fp: &Path) -> Vec<Beat> {
     _avroha
 }
 
-pub fn pakad(fp: &Path) -> Vec<SwarBlock> {
+fn pakad(fp: &Path) -> Vec<SwarBlock> {
     let s = std::fs::read_to_string(fp).unwrap();
     let blks: Vec<String>  = s.split(",").map(|x| x.trim().to_ascii_uppercase()).collect();
     let mut _pakad: Vec<SwarBlock> = vec![];
