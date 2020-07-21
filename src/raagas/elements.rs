@@ -19,16 +19,16 @@ pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     swars.insert("-NI", Hertz(261.63));
 
     swars.insert("SA", Hertz(277.18));
-    swars.insert("Re", Hertz(293.66));
+    swars.insert(".RE", Hertz(293.66));
     swars.insert("RE", Hertz(311.13));
-    swars.insert("Ga", Hertz(329.63));
+    swars.insert(".GA", Hertz(329.63));
     swars.insert("GA", Hertz(349.23));
     swars.insert("MA", Hertz(369.99));
     swars.insert("MA'", Hertz(392.00));
     swars.insert("PA", Hertz(415.30));
-    swars.insert("Dha", Hertz(440.0));
+    swars.insert(".DHA", Hertz(440.0));
     swars.insert("DHA", Hertz(466.16));
-    swars.insert("Ni", Hertz(493.88));
+    swars.insert(".NI", Hertz(493.88));
     swars.insert("NI", Hertz(523.25));
     swars.insert("SA+", Hertz(554.37));
 
