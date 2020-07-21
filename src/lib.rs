@@ -13,4 +13,3 @@ lazy_static! {
     pub static ref SWARS: HashMap<&'static str, Hertz> = initialise_swars();
     pub static ref BEEP: File = File::open("./samples/beep.wav").unwrap();
 }
-

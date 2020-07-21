@@ -5,6 +5,16 @@ use std::error::Error;
 use crate::raagas::random::randomiser;
 use crate::raagas::raag;
 
+pub fn build_opts() -> Options {
+    let mut opts = getopts::Options::new();
+    opts.optopt("z", "rand", "no of random swars to play", "<-z 5>");
+    opts.optopt("r", "raag", "raag to play", "-r <durga|bhupali>");
+    opts.optopt("f", "play", "play swars from file", "<file>");
+    opts.optflag("h", "help", "usage");
+
+    opts
+}
+
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
 }
@@ -77,7 +87,7 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
             }
         }
         _ => {
-            Err("A valid raag was not passed!".into())
+            Err("A valid option was not passed!".into())
         }
     }
 }
