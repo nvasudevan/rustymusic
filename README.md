@@ -1,3 +1,7 @@
+# rustymusic
+
+![Rust](https://github.com/nvasudevan/rustymusic/workflows/Rust/badge.svg)
+
 ## Play compositions in Hindustani music
 
 ### Swar Notations
