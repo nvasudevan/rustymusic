@@ -2,6 +2,7 @@
 mod tests {
     use crate::raagas::elements;
     use crate::raagas::raag;
+    use crate::raagas::random;
 
     #[test]
     fn test_hertz_sub_op() {
@@ -80,8 +81,9 @@ mod tests {
 
     #[test]
     fn test_randomiser() {
-        let z = 3;
+        let z: usize = 3;
         // test 3 notes are returned
-        assert_eq!("", "")
+        let swars = random::randomiser(z);
+        assert_eq!(swars.len(), z);
     }
 }
