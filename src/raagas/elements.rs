@@ -101,17 +101,34 @@ impl fmt::Display for Pitch {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Swar {
-    pub swar: Option<Pitch>,
+    pub pitch: Option<Pitch>,
     pub beat_cnt: u64,
+}
+
+impl Swar {
+    pub fn new(pitch: Pitch, beat_cnt: u64) -> Swar {
+        Swar {
+            pitch: Some(pitch),
+            beat_cnt
+        }
+    }
+
+    pub fn pitch(&self) -> Option<Pitch> {
+        self.pitch.clone()
+    }
+
+    pub fn beat_count(&self) -> u64 {
+        self.beat_cnt
+    }
 }
 
 impl fmt::Display for Swar {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let dash = (0..(self.beat_cnt-1)).map(|_| " - ").collect::<String>();
         let mut _s = "".to_string();
-        match &self.swar {
+        match &self.pitch {
             Some(sw) => {
                 _s  = format!("{}{}", sw, dash);
             },
@@ -246,7 +263,7 @@ impl Melody for Raag {
 
 pub fn play_swar(dev: &Device, sw: &Swar) {
     let sink = Sink::new(&dev);
-    match &sw.swar {
+    match &sw.pitch {
         Some(p) =>  {
             let sinew = SineWave::from(p.to_owned());
             sink.append(sinew);

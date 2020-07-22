@@ -12,7 +12,7 @@ pub fn randomiser(n: u32) -> Vec<Swar> {
                                 .map(|x| x.to_string())
                                 .map(|s|
                                     Swar {
-                                        swar: Some(Pitch::new(s)),
+                                        pitch: Some(Pitch::new(s)),
                                         beat_cnt: 1
                                     }
                                 )

@@ -11,9 +11,9 @@ fn aroha(fp: String) -> Vec<Swar> {
                                   .collect();
         for swar in swars {
             if swar.eq("SA+") {
-                aroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 2 });
+                aroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 2 });
             } else {
-                aroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+                aroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
             }
         }
     }
@@ -30,9 +30,9 @@ fn avroha(fp: String) -> Vec<Swar> {
             .collect();
         for swar in swars {
             if swar.eq("SA") {
-                avroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 2 });
+                avroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 2 });
             } else {
-                avroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+                avroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
             }
         }
     }
@@ -55,9 +55,9 @@ fn pakad(fp: String) -> Vec<SwarBlock> {
                     let prev = _blk.pop().unwrap();
                     let beat_cnt = prev.beat_cnt + 1;
 
-                    _blk.push(Swar { swar: prev.swar, beat_cnt });
+                    _blk.push(Swar { pitch: prev.pitch, beat_cnt });
                 } else {
-                    _blk.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+                    _blk.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
                 }
             }
 
@@ -77,7 +77,7 @@ fn alankars(fp: String) -> Vec<Vec<Swar>> {
                                      .collect();
         let mut alankar: Vec<Swar> = vec![];
         for swar in swars {
-            alankar.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+            alankar.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
         }
 
         alankars.push(alankar);
