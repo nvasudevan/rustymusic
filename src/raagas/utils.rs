@@ -4,6 +4,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
+    println!("reading from file: {}", fp);
     let _path = std::path::Path::new(fp.as_str());
     let f = File::open(_path);
     let buf = std::io::BufReader::new(f.unwrap());

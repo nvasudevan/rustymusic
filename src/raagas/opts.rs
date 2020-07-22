@@ -1,6 +1,6 @@
 use getopts::Options;
 
-use crate::raagas::elements::{Melody, SwarBlock, Swar, Pitch, CONF_DIR};
+use crate::raagas::elements::{Melody, SwarBlock, Swar, Pitch};
 use std::error::Error;
 use crate::raagas::random::randomiser;
 use crate::raagas::{raag, utils};
@@ -48,7 +48,6 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
                 let swars_vec: Vec<String> = l.split(" ")
                                           .map(|x| x.to_ascii_uppercase())
                                           .collect();
-                println!("swars_vec: {:?}", swars_vec);
                 for swr in swars_vec {
                     if swr.eq("-") {
                         let prev = swars.pop().unwrap();
@@ -76,8 +75,7 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
             println!("playing raag: {}", _r);
             match _r.as_ref() {
                 "durga" | "bhupali" => {
-                    let fp = format!("{}/{}", CONF_DIR, _r);
-                    let raag = raag::raag(_r, fp);
+                    let raag = raag::raag(_r);
                     Ok(Box::new(raag))
                 }
                 _ => {

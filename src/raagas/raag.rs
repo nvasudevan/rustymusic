@@ -96,7 +96,7 @@ pub fn raag(name: String) -> Raag {
     let pakadp = format!("{}/{}/pakad.txt", CONF_DIR, name);
     let pakad = pakad(pakadp);
 
-    let alankarsp = format!("{}/{}/alankaars.txt", CONF_DIR, name);
+    let alankarsp = format!("{}/{}/alankars.txt", CONF_DIR, name);
     let alankars = alankars(alankarsp);
 
     Raag::new(name, aroha, avroha, pakad, alankars)
