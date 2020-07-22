@@ -1,7 +1,7 @@
 
 use std::fmt;
-use std::thread::sleep;
-use std::time::Duration;
+
+
 use std::io::{Write, BufReader};
 use std::fmt::Formatter;
 use std::collections::HashMap;
@@ -238,7 +238,7 @@ impl Melody for Raag {
         // self.play_avroha(&dev);
         // utils::delay((((gap as f32) * BPM) as u64));
         self.play_pakad(&dev);
-        utils::delay((((gap as f32) * BPM) as u64));
+        utils::delay(((gap as f32) * BPM) as u64);
         self.play_alankars(&dev);
     }
 }

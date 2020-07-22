@@ -1,6 +1,6 @@
 use getopts::Options;
 
-use crate::raagas::elements::{Melody, SwarBlock, Swar, Pitch, BPM, VOLUME_LEVEL, CONF_DIR};
+use crate::raagas::elements::{Melody, SwarBlock, Swar, Pitch, CONF_DIR};
 use std::error::Error;
 use crate::raagas::random::randomiser;
 use crate::raagas::{raag, utils};

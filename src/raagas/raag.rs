@@ -1,5 +1,5 @@
-use std::path::Path;
-use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, BPM, CONF_DIR};
+
+use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, CONF_DIR};
 use crate::raagas::utils;
 
 fn aroha(fp: String) -> Vec<Swar> {
@@ -86,7 +86,7 @@ fn alankars(fp: String) -> Vec<Vec<Swar>> {
     alankars
 }
 
-pub fn raag(name: String, fp: String) -> Raag {
+pub fn raag(name: String) -> Raag {
     let arohap = format!("{}/{}/aroha.txt", CONF_DIR, name);
     let aroha = aroha(arohap);
 

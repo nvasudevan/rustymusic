@@ -1,7 +1,7 @@
 use rand;
 use crate::raagas::elements::Swar;
 use crate::SWARS;
-use crate::raagas::elements::{Pitch, BPM};
+use crate::raagas::elements::{Pitch};
 use rand::seq::SliceRandom;
 
 
