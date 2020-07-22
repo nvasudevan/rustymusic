@@ -8,8 +8,7 @@ use rodio::{Sink, source::SineWave, Device};
 use crate::raagas::utils;
 use crate::SWARS;
 
-pub const BPM: f32 = 1.0;
-pub const VOLUME_LEVEL: f32 = 2.0;
+pub const BPS: f32 = 1.0;  // equivalent to 60 BPM
 pub const CONF_DIR: &str = "./config";
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
@@ -33,6 +32,17 @@ pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     swars.insert("SA+", Hertz(554.37));
 
     swars
+}
+
+pub struct AudioDevice {
+    dev: Device,
+    vol: f32,
+}
+
+impl AudioDevice {
+    pub fn new(dev: Device, vol: f32) -> AudioDevice {
+        AudioDevice { dev, vol }
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -129,14 +139,14 @@ impl fmt::Display for Swar {
 }
 
 pub trait Melody {
-    fn play(&self, dev: &Device);
+    fn play(&self, dev: &AudioDevice);
 }
 
 #[derive(Debug, Clone)]
 pub struct SwarBlock(pub Vec<Swar>);
 
 impl Melody for SwarBlock {
-    fn play(&self, dev: &Device) {
+    fn play(&self, dev: &AudioDevice) {
        for bt in &self.0 {
            print!("{} ", bt);
            utils::io_flush();
@@ -189,7 +199,7 @@ impl Raag {
         &self.alankars
     }
 
-    fn play_aroha(&self, dev: &Device) {
+    fn play_aroha(&self, dev: &AudioDevice) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         for sw in self.aroha() {
             print!("{} ", sw);
@@ -198,7 +208,7 @@ impl Raag {
         }
     }
 
-    fn play_avroha(&self, dev: &Device) {
+    fn play_avroha(&self, dev: &AudioDevice) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         for sw in self.avroha() {
             print!("{} ", sw);
@@ -207,7 +217,7 @@ impl Raag {
         }
     }
 
-    fn play_pakad(&self, dev: &Device) {
+    fn play_pakad(&self, dev: &AudioDevice) {
         println!("\n=> Playing pakad for raag: {}", self.name());
         let mut _comma: bool = false;
         for blk in self.pakad() {
@@ -224,7 +234,7 @@ impl Raag {
         }
     }
 
-    fn play_alankars(&self, dev: &Device) {
+    fn play_alankars(&self, dev: &AudioDevice) {
         println!("\n=> Playing alankars for raag: {}", self.name());
         for alankar in self.alankars() {
             for sw in alankar {
@@ -238,36 +248,35 @@ impl Raag {
 }
 
 impl Melody for Raag {
-    fn play(&self, dev: &Device) {
+    fn play(&self, dev: &AudioDevice) {
         let gap: i32 = 4; //no of beats
-        self.play_aroha(dev);
-        utils::delay(((gap as f32) * BPM) as u64);
+        self.play_aroha(&dev);
+        utils::delay(((gap as f32) * BPS) as u64);
         self.play_avroha(&dev);
-        utils::delay(((gap as f32) * BPM) as u64);
+        utils::delay(((gap as f32) * BPS) as u64);
         self.play_pakad(&dev);
-        utils::delay(((gap as f32) * BPM) as u64);
+        utils::delay(((gap as f32) * BPS) as u64);
         self.play_alankars(&dev);
     }
 }
 
-
-pub fn play_swar(dev: &Device, sw: &Swar) {
-    let sink = Sink::new(&dev);
+pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
+    let sink = Sink::new(&dev.dev);
     match &sw.pitch {
         Some(p) =>  {
             let sinew = SineWave::from(p.to_owned());
             sink.append(sinew);
             sink.play();
-            sink.set_volume(VOLUME_LEVEL);
-            utils::delay(sw.beat_cnt * BPM as u64);
+            sink.set_volume(*&dev.vol as f32);
+            utils::delay(sw.beat_cnt * BPS as u64);
             sink.stop();
         },
         _ => {
             let f: std::fs::File = std::fs::File::open("./samples/beep.wav").unwrap();
-            let beep = rodio::play_once(&dev, BufReader::new(f)).unwrap();
-            beep.set_volume(VOLUME_LEVEL);
+            let beep = rodio::play_once(&dev.dev, BufReader::new(f)).unwrap();
+            sink.set_volume(*&dev.vol as f32);
             let bt_cnt = 2;
-            utils::delay((bt_cnt as f32 * BPM) as u64);
+            utils::delay((bt_cnt as f32 * BPS) as u64);
             beep.stop();
         }
     }
