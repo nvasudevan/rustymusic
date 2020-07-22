@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -17,4 +17,11 @@ pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
 
 pub fn delay(t: u64) {
     sleep(Duration::from_secs(t));
+}
+
+pub(crate) fn io_flush() {
+    match std::io::stdout().flush() {
+        Ok(()) => {},
+        _ => { panic!("I/O couldn't be flushed to terminal!")}
+    }
 }

@@ -31,7 +31,7 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
     // play N random notes
     match matches.opt_str("z") {
         Some(n) => {
-            let swars = randomiser(n.parse::<u32>().unwrap());
+            let swars = randomiser(n.parse::<usize>().unwrap());
             let swarblk = SwarBlock(swars);
             return Ok(Box::new(swarblk));
         }

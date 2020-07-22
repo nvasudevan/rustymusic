@@ -1,8 +1,5 @@
-
 use std::fmt;
-
-
-use std::io::{Write, BufReader};
+use std::io::BufReader;
 use std::fmt::Formatter;
 use std::collections::HashMap;
 use std::ops::Sub;
@@ -36,13 +33,6 @@ pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     swars.insert("SA+", Hertz(554.37));
 
     swars
-}
-
-fn io_flush() {
-    match std::io::stdout().flush() {
-        Ok(()) => {},
-        _ => { panic!("I/O couldn't be flushed to terminal!")}
-    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -149,7 +139,7 @@ impl Melody for SwarBlock {
     fn play(&self, dev: &Device) {
        for bt in &self.0 {
            print!("{} ", bt);
-           io_flush();
+           utils::io_flush();
            play_swar(&dev, &bt);
        }
     }
@@ -203,7 +193,7 @@ impl Raag {
         println!("\n=> Playing aroha for raag: {}", self.name());
         for sw in self.aroha() {
             print!("{} ", sw);
-            io_flush();
+            utils::io_flush();
             play_swar(&dev, &sw);
         }
     }
@@ -212,7 +202,7 @@ impl Raag {
         println!("\n=> Playing avroha for raag: {}", self.name());
         for sw in self.avroha() {
             print!("{} ", sw);
-            io_flush();
+            utils::io_flush();
             play_swar(&dev, &sw);
         }
     }
@@ -223,12 +213,12 @@ impl Raag {
         for blk in self.pakad() {
             if _comma {
                 print!(", ");
-                io_flush();
+                utils::io_flush();
             }
             _comma = true;
             for sw in &blk.0 {
                 print!("{} ", sw);
-                io_flush();
+                utils::io_flush();
                 play_swar(&dev, &sw);
             }
         }
@@ -239,7 +229,7 @@ impl Raag {
         for alankar in self.alankars() {
             for sw in alankar {
                 print!("{} ", sw);
-                io_flush();
+                utils::io_flush();
                 play_swar(&dev, &sw);
             }
             println!();
