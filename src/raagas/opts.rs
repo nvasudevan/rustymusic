@@ -1,12 +1,13 @@
 use getopts::Options;
 
-use crate::raagas::elements::{Melody, SwarBlock, Beat, Pitch, BASE_SWAR_INTERVAL};
+use crate::raagas::elements::{Melody, SwarBlock, Swar, Pitch, BPM, VOLUME_LEVEL, CONF_DIR};
 use std::error::Error;
 use crate::raagas::random::randomiser;
-use crate::raagas::raag;
+use crate::raagas::{raag, utils};
 
 pub fn build_opts() -> Options {
     let mut opts = getopts::Options::new();
+    opts.optopt("v", "vol", "set volume", "1.0 (default)");
     opts.optopt("z", "rand", "no of random swars to play", "<-z 5>");
     opts.optopt("r", "raag", "raag to play", "-r <durga|bhupali>");
     opts.optopt("f", "play", "play swars from file", "<file>");
@@ -30,37 +31,38 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
     // play N random notes
     match matches.opt_str("z") {
         Some(n) => {
-            let beats = randomiser(n.parse::<u32>().unwrap());
-            let swarblk = SwarBlock(beats);
+            let swars = randomiser(n.parse::<u32>().unwrap());
+            let swarblk = SwarBlock(swars);
             return Ok(Box::new(swarblk));
         }
         _ => {}
     }
 
-    // playing swars from the file
+    // playing swars from the file, although multiple lines, we see it as one block
     match matches.opt_str("f") {
         Some(fp) => {
             println!("Playing swars from the file {}", fp);
-            let s = std::fs::read_to_string(fp).unwrap();
-            let _s = s.replace("\n", "");
-            let swars: Vec<String> = _s.split(" ").map(|x| x.to_ascii_uppercase()).collect();
-            println!("swars: {:?}", swars);
-            let mut beats: Vec<Beat> = vec![];
-            for swr in swars {
-                if swr.eq("-") {
-                    let prev = beats.pop().unwrap();
-                    let long = prev.long + 1;
+            let lines = utils::lines_from_file(fp);
+            let mut swars: Vec<Swar> = vec![];
+            for l in lines {
+                let swars_vec: Vec<String> = l.split(" ")
+                                          .map(|x| x.to_ascii_uppercase())
+                                          .collect();
+                println!("swars_vec: {:?}", swars_vec);
+                for swr in swars_vec {
+                    if swr.eq("-") {
+                        let prev = swars.pop().unwrap();
+                        let beat_cnt = prev.beat_cnt + 1;
 
-                    beats.push(Beat {swar: prev.swar, long: long});
+                        swars.push(Swar {swar: prev.swar, beat_cnt});
 
-                } else {
-                    beats.push(
-                        Beat { swar: Some(Pitch::new(swr)),
-                            long: BASE_SWAR_INTERVAL }
-                    );
+                    } else {
+                        swars.push(Swar { swar: Some(Pitch::new(swr)), beat_cnt: 1 });
+                    }
                 }
+
             }
-            let swarblk = SwarBlock(beats);
+            let swarblk = SwarBlock(swars);
             return Ok(Box::new(swarblk));
         }
         _ => {}
@@ -68,17 +70,14 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
 
     // playing the raag given
     match matches.opt_str("r") {
+        // change case to lower
         Some(r) => {
-            println!("playing raag: {}", r);
-            match r.as_ref() {
-                "durga" => {
-                    let fp = format!("./config/durga");
-                    let raag = raag::raag("Durga".to_string(), fp);
-                    Ok(Box::new(raag))
-                }
-                "bhupali" => {
-                    let fp = format!("./config/bhupali");
-                    let raag = raag::raag("Bhupali".to_string(), fp);
+            let _r = r.to_lowercase();
+            println!("playing raag: {}", _r);
+            match _r.as_ref() {
+                "durga" | "bhupali" => {
+                    let fp = format!("{}/{}", CONF_DIR, _r);
+                    let raag = raag::raag(_r, fp);
                     Ok(Box::new(raag))
                 }
                 _ => {

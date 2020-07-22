@@ -1,77 +1,103 @@
 use std::path::Path;
-use crate::raagas::elements::{Raag, Beat, SwarBlock, Pitch, BASE_SWAR_INTERVAL};
+use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, BPM, CONF_DIR};
+use crate::raagas::utils;
 
-fn aroha(fp: &Path) -> Vec<Beat> {
-    let s = std::fs::read_to_string(fp).unwrap();
-    let _s = s.replace("\n", "");
-    let swars: Vec<String> = _s.split(" ").map(|x| x.to_ascii_uppercase()).collect();
-
-    let mut _aroha: Vec<Beat> = vec![];
-    for swar in swars {
-        if swar.eq("SA+") {
-            _aroha.push(Beat { swar: Some(Pitch::new(swar)), long: 2 * BASE_SWAR_INTERVAL });
-        } else {
-            _aroha.push(Beat { swar: Some(Pitch::new(swar)), long: BASE_SWAR_INTERVAL });
-        }
-    }
-
-    _aroha
-}
-
-fn avroha(fp: &Path) -> Vec<Beat> {
-    let s = std::fs::read_to_string(fp).unwrap();
-    let _s = s.replace("\n", "");
-    let swars: Vec<String> = _s.split(" ").map(|x| x.to_ascii_uppercase()).collect();
-
-    let mut _avroha: Vec<Beat> = vec![];
-    for swar in swars {
-        if swar.eq("SA") {
-            _avroha.push(Beat { swar: Some(Pitch::new(swar)), long: 2 * BASE_SWAR_INTERVAL });
-        } else {
-            _avroha.push(Beat { swar: Some(Pitch::new(swar)), long: BASE_SWAR_INTERVAL });
-        }
-    }
-
-    _avroha
-}
-
-fn pakad(fp: &Path) -> Vec<SwarBlock> {
-    let s = std::fs::read_to_string(fp).unwrap();
-    let blks: Vec<String>  = s.split(",").map(|x| x.trim().to_ascii_uppercase()).collect();
-    let mut _pakad: Vec<SwarBlock> = vec![];
-
-    for blk in blks {
-        let mut _blk: Vec<Beat> = vec![];
-        let swars: Vec<String> = blk.split(" ").map(|x| x.to_string()).collect();
+fn aroha(fp: String) -> Vec<Swar> {
+    let lines = utils::lines_from_file(fp);
+    let mut aroha: Vec<Swar> = vec![];
+    for l in lines {
+        let swars: Vec<String> = l.split(" ")
+                                  .map(|x| x.to_ascii_uppercase())
+                                  .collect();
         for swar in swars {
-            if swar.eq("-") {
-                let prev = _blk.pop().unwrap();
-                let long = prev.long + 1;
-
-                _blk.push(Beat { swar: prev.swar, long: long });
+            if swar.eq("SA+") {
+                aroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 2 });
             } else {
-                _blk.push(Beat { swar: Some(Pitch::new(swar)), long: BASE_SWAR_INTERVAL });
+                aroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
             }
         }
-
-        _pakad.push(SwarBlock(_blk));
     }
 
-    _pakad
+    aroha
+}
+
+fn avroha(fp: String) -> Vec<Swar> {
+    let lines = utils::lines_from_file(fp);
+    let mut avroha: Vec<Swar> = vec![];
+    for l in lines {
+        let swars: Vec<String> = l.split(" ")
+            .map(|x| x.to_ascii_uppercase())
+            .collect();
+        for swar in swars {
+            if swar.eq("SA") {
+                avroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 2 });
+            } else {
+                avroha.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+            }
+        }
+    }
+
+    avroha
+}
+
+fn pakad(fp: String) -> Vec<SwarBlock> {
+    let lines = utils::lines_from_file(fp);
+    let mut pakad: Vec<SwarBlock> = vec![];
+    for l in lines {
+        let blks: Vec<String>  = l.split(",")
+                                  .map(|x| x.trim().to_ascii_uppercase())
+                                  .collect();
+        for blk in blks {
+            let mut _blk: Vec<Swar> = vec![];
+            let swars: Vec<String> = blk.split(" ").map(|x| x.to_string()).collect();
+            for swar in swars {
+                if swar.eq("-") {
+                    let prev = _blk.pop().unwrap();
+                    let beat_cnt = prev.beat_cnt + 1;
+
+                    _blk.push(Swar { swar: prev.swar, beat_cnt });
+                } else {
+                    _blk.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+                }
+            }
+
+            pakad.push(SwarBlock(_blk));
+        }
+    }
+
+    pakad
+}
+
+fn alankars(fp: String) -> Vec<Vec<Swar>> {
+    let lines = utils::lines_from_file(fp);
+    let mut alankars: Vec<Vec<Swar>> = Vec::new();
+    for line in lines {
+        let swars: Vec<String> = line.split(" ")
+                                     .map(|x| x.to_ascii_uppercase())
+                                     .collect();
+        let mut alankar: Vec<Swar> = vec![];
+        for swar in swars {
+            alankar.push(Swar { swar: Some(Pitch::new(swar)), beat_cnt: 1 });
+        }
+
+        alankars.push(alankar);
+    }
+
+    alankars
 }
 
 pub fn raag(name: String, fp: String) -> Raag {
-    let arohap = format!("{}/aroha.txt", fp);
-    let aroha_path = std::path::Path::new(arohap.as_str());
-    let arohav = aroha(&aroha_path);
+    let arohap = format!("{}/{}/aroha.txt", CONF_DIR, name);
+    let aroha = aroha(arohap);
 
-    let avrohap = format!("{}/avroha.txt", fp);
-    let avroha_path = std::path::Path::new(avrohap.as_str());
-    let avrohav = avroha(&avroha_path);
+    let avrohap = format!("{}/{}/avroha.txt", CONF_DIR, name);
+    let avroha = avroha(avrohap);
 
-    let pakadp = format!("{}/pakad.txt", fp);
-    let pakad_path = std::path::Path::new(pakadp.as_str());
-    let pakadv = pakad(&pakad_path);
+    let pakadp = format!("{}/{}/pakad.txt", CONF_DIR, name);
+    let pakad = pakad(pakadp);
 
-    Raag::new(name, arohav, avrohav, pakadv)
+    let alankarsp = format!("{}/{}/alankaars.txt", CONF_DIR, name);
+    let alankars = alankars(alankarsp);
+
+    Raag::new(name, aroha, avroha, pakad, alankars)
 }

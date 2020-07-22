@@ -7,7 +7,7 @@ use rustymusic::raagas::opts;
 
 
 fn main() {
-    println!("\nA music application to hindustani compositions using Rust\n");
+    println!("\nA music app to render hindustani compositions using Rust\n");
     let args: Vec<String> = env::args().collect();
     let dev = default_output_device().unwrap();
 

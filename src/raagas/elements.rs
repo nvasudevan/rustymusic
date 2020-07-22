@@ -1,4 +1,3 @@
-use crate::SWARS;
 
 use std::fmt;
 use std::thread::sleep;
@@ -9,14 +8,18 @@ use std::collections::HashMap;
 use std::ops::Sub;
 
 use rodio::{Sink, source::SineWave, Device};
+use crate::raagas::utils;
+use crate::SWARS;
 
-pub const BASE_SWAR_INTERVAL: u64 = 1;
+pub const BPM: f32 = 1.0;
+pub const VOLUME_LEVEL: f32 = 2.0;
+pub const CONF_DIR: &str = "./config";
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();
-    swars.insert("-DHA", Hertz(233.08));
-    swars.insert("-Ni", Hertz(246.94));
-    swars.insert("-NI", Hertz(261.63));
+    swars.insert("_DHA", Hertz(233.08));
+    swars.insert("_.NI", Hertz(246.94)); //komal ni in lower octave
+    swars.insert("_NI", Hertz(261.63));
 
     swars.insert("SA", Hertz(277.18));
     swars.insert(".RE", Hertz(293.66));
@@ -99,15 +102,15 @@ impl fmt::Display for Pitch {
 }
 
 #[derive(Debug, Clone)]
-pub struct Beat {
+pub struct Swar {
     pub swar: Option<Pitch>,
-    pub long: u64,
+    pub beat_cnt: u64,
 }
 
-impl fmt::Display for Beat {
+impl fmt::Display for Swar {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let dash = (0..(self.long-1)).map(|_| " - ").collect::<String>();
-        let mut _s = ".".to_string();
+        let dash = (0..(self.beat_cnt-1)).map(|_| " - ").collect::<String>();
+        let mut _s = "".to_string();
         match &self.swar {
             Some(sw) => {
                 _s  = format!("{}{}", sw, dash);
@@ -123,7 +126,7 @@ pub trait Melody {
 }
 
 #[derive(Debug, Clone)]
-pub struct SwarBlock(pub Vec<Beat>);
+pub struct SwarBlock(pub Vec<Swar>);
 
 impl Melody for SwarBlock {
     fn play(&self, dev: &Device) {
@@ -138,18 +141,24 @@ impl Melody for SwarBlock {
 #[derive(Debug, Clone)]
 pub struct Raag {
     name: String,
-    aroha: Vec<Beat>,
-    avroha: Vec<Beat>,
-    pakad: Vec<SwarBlock>
+    aroha: Vec<Swar>,
+    avroha: Vec<Swar>,
+    pakad: Vec<SwarBlock>,
+    alankars: Vec<Vec<Swar>>,
 }
 
 impl Raag {
-    pub fn new(name: String, aroha: Vec<Beat>, avroha: Vec<Beat>, pakad: Vec<SwarBlock>) -> Raag {
+    pub fn new(name: String,
+               aroha: Vec<Swar>,
+               avroha: Vec<Swar>,
+               pakad: Vec<SwarBlock>,
+               alankars: Vec<Vec<Swar>>) -> Raag {
         Raag {
             name,
             aroha,
             avroha,
             pakad,
+            alankars,
         }
     }
 
@@ -157,11 +166,11 @@ impl Raag {
         self.name.to_string()
     }
 
-    pub fn aroha(&self) -> &Vec<Beat> {
+    pub fn aroha(&self) -> &Vec<Swar> {
         &self.aroha
     }
 
-    pub fn avroha(&self) -> &Vec<Beat> {
+    pub fn avroha(&self) -> &Vec<Swar> {
         &self.avroha
     }
 
@@ -169,21 +178,25 @@ impl Raag {
         &self.pakad
     }
 
+    pub fn alankars(&self) -> &Vec<Vec<Swar>> {
+        &self.alankars
+    }
+
     fn play_aroha(&self, dev: &Device) {
         println!("\n=> Playing aroha for raag: {}", self.name());
-        for bt in self.aroha() {
-            print!("{} ", bt);
+        for sw in self.aroha() {
+            print!("{} ", sw);
             io_flush();
-            play_swar(&dev, &bt);
+            play_swar(&dev, &sw);
         }
     }
 
     fn play_avroha(&self, dev: &Device) {
         println!("\n=> Playing avroha for raag: {}", self.name());
-        for bt in self.avroha() {
-            print!("{} ", bt);
+        for sw in self.avroha() {
+            print!("{} ", sw);
             io_flush();
-            play_swar(&dev, &bt);
+            play_swar(&dev, &sw);
         }
     }
 
@@ -196,45 +209,58 @@ impl Raag {
                 io_flush();
             }
             _comma = true;
-            for bt in &blk.0 {
-                print!("{} ", bt);
+            for sw in &blk.0 {
+                print!("{} ", sw);
                 io_flush();
-                play_swar(&dev, &bt);
+                play_swar(&dev, &sw);
             }
+        }
+    }
+
+    fn play_alankars(&self, dev: &Device) {
+        println!("\n=> Playing alankars for raag: {}", self.name());
+        for alankar in self.alankars() {
+            for sw in alankar {
+                print!("{} ", sw);
+                io_flush();
+                play_swar(&dev, &sw);
+            }
+            println!();
         }
     }
 }
 
-
 impl Melody for Raag {
     fn play(&self, dev: &Device) {
-        self.play_aroha(dev);
-        delay(2);
-        self.play_avroha(&dev);
-        delay(2);
+        let gap: i32 = 4; //no of beats
+        // self.play_aroha(dev);
+        // utils::delay((((gap as f32) * BPM) as u64));
+        // self.play_avroha(&dev);
+        // utils::delay((((gap as f32) * BPM) as u64));
         self.play_pakad(&dev);
+        utils::delay((((gap as f32) * BPM) as u64));
+        self.play_alankars(&dev);
     }
 }
 
-pub fn delay(t: u64) {
-    sleep(Duration::from_secs(t));
-}
 
-pub fn play_swar(dev: &Device, bt: &Beat) {
+pub fn play_swar(dev: &Device, sw: &Swar) {
     let sink = Sink::new(&dev);
-    match &bt.swar {
+    match &sw.swar {
         Some(p) =>  {
-            let sw = SineWave::from(p.to_owned());
-            sink.append(sw);
+            let sinew = SineWave::from(p.to_owned());
+            sink.append(sinew);
             sink.play();
-            delay(bt.long);
+            sink.set_volume(VOLUME_LEVEL);
+            utils::delay(sw.beat_cnt * BPM as u64);
             sink.stop();
         },
         _ => {
             let f: std::fs::File = std::fs::File::open("./samples/beep.wav").unwrap();
             let beep = rodio::play_once(&dev, BufReader::new(f)).unwrap();
-            beep.set_volume(0.2);
-            delay(BASE_SWAR_INTERVAL);
+            beep.set_volume(VOLUME_LEVEL);
+            let bt_cnt = 2;
+            utils::delay((bt_cnt as f32 * BPM) as u64);
             beep.stop();
         }
     }
