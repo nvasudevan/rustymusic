@@ -74,12 +74,12 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
             let _r = r.to_lowercase();
             println!("playing raag: {}", _r);
             match _r.as_ref() {
-                "durga" | "bhupali" => {
+                "bhupali" | "durga" | "yaman" | "hamsadhwani" => {
                     let raag = raag::raag(_r);
                     Ok(Box::new(raag))
                 }
                 _ => {
-                    Err(format!("Raag {} is unfamiliar, so can't play", r).into())
+                    Err(format!("Raag {} is unsupported at present, pick one of the supported ragas: bhupali, durga, yaman or hamsadhwani", r).into())
                 }
             }
         }
