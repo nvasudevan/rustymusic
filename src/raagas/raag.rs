@@ -9,11 +9,21 @@ fn aroha(fp: String) -> Vec<Swar> {
         let swars: Vec<String> = l.split(" ")
                                   .map(|x| x.to_ascii_uppercase())
                                   .collect();
-        for swar in swars {
-            if swar.eq("SA_") {
-                aroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 2 });
+        for sw in swars {
+            if sw.eq("-") {
+                //add an extra beat to previous swar
+                let prev = aroha.pop();
+                match &prev {
+                    Some(_sw) => {
+                        let p = _sw.pitch.as_ref().unwrap();
+                        aroha.push(Swar::new(p.clone(), _sw.beat_cnt + 1))
+                    },
+                    None => {
+                        // TODO: no previous swar, so we should be playing just thaalam.
+                    }
+                }
             } else {
-                aroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
+                aroha.push(Swar::new(Pitch::new(sw), 1))
             }
         }
     }
@@ -28,11 +38,21 @@ fn avroha(fp: String) -> Vec<Swar> {
         let swars: Vec<String> = l.split(" ")
             .map(|x| x.to_ascii_uppercase())
             .collect();
-        for swar in swars {
-            if swar.eq("SA") {
-                avroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 2 });
+        for sw in swars {
+            if sw.eq("-") {
+                //add an extra beat to previous swar
+                let prev = avroha.pop();
+                match &prev {
+                    Some(_sw) => {
+                        let p = _sw.pitch.as_ref().unwrap();
+                        avroha.push(Swar::new(p.clone(), _sw.beat_cnt + 1))
+                    },
+                    None => {
+                        // TODO: no previous swar, so we should be playing just thaalam.
+                    }
+                }
             } else {
-                avroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
+                avroha.push(Swar::new(Pitch::new(sw), 1))
             }
         }
     }
@@ -55,9 +75,9 @@ fn pakad(fp: String) -> Vec<SwarBlock> {
                     let prev = _blk.pop().unwrap();
                     let beat_cnt = prev.beat_cnt + 1;
 
-                    _blk.push(Swar { pitch: prev.pitch, beat_cnt });
+                    _blk.push(Swar::new(prev.pitch.unwrap(), beat_cnt));
                 } else {
-                    _blk.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
+                    _blk.push(Swar::new(Pitch::new(swar), 1));
                 }
             }
 
