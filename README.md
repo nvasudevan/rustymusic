@@ -6,12 +6,12 @@
 
 ### Swar Notations
 
-- shuddh swars are represented as `sa`, `re` and so on.
-- komal (or flat) swars are prefixed by a dot (.), e.g. `.re`
+- shuddh (or pure) swars are represented as `sa`, `re` and so on.
+- komal (or flat) swars are prefixed by a dot, e.g. `.re`
 - Tivra (or sharp) swars are shown with an apostrophe, e.g. `Ma'` 
-- lower octave notes are prefixed by a dash (-), e.g. `-dha`
-- higher octave notes are suffixed by a plus (+), e.g. `sa+`
-- swars played for longer than a beat is shown as a dash, e.g. to play `re` for two beats, `re - `
+- mandra (or lower octave) swars are prefixed by an underscore, e.g. `_dha`. A mandra komal swar is then prefixed by `_.`, e.g. `_.Ni`
+- higher octave notes are suffixed by a plus, e.g. `sa+`
+- swars played for longer than a matra (or beat) is ornamented with a dash, e.g. `re - ` indicates playing of `re` for two matras. 
 
 ### Usage
 
@@ -19,6 +19,6 @@ There are three options:
 
 - play a raag (`-r <raag>`), currently raag `durga` and `bhupali` are supported
 - play swars from a file (`-f <file>`). See files in `config` directory.
-- play random swars (`-z <N>`), where N indicates number of random swars to play.
+- play random swars (`-z <N>`), where N indicates number of random swars to play. This option is useful for vocals exercise.
 
 
