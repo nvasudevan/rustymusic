@@ -6,8 +6,7 @@
 
 ### Demo
 
-![Playing Raag Yaman]
-(demo/demo.gif)
+![Playing Raag Yaman](demo/demo.gif)
 
 ### Swar Notations
 
