@@ -10,7 +10,7 @@ fn aroha(fp: String) -> Vec<Swar> {
                                   .map(|x| x.to_ascii_uppercase())
                                   .collect();
         for swar in swars {
-            if swar.eq("SA+") {
+            if swar.eq("SA_") {
                 aroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 2 });
             } else {
                 aroha.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });

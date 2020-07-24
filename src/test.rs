@@ -52,12 +52,16 @@ mod tests {
     fn test_raag_aroha_as_string() {
         let s = "durga";
         let raag = raag::raag(s.to_string());
-        let expected = " SA RE MA PA DHA SA+ - ";
+        let expected = " SA RE MA PA DHA SA_ - ";
 
         let aroha = raag.aroha();
         let mut aroha_s = String::new();
         for sw in aroha {
-            aroha_s = format!("{} {}", aroha_s, sw);
+            let mut dash: String = "".to_string();
+            if sw.beat_cnt > 1 {
+                dash = (1..sw.beat_cnt-1).map(|_|  " - ").collect::<String>();
+            }
+            aroha_s = format!("{} {}{}", aroha_s, sw, dash);
         }
         assert_eq!(aroha_s, expected);
     }
@@ -67,7 +71,7 @@ mod tests {
         let s = "durga";
         let raag = raag::raag(s.to_string());
         let expected: Vec<elements::Swar> = vec![
-            elements::Swar::new(elements::Pitch::new("SA+".to_string()), 1),
+            elements::Swar::new(elements::Pitch::new("SA_".to_string()), 1),
             elements::Swar::new(elements::Pitch::new("DHA".to_string()), 1),
             elements::Swar::new(elements::Pitch::new("PA".to_string()), 1),
             elements::Swar::new(elements::Pitch::new("MA".to_string()), 1),
