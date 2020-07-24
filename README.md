@@ -17,7 +17,7 @@
 
 There are three options:
 
-- play a raag (`-r <raag>`), currently raag `durga` and `bhupali` are supported
+- play a raag (`-r <raag>`), currently raag `bhupali`, `durga`, `yaman` and `hamsadhwani` are supported
 - play swars from a file (`-f <file>`). See files in `config` directory.
 - play random swars (`-z <N>`), where N indicates number of random swars to play. This option is useful for vocals exercise.
 

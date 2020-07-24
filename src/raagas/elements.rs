@@ -29,7 +29,7 @@ pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     swars.insert("DHA", Hertz(466.16));
     swars.insert(".NI", Hertz(493.88));
     swars.insert("NI", Hertz(523.25));
-    swars.insert("SA+", Hertz(554.37));
+    swars.insert("SA_", Hertz(554.37));
 
     swars
 }
