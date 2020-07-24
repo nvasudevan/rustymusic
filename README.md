@@ -4,6 +4,11 @@
 
 ## Play compositions in Hindustani music
 
+### Demo
+
+![Playing Raag Yaman]
+(demo/demo.gif)
+
 ### Swar Notations
 
 - shuddh (or pure) swars are represented as `sa`, `re` and so on.
