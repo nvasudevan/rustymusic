@@ -250,7 +250,7 @@ impl Raag {
 
 impl Melody for Raag {
     fn play(&self, dev: &AudioDevice) {
-        let gap: i32 = 3; //no of beats
+        let gap: i32 = 1; //no of beats
         self.play_aroha(&dev);
         utils::delay(((gap as f32) * BPS) as u64);
         self.play_avroha(&dev);
