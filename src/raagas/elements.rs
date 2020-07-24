@@ -234,6 +234,7 @@ impl Raag {
         }
     }
 
+    #[allow(dead_code)]
     fn play_alankars(&self, dev: &AudioDevice) {
         println!("\n=> Playing alankars for raag: {}", self.name());
         for alankar in self.alankars() {
@@ -249,14 +250,14 @@ impl Raag {
 
 impl Melody for Raag {
     fn play(&self, dev: &AudioDevice) {
-        let gap: i32 = 4; //no of beats
+        let gap: i32 = 3; //no of beats
         self.play_aroha(&dev);
         utils::delay(((gap as f32) * BPS) as u64);
         self.play_avroha(&dev);
         utils::delay(((gap as f32) * BPS) as u64);
         self.play_pakad(&dev);
-        utils::delay(((gap as f32) * BPS) as u64);
-        self.play_alankars(&dev);
+        // utils::delay(((gap as f32) * BPS) as u64);
+        // self.play_alankars(&dev);
     }
 }
 
