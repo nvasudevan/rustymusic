@@ -1,6 +1,10 @@
+extern crate yaml_rust;
 
-use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, CONF_DIR};
+use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, CONF_DIR, Swarmaalika};
 use crate::raagas::utils;
+use yaml_rust::YamlLoader;
+use std::error::Error;
+
 
 fn aroha(fp: String) -> Vec<Swar> {
     let lines = utils::lines_from_file(fp);
@@ -106,6 +110,29 @@ fn alankars(fp: String) -> Vec<Vec<Swar>> {
     alankars
 }
 
+//-> Result<Swarmaalika, dyn Error> {
+fn swarmaalika(fp: String) -> Swarmaalika {
+    let s = utils::file_as_str(fp);
+    let yamlldr = YamlLoader::load_from_str(&s);
+    // match &yamlldr {
+    //     Ok(docs) => {
+    //         let doc = &docs[0];
+    //         let sthayi_s = &doc["sthayi"];
+    //         let antara_s = &doc["antara"];
+    //         let sthayi: Vec<SwarBlock> = Vec::new();
+    //         let antara: Vec<SwarBlock> = Vec::new();
+    //         let swarmaalika = Swarmaalika::new(sthayi, antara);
+    //
+    //         Ok()
+    //     },
+    //     _ => {
+    //         None
+    //     }
+    // }
+
+    Swarmaalika::new(Vec::new(), Vec::new())
+}
+
 pub fn raag(name: String) -> Raag {
     let arohap = format!("{}/{}/aroha.txt", CONF_DIR, name);
     let aroha = aroha(arohap);
@@ -119,5 +146,8 @@ pub fn raag(name: String) -> Raag {
     let alankarsp = format!("{}/{}/alankars.txt", CONF_DIR, name);
     let alankars = alankars(alankarsp);
 
-    Raag::new(name, aroha, avroha, pakad, alankars)
+    let swarmaalikap = format!("{}/{}/swarmaalika.yaml", CONF_DIR, name);
+    let swarmaalika = swarmaalika(swarmaalikap);
+
+    Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika)
 }

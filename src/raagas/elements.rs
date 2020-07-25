@@ -13,23 +13,23 @@ pub const CONF_DIR: &str = "./config";
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();
-    swars.insert("_DHA", Hertz(233.08));
+    swars.insert(".DHA", Hertz(233.08));
     swars.insert("_.NI", Hertz(246.94)); //komal ni in lower octave
-    swars.insert("_NI", Hertz(261.63));
+    swars.insert(".NI", Hertz(261.63));
 
     swars.insert("SA", Hertz(277.18));
-    swars.insert(".RE", Hertz(293.66));
+    swars.insert("_RE", Hertz(293.66));
     swars.insert("RE", Hertz(311.13));
-    swars.insert(".GA", Hertz(329.63));
+    swars.insert("_GA", Hertz(329.63));
     swars.insert("GA", Hertz(349.23));
     swars.insert("MA", Hertz(369.99));
     swars.insert("MA'", Hertz(392.00));
     swars.insert("PA", Hertz(415.30));
-    swars.insert(".DHA", Hertz(440.0));
+    swars.insert("_DHA", Hertz(440.0));
     swars.insert("DHA", Hertz(466.16));
-    swars.insert(".NI", Hertz(493.88));
+    swars.insert("_NI", Hertz(493.88));
     swars.insert("NI", Hertz(523.25));
-    swars.insert("SA_", Hertz(554.37));
+    swars.insert("SA.", Hertz(554.37));
 
     swars
 }
@@ -154,6 +154,72 @@ impl Melody for SwarBlock {
        }
     }
 }
+#[derive(Debug, Clone)]
+pub struct Swarmaalika {
+    pub sthayi: Vec<SwarBlock>,
+    pub antara: Vec<SwarBlock>,
+}
+
+impl Swarmaalika {
+    pub fn new(sthayi: Vec<SwarBlock>, antara: Vec<SwarBlock>) -> Self {
+       Swarmaalika {
+           sthayi,
+           antara
+       }
+    }
+
+}
+
+impl Melody for Swarmaalika {
+    fn play(&self, dev: &AudioDevice) {
+        // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
+        println!("Playing swarmaalika");
+        let sthayi = &self.sthayi;
+        let antara = &self.antara;
+        let gap:i32 = 1;
+
+        for blk in sthayi {
+            for sw in &blk.0 {
+                println!("{}", sw);
+                utils::io_flush();
+                play_swar(&dev, &sw);
+            }
+        }
+
+        let lineA = sthayi.get(0).unwrap();
+        for sw in &lineA.0 {
+            println!("{}", sw);
+            utils::io_flush();
+            play_swar(&dev, &sw);
+        }
+
+        for blk in antara {
+            for sw in &blk.0 {
+                println!("{}", sw);
+                utils::io_flush();
+                play_swar(&dev, sw);
+            }
+        }
+
+        for sw in &lineA.0 {
+            println!("{}", sw);
+            utils::io_flush();
+            play_swar(&dev, sw);
+        }
+        // tihayi is played n (=3) times
+        let n = 3;
+        for i in 0..3 {
+            // we only play the first j beats
+            let j = 8;
+            let tihyai = &lineA.0[..j];
+            for sw in tihyai {
+                println!("{}", sw);
+                utils::io_flush();
+                play_swar(&dev, &sw);
+            }
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct Raag {
@@ -162,6 +228,7 @@ pub struct Raag {
     avroha: Vec<Swar>,
     pakad: Vec<SwarBlock>,
     alankars: Vec<Vec<Swar>>,
+    swarmaalika: Swarmaalika,
 }
 
 impl Raag {
@@ -169,13 +236,15 @@ impl Raag {
                aroha: Vec<Swar>,
                avroha: Vec<Swar>,
                pakad: Vec<SwarBlock>,
-               alankars: Vec<Vec<Swar>>) -> Raag {
+               alankars: Vec<Vec<Swar>>,
+               swarmaalika: Swarmaalika) -> Raag {
         Raag {
             name,
             aroha,
             avroha,
             pakad,
             alankars,
+            swarmaalika,
         }
     }
 
@@ -197,6 +266,10 @@ impl Raag {
 
     pub fn alankars(&self) -> &Vec<Vec<Swar>> {
         &self.alankars
+    }
+
+    pub fn swarmaalika(&self) -> &Swarmaalika {
+        &self.swarmaalika
     }
 
     fn play_aroha(&self, dev: &AudioDevice) {
@@ -246,6 +319,7 @@ impl Raag {
             println!();
         }
     }
+
 }
 
 impl Melody for Raag {
@@ -256,6 +330,8 @@ impl Melody for Raag {
         self.play_avroha(&dev);
         utils::delay(((gap as f32) * BPS) as u64);
         self.play_pakad(&dev);
+        utils::delay(((gap as f32) * BPS) as u64);
+        // self.swarmaalika.play(dev);
         // utils::delay(((gap as f32) * BPS) as u64);
         // self.play_alankars(&dev);
     }

@@ -15,6 +15,18 @@ pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
     lines
 }
 
+pub(crate) fn file_as_str(fp: String) -> String {
+    let f = std::fs::read_to_string(fp);
+    match &f {
+        Ok(_s) => {
+            String::from(_s)
+        },
+        _ => {
+            String::new()
+        }
+    }
+}
+
 pub fn delay(t: u64) {
     sleep(Duration::from_secs(t));
 }
