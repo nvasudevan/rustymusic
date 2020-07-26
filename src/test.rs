@@ -44,14 +44,14 @@ mod tests {
     #[test]
     fn test_raag() {
         let s = "durga";
-        let raag = raag::raag(s.to_string());
+        let raag = raag::raag(s.to_string()).unwrap();
         assert_eq!(raag.name(), s);
     }
 
     #[test]
     fn test_raag_aroha_as_string() {
         let s = "durga";
-        let raag = raag::raag(s.to_string());
+        let raag = raag::raag(s.to_string()).unwrap();
         let expected = " SA RE MA PA DHA SA. - ";
 
         let aroha = raag.aroha();
@@ -69,7 +69,7 @@ mod tests {
     #[test]
     fn test_raag_avroha() {
         let s = "durga";
-        let raag = raag::raag(s.to_string());
+        let raag = raag::raag(s.to_string()).unwrap();
         let expected: Vec<elements::Swar> = vec![
             elements::Swar::new(elements::Pitch::new("SA.".to_string()), 1),
             elements::Swar::new(elements::Pitch::new("DHA".to_string()), 1),
