@@ -4,64 +4,41 @@ use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, CONF_DIR, Swarmaalik
 use crate::raagas::utils;
 use yaml_rust::YamlLoader;
 use std::error::Error;
+use self::yaml_rust::yaml;
 
 
-fn aroha(fp: String) -> Vec<Swar> {
-    let lines = utils::lines_from_file(fp);
-    let mut aroha: Vec<Swar> = vec![];
-    for l in lines {
-        let swars: Vec<String> = l.split(" ")
-                                  .map(|x| x.to_ascii_uppercase())
-                                  .collect();
-        for sw in swars {
-            if sw.eq("-") {
-                //add an extra beat to previous swar
-                let prev = aroha.pop();
-                match &prev {
-                    Some(_sw) => {
-                        let p = _sw.pitch.as_ref().unwrap();
-                        aroha.push(Swar::new(p.clone(), _sw.beat_cnt + 1))
-                    },
-                    None => {
-                        // TODO: no previous swar, so we should be playing just thaalam.
-                    }
+fn to_swars(s: &str) -> Vec<Swar> {
+    let mut _blk: Vec<Swar> = vec![];
+    let swars: Vec<String> = s.split(" ")
+        .map(|x| x.to_ascii_uppercase())
+        .collect();
+    println!("swars: {:?}", swars);
+    for sw in swars {
+        if sw.eq("-") {
+            //add an extra beat to previous swar
+            let prev = _blk.pop();
+            match &prev {
+                Some(_sw) => {
+                    let p = _sw.pitch.as_ref().unwrap();
+                    _blk.push(Swar::new(p.clone(), _sw.beat_cnt + 1))
+                },
+                None => {
+                    // TODO: no previous swar, so we should be playing just thaalam.
                 }
-            } else {
-                aroha.push(Swar::new(Pitch::new(sw), 1))
             }
+        } else {
+            _blk.push(Swar::new(Pitch::new(sw), 1));
         }
     }
 
-    aroha
+    _blk
 }
 
-fn avroha(fp: String) -> Vec<Swar> {
+fn aroha_avroha(fp: String) -> Vec<Swar> {
     let lines = utils::lines_from_file(fp);
-    let mut avroha: Vec<Swar> = vec![];
-    for l in lines {
-        let swars: Vec<String> = l.split(" ")
-            .map(|x| x.to_ascii_uppercase())
-            .collect();
-        for sw in swars {
-            if sw.eq("-") {
-                //add an extra beat to previous swar
-                let prev = avroha.pop();
-                match &prev {
-                    Some(_sw) => {
-                        let p = _sw.pitch.as_ref().unwrap();
-                        avroha.push(Swar::new(p.clone(), _sw.beat_cnt + 1))
-                    },
-                    None => {
-                        // TODO: no previous swar, so we should be playing just thaalam.
-                    }
-                }
-            } else {
-                avroha.push(Swar::new(Pitch::new(sw), 1))
-            }
-        }
-    }
+    let mut swars = to_swars(lines.get(0).unwrap().as_str());
 
-    avroha
+    swars
 }
 
 fn pakad(fp: String) -> Vec<SwarBlock> {
@@ -72,19 +49,7 @@ fn pakad(fp: String) -> Vec<SwarBlock> {
                                   .map(|x| x.trim().to_ascii_uppercase())
                                   .collect();
         for blk in blks {
-            let mut _blk: Vec<Swar> = vec![];
-            let swars: Vec<String> = blk.split(" ").map(|x| x.to_string()).collect();
-            for swar in swars {
-                if swar.eq("-") {
-                    let prev = _blk.pop().unwrap();
-                    let beat_cnt = prev.beat_cnt + 1;
-
-                    _blk.push(Swar::new(prev.pitch.unwrap(), beat_cnt));
-                } else {
-                    _blk.push(Swar::new(Pitch::new(swar), 1));
-                }
-            }
-
+            let mut _blk = to_swars(blk.as_str());
             pakad.push(SwarBlock(_blk));
         }
     }
@@ -96,49 +61,58 @@ fn alankars(fp: String) -> Vec<Vec<Swar>> {
     let lines = utils::lines_from_file(fp);
     let mut alankars: Vec<Vec<Swar>> = Vec::new();
     for line in lines {
-        let swars: Vec<String> = line.split(" ")
-                                     .map(|x| x.to_ascii_uppercase())
-                                     .collect();
-        let mut alankar: Vec<Swar> = vec![];
-        for swar in swars {
-            alankar.push(Swar { pitch: Some(Pitch::new(swar)), beat_cnt: 1 });
-        }
-
+        let alankar = to_swars(line.as_str());
         alankars.push(alankar);
     }
 
     alankars
 }
 
-//-> Result<Swarmaalika, dyn Error> {
-fn swarmaalika(fp: String) -> Swarmaalika {
+fn swarmaalika(fp: String) -> Option<Swarmaalika> {
     let s = utils::file_as_str(fp);
     let yamlldr = YamlLoader::load_from_str(&s);
-    // match &yamlldr {
-    //     Ok(docs) => {
-    //         let doc = &docs[0];
-    //         let sthayi_s = &doc["sthayi"];
-    //         let antara_s = &doc["antara"];
-    //         let sthayi: Vec<SwarBlock> = Vec::new();
-    //         let antara: Vec<SwarBlock> = Vec::new();
-    //         let swarmaalika = Swarmaalika::new(sthayi, antara);
-    //
-    //         Ok()
-    //     },
-    //     _ => {
-    //         None
-    //     }
-    // }
+    match &yamlldr {
+        Ok(docs) => {
+            let doc = &docs[0];
+            let sthayi_s = &doc["sthayi"];
+            let antara_s = &doc["antara"];
+            let mut sthayi: Vec<SwarBlock> = Vec::new();
+            let mut antara: Vec<SwarBlock> = Vec::new();
+            match sthayi_s {
+                yaml::Yaml::Array(ref v) => {
+                    for line in v {
+                        let _blk = to_swars(line.as_str().unwrap());
+                        sthayi.push(SwarBlock(_blk));
+                    }
+                },
+                _ => {}
+            }
+            match antara_s {
+                yaml::Yaml::Array(ref v) => {
+                     for line in v {
+                         let _blk = to_swars(line.as_str().unwrap());
+                         antara.push(SwarBlock(_blk));
+                     }
+                },
+                _ => {}
+            }
+            let swarmaalika = Swarmaalika::new(sthayi, antara);
 
-    Swarmaalika::new(Vec::new(), Vec::new())
+            Some(swarmaalika)
+        },
+        _ => {
+            None
+        }
+    }
+
 }
 
 pub fn raag(name: String) -> Raag {
     let arohap = format!("{}/{}/aroha.txt", CONF_DIR, name);
-    let aroha = aroha(arohap);
+    let aroha = aroha_avroha(arohap);
 
     let avrohap = format!("{}/{}/avroha.txt", CONF_DIR, name);
-    let avroha = avroha(avrohap);
+    let avroha = aroha_avroha(avrohap);
 
     let pakadp = format!("{}/{}/pakad.txt", CONF_DIR, name);
     let pakad = pakad(pakadp);
@@ -147,7 +121,7 @@ pub fn raag(name: String) -> Raag {
     let alankars = alankars(alankarsp);
 
     let swarmaalikap = format!("{}/{}/swarmaalika.yaml", CONF_DIR, name);
-    let swarmaalika = swarmaalika(swarmaalikap);
+    let swarmaalika = swarmaalika(swarmaalikap).unwrap();
 
     Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika)
 }

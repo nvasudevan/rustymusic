@@ -154,6 +154,7 @@ impl Melody for SwarBlock {
        }
     }
 }
+
 #[derive(Debug, Clone)]
 pub struct Swarmaalika {
     pub sthayi: Vec<SwarBlock>,
@@ -167,7 +168,6 @@ impl Swarmaalika {
            antara
        }
     }
-
 }
 
 impl Melody for Swarmaalika {
@@ -180,44 +180,51 @@ impl Melody for Swarmaalika {
 
         for blk in sthayi {
             for sw in &blk.0 {
-                println!("{}", sw);
+                print!("{} ", sw);
                 utils::io_flush();
                 play_swar(&dev, &sw);
             }
+            println!();
         }
-
+        println!();
         let lineA = sthayi.get(0).unwrap();
         for sw in &lineA.0 {
-            println!("{}", sw);
+            print!("{} ", sw);
             utils::io_flush();
             play_swar(&dev, &sw);
         }
+        println!();
 
         for blk in antara {
             for sw in &blk.0 {
-                println!("{}", sw);
+                print!("{} ", sw);
                 utils::io_flush();
                 play_swar(&dev, sw);
             }
+            println!();
         }
+        println!();
 
         for sw in &lineA.0 {
-            println!("{}", sw);
+            print!("{} ", sw);
             utils::io_flush();
             play_swar(&dev, sw);
         }
+        println!();
         // tihayi is played n (=3) times
         let n = 3;
         for i in 0..3 {
             // we only play the first j beats
-            let j = 8;
+            let j = (lineA.0.len()/2)-1;
             let tihyai = &lineA.0[..j];
             for sw in tihyai {
-                println!("{}", sw);
+                print!("{} ", sw);
                 utils::io_flush();
                 play_swar(&dev, &sw);
             }
+            println!();
         }
+        println!();
     }
 }
 
@@ -331,9 +338,9 @@ impl Melody for Raag {
         utils::delay(((gap as f32) * BPS) as u64);
         self.play_pakad(&dev);
         utils::delay(((gap as f32) * BPS) as u64);
-        // self.swarmaalika.play(dev);
-        // utils::delay(((gap as f32) * BPS) as u64);
-        // self.play_alankars(&dev);
+        self.swarmaalika.play(dev);
+        utils::delay(((gap as f32) * BPS) as u64);
+        self.play_alankars(&dev);
     }
 }
 
