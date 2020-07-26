@@ -173,7 +173,7 @@ impl Swarmaalika {
 impl Melody for Swarmaalika {
     fn play(&self, dev: &AudioDevice) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
-        println!("Playing swarmaalika");
+        println!("\nPlaying swarmaalika");
         let sthayi = &self.sthayi;
         let antara = &self.antara;
         let gap:i32 = 1;

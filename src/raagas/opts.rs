@@ -75,7 +75,7 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
             println!("playing raag: {}", _r);
             match _r.as_ref() {
                 "bhupali" | "durga" | "yaman" | "hamsadhwani" => {
-                    let raag = raag::raag(_r);
+                    let raag = raag::raag(_r).unwrap();
                     Ok(Box::new(raag))
                 }
                 _ => {
