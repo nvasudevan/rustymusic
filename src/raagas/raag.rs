@@ -9,10 +9,9 @@ use self::yaml_rust::{yaml, Yaml};
 
 fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
-    let swars: Vec<String> = s.split(" ")
+    let swars: Vec<String> = s.trim().split(" ")
         .map(|x| x.to_ascii_uppercase())
         .collect();
-    println!("swars: {:?}", swars);
     for sw in swars {
         if sw.eq("-") {
             //add an extra beat to previous swar
@@ -57,8 +56,11 @@ fn pakad(doc: &Yaml) -> Vec<SwarBlock> {
     match pakad_s {
         yaml::Yaml::Array(ref v) => {
             for line in v {
-                let _blk = to_swars(line.as_str().unwrap());
-                pakad.push(SwarBlock(_blk));
+                let blks: Vec<&str> = line.as_str().unwrap().split(",").collect();
+                for blk in blks {
+                    let _blk = to_swars(blk);
+                    pakad.push(SwarBlock(_blk));
+                }
             }
         },
         _ => {}
@@ -123,7 +125,10 @@ pub fn raag(name: String) -> Option<Raag> {
             let alankars = alankars(&doc);
             let swarmaalika = swarmaalika(&doc);
 
-            Some(Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika))
+            let r = Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika);
+            println!("r: {:#?}", r);
+
+            Some(r)
         },
         _ => {
             None
