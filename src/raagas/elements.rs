@@ -8,7 +8,7 @@ use rodio::{Sink, source::SineWave, Device};
 use crate::raagas::utils;
 use crate::SWARS;
 
-pub const BPS: f32 = 1.0;  // equivalent to 60 BPM
+pub const BPS: f64 = 0.5;  // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
@@ -331,15 +331,15 @@ impl Raag {
 
 impl Melody for Raag {
     fn play(&self, dev: &AudioDevice) {
-        let gap: i32 = 1; //no of beats
+        let gap: f64 = 1.0; //no of beats
         self.play_aroha(&dev);
-        utils::delay(((gap as f32) * BPS) as u64);
+        utils::delay(gap * BPS);
         self.play_avroha(&dev);
-        utils::delay(((gap as f32) * BPS) as u64);
+        utils::delay(gap * BPS);
         self.play_pakad(&dev);
-        utils::delay(((gap as f32) * BPS) as u64);
+        utils::delay(gap * BPS);
         self.swarmaalika.play(dev);
-        utils::delay(((gap as f32) * BPS) as u64);
+        utils::delay(gap * BPS);
         self.play_alankars(&dev);
     }
 }
@@ -350,9 +350,9 @@ pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
         Some(p) =>  {
             let sinew = SineWave::from(p.to_owned());
             sink.append(sinew);
-            sink.play();
             sink.set_volume(*&dev.vol as f32);
-            utils::delay(sw.beat_cnt * BPS as u64);
+            sink.play();
+            utils::delay(sw.beat_cnt as f64 * BPS);
             sink.stop();
         },
         _ => {
@@ -360,7 +360,7 @@ pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
             let beep = rodio::play_once(&dev.dev, BufReader::new(f)).unwrap();
             sink.set_volume(*&dev.vol as f32);
             let bt_cnt = 2;
-            utils::delay((bt_cnt as f32 * BPS) as u64);
+            utils::delay(bt_cnt as f64 * BPS);
             beep.stop();
         }
     }

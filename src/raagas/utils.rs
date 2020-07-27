@@ -27,8 +27,8 @@ pub(crate) fn file_as_str(fp: String) -> String {
     }
 }
 
-pub fn delay(t: u64) {
-    sleep(Duration::from_secs(t));
+pub fn delay(t: f64) {
+    sleep(Duration::from_secs_f64(t));
 }
 
 pub(crate) fn io_flush() {
