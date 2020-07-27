@@ -187,8 +187,8 @@ impl Melody for Swarmaalika {
             println!();
         }
         println!();
-        let lineA = sthayi.get(0).unwrap();
-        for sw in &lineA.0 {
+        let line_a = sthayi.get(0).unwrap();
+        for sw in &line_a.0 {
             print!("{} ", sw);
             utils::io_flush();
             play_swar(&dev, &sw);
@@ -205,7 +205,7 @@ impl Melody for Swarmaalika {
         }
         println!();
 
-        for sw in &lineA.0 {
+        for sw in &line_a.0 {
             print!("{} ", sw);
             utils::io_flush();
             play_swar(&dev, sw);
@@ -215,8 +215,8 @@ impl Melody for Swarmaalika {
         let _n = 3;
         for _i in 0..3 {
             // we only play the first j beats
-            let j = (lineA.0.len()/2)-1;
-            let tihyai = &lineA.0[..j];
+            let j = (line_a.0.len()/2)-1;
+            let tihyai = &line_a.0[..j];
             for sw in tihyai {
                 print!("{} ", sw);
                 utils::io_flush();
