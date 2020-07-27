@@ -125,10 +125,7 @@ pub fn raag(name: String) -> Option<Raag> {
             let alankars = alankars(&doc);
             let swarmaalika = swarmaalika(&doc);
 
-            let r = Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika);
-            println!("r: {:#?}", r);
-
-            Some(r)
+            Some(Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika))
         },
         _ => {
             None
