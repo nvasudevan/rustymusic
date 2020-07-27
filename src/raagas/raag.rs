@@ -3,7 +3,7 @@ extern crate yaml_rust;
 use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, CONF_DIR, Swarmaalika};
 use crate::raagas::utils;
 use yaml_rust::YamlLoader;
-use std::error::Error;
+
 use self::yaml_rust::{yaml, Yaml};
 
 

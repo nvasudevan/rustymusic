@@ -176,7 +176,7 @@ impl Melody for Swarmaalika {
         println!("\nPlaying swarmaalika");
         let sthayi = &self.sthayi;
         let antara = &self.antara;
-        let gap:i32 = 1;
+        let _gap:i32 = 1;
 
         for blk in sthayi {
             for sw in &blk.0 {
@@ -212,8 +212,8 @@ impl Melody for Swarmaalika {
         }
         println!();
         // tihayi is played n (=3) times
-        let n = 3;
-        for i in 0..3 {
+        let _n = 3;
+        for _i in 0..3 {
             // we only play the first j beats
             let j = (lineA.0.len()/2)-1;
             let tihyai = &lineA.0[..j];
