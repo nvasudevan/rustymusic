@@ -13,7 +13,7 @@ pub fn randomiser(n: usize) -> Vec<Swar> {
                                 .map(|s|
                                     Swar {
                                         pitch: Some(Pitch::new(s)),
-                                        beat_cnt: 1
+                                        beat_cnt: 1.0
                                     }
                                 )
                                 .collect();

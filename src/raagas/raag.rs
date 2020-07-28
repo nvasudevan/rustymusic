@@ -19,14 +19,22 @@ fn to_swars(s: &str) -> Vec<Swar> {
             match &prev {
                 Some(_sw) => {
                     let p = _sw.pitch.as_ref().unwrap();
-                    _blk.push(Swar::new(p.clone(), _sw.beat_cnt + 1))
+                    _blk.push(Swar::new(p.clone(), _sw.beat_cnt + 1.0))
                 },
                 None => {
                     // TODO: no previous swar, so we should be playing just thaalam.
                 }
             }
         } else {
-            _blk.push(Swar::new(Pitch::new(sw), 1));
+            if sw.contains(":") {
+                let _swrs: Vec<String> = sw.split(":").map(|x| x.to_string()).collect();
+                let beat_cnt: f32 = 1.0/_swrs.len() as f32;
+                for _sw in _swrs {
+                    _blk.push(Swar::new(Pitch::new(_sw), beat_cnt));
+                }
+            } else {
+                _blk.push(Swar::new(Pitch::new(sw), 1.0));
+            }
         }
     }
 
@@ -113,6 +121,7 @@ fn swarmaalika(doc: &Yaml) -> Swarmaalika {
 }
 
 pub fn raag(name: String) -> Option<Raag> {
+    // Given a raag name returns a Raag
     let raagp = format!("{}/{}.yaml", CONF_DIR, name);
     let s = utils::file_as_str(raagp);
     let yamlldr = YamlLoader::load_from_str(&s);
@@ -131,5 +140,4 @@ pub fn raag(name: String) -> Option<Raag> {
             None
         }
     }
-
 }

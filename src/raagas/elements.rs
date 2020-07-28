@@ -8,7 +8,7 @@ use rodio::{Sink, source::SineWave, Device};
 use crate::raagas::utils;
 use crate::SWARS;
 
-pub const BPS: f64 = 0.5;  // equivalent to 120 BPM
+pub const BPS: f32 = 0.5;  // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
@@ -104,11 +104,11 @@ impl fmt::Display for Pitch {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Swar {
     pub pitch: Option<Pitch>,
-    pub beat_cnt: u64,
+    pub beat_cnt: f32,
 }
 
 impl Swar {
-    pub fn new(pitch: Pitch, beat_cnt: u64) -> Swar {
+    pub fn new(pitch: Pitch, beat_cnt: f32) -> Swar {
         Swar {
             pitch: Some(pitch),
             beat_cnt
@@ -119,14 +119,17 @@ impl Swar {
         self.pitch.clone()
     }
 
-    pub fn beat_count(&self) -> u64 {
+    pub fn beat_count(&self) -> f32 {
         self.beat_cnt
     }
 }
 
 impl fmt::Display for Swar {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let dash = (0..(self.beat_cnt-1)).map(|_| " - ").collect::<String>();
+        let mut dash = String::new();
+        if self.beat_cnt > 1.0 {
+            dash = (0..(self.beat_cnt as usize-1)).map(|_| " - ").collect::<String>();
+        }
         let mut _s = "".to_string();
         match &self.pitch {
             Some(sw) => {
@@ -331,7 +334,7 @@ impl Raag {
 
 impl Melody for Raag {
     fn play(&self, dev: &AudioDevice) {
-        let gap: f64 = 1.0; //no of beats
+        let gap: f32 = 1.0; //no of beats
         self.play_aroha(&dev);
         utils::delay(gap * BPS);
         self.play_avroha(&dev);
@@ -352,15 +355,15 @@ pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
             sink.append(sinew);
             sink.set_volume(*&dev.vol as f32);
             sink.play();
-            utils::delay(sw.beat_cnt as f64 * BPS);
+            utils::delay(sw.beat_cnt * BPS);
             sink.stop();
         },
         _ => {
             let f: std::fs::File = std::fs::File::open("./samples/beep.wav").unwrap();
             let beep = rodio::play_once(&dev.dev, BufReader::new(f)).unwrap();
             sink.set_volume(*&dev.vol as f32);
-            let bt_cnt = 2;
-            utils::delay(bt_cnt as f64 * BPS);
+            let bt_cnt = 2.0;
+            utils::delay(bt_cnt * BPS);
             beep.stop();
         }
     }

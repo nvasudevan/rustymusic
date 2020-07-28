@@ -21,7 +21,7 @@ mod tests {
     fn test_base_swar_is_sa() {
         let base_hz = elements::Hertz(277.18);
         let sa_pitch = elements::Pitch::new("SA".to_string());
-        let sa = elements::Swar::new(sa_pitch, 1);
+        let sa = elements::Swar::new(sa_pitch, 1.0);
         assert_eq!(sa.pitch.unwrap().hertz().unwrap(), base_hz);
     }
 
@@ -29,7 +29,7 @@ mod tests {
     fn test_swar_single_beat() {
         // test string version of swar
         let sa_pitch = elements::Pitch::new("sa".to_string());
-        let sa = elements::Swar::new(sa_pitch, 1);
+        let sa = elements::Swar::new(sa_pitch, 1.0);
         assert_eq!(sa.to_string(), "sa");
     }
 
@@ -37,7 +37,7 @@ mod tests {
     fn test_swar_multiple_beats() {
         // test string version of swar
         let sa_pitch = elements::Pitch::new("sa".to_string());
-        let sa = elements::Swar::new(sa_pitch, 3);
+        let sa = elements::Swar::new(sa_pitch, 3.0);
         assert_eq!(sa.to_string(), "sa -  - ");
     }
 
@@ -58,8 +58,8 @@ mod tests {
         let mut aroha_s = String::new();
         for sw in aroha {
             let mut dash: String = "".to_string();
-            if sw.beat_cnt > 1 {
-                dash = (1..sw.beat_cnt-1).map(|_|  " - ").collect::<String>();
+            if sw.beat_cnt > 1.0 {
+                dash = (1..sw.beat_cnt as usize -1).map(|_|  " - ").collect::<String>();
             }
             aroha_s = format!("{} {}{}", aroha_s, sw, dash);
         }
@@ -71,12 +71,12 @@ mod tests {
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
         let expected: Vec<elements::Swar> = vec![
-            elements::Swar::new(elements::Pitch::new("SA.".to_string()), 1),
-            elements::Swar::new(elements::Pitch::new("DHA".to_string()), 1),
-            elements::Swar::new(elements::Pitch::new("PA".to_string()), 1),
-            elements::Swar::new(elements::Pitch::new("MA".to_string()), 1),
-            elements::Swar::new(elements::Pitch::new("RE".to_string()), 1),
-            elements::Swar::new(elements::Pitch::new("SA".to_string()), 2),
+            elements::Swar::new(elements::Pitch::new("SA.".to_string()), 1.0),
+            elements::Swar::new(elements::Pitch::new("DHA".to_string()), 1.0),
+            elements::Swar::new(elements::Pitch::new("PA".to_string()), 1.0),
+            elements::Swar::new(elements::Pitch::new("MA".to_string()), 1.0),
+            elements::Swar::new(elements::Pitch::new("RE".to_string()), 1.0),
+            elements::Swar::new(elements::Pitch::new("SA".to_string()), 2.0),
         ];
 
         let avroha = raag.avroha().clone();

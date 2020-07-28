@@ -51,12 +51,12 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
                 for swr in swars_vec {
                     if swr.eq("-") {
                         let prev = swars.pop().unwrap();
-                        let beat_cnt = prev.beat_cnt + 1;
+                        let beat_cnt = prev.beat_cnt + 1.0;
 
                         swars.push(Swar { pitch: prev.pitch, beat_cnt});
 
                     } else {
-                        swars.push(Swar { pitch: Some(Pitch::new(swr)), beat_cnt: 1 });
+                        swars.push(Swar { pitch: Some(Pitch::new(swr)), beat_cnt: 1.0 });
                     }
                 }
 
