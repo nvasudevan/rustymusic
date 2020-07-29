@@ -93,7 +93,7 @@ impl Pitch {
 
 impl Default for Pitch {
     fn default() -> Self {
-        Self("SA".to_string())
+        Self("S".to_string())
     }
 }
 
@@ -210,7 +210,7 @@ impl Melody for Swarmaalika {
         println!();
 
         for blk in antara {
-            for _ in (0..2) {
+            for _ in 0..2 {
                 for sw in &blk.0 {
                     print!("{} ", sw);
                     utils::io_flush();
