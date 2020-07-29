@@ -8,6 +8,9 @@
 
 ![Playing Raag Yaman](demo/demo.gif)
 
+[Play Raag Yaman](https://raw.githubusercontent.com/nvasudevan/rustymusic/master/demo/demo.mp3)
+
+
 ### Swar Notations
 
 - `shuddh` (or pure) swars are represented by uppercase letters, so `S`, `R` and so on.
