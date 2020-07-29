@@ -5,10 +5,8 @@
 ## Play compositions in Hindustani music
 
 ### Demo
-
+Play Raag Yaman [MP3](https://raw.githubusercontent.com/nvasudevan/rustymusic/master/demo/demo.mp3)
 ![Playing Raag Yaman](demo/demo.gif)
-
-[Play Raag Yaman](https://raw.githubusercontent.com/nvasudevan/rustymusic/master/demo/demo.mp3)
 
 
 ### Swar Notations
