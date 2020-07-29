@@ -13,23 +13,31 @@ pub const CONF_DIR: &str = "./config";
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();
-    swars.insert(".DHA", Hertz(233.08));
-    swars.insert("_.NI", Hertz(246.94)); //komal ni in lower octave
-    swars.insert(".NI", Hertz(261.63));
+    swars.insert(".P", Hertz(207.65));
+    swars.insert(".d", Hertz(220.00));
+    swars.insert(".D", Hertz(233.08));
+    swars.insert(".n", Hertz(246.94)); //komal ni in lower octave
+    swars.insert(".N", Hertz(261.63));
 
-    swars.insert("SA", Hertz(277.18));
-    swars.insert("_RE", Hertz(293.66));
-    swars.insert("RE", Hertz(311.13));
-    swars.insert("_GA", Hertz(329.63));
-    swars.insert("GA", Hertz(349.23));
-    swars.insert("MA", Hertz(369.99));
-    swars.insert("MA'", Hertz(392.00));
-    swars.insert("PA", Hertz(415.30));
-    swars.insert("_DHA", Hertz(440.0));
-    swars.insert("DHA", Hertz(466.16));
-    swars.insert("_NI", Hertz(493.88));
-    swars.insert("NI", Hertz(523.25));
-    swars.insert("SA.", Hertz(554.37));
+    swars.insert("S", Hertz(277.18)); // C#
+    swars.insert("r", Hertz(293.66));
+    swars.insert("R", Hertz(311.13));
+    swars.insert("g", Hertz(329.63));
+    swars.insert("G", Hertz(349.23));
+    swars.insert("M", Hertz(369.99));
+    swars.insert("M'", Hertz(392.00));
+    swars.insert("P", Hertz(415.30));
+    swars.insert("d", Hertz(440.0));
+    swars.insert("D", Hertz(466.16));
+    swars.insert("n", Hertz(493.88));
+    swars.insert("N", Hertz(523.25));
+    swars.insert("S.", Hertz(554.37));
+    swars.insert("r.", Hertz(587.33));
+    swars.insert("R.", Hertz(622.25));
+    swars.insert("g.", Hertz(659.25));
+    swars.insert("G.", Hertz(698.46));
+    swars.insert("M.", Hertz(739.99));
+    swars.insert("M'.", Hertz(783.99));
 
     swars
 }
@@ -179,15 +187,18 @@ impl Melody for Swarmaalika {
         println!("\nPlaying swarmaalika");
         let sthayi = &self.sthayi;
         let antara = &self.antara;
-        let _gap:i32 = 1;
+        // let _gap:i32 = 1;
 
+        // play each line of sthayi twice
         for blk in sthayi {
-            for sw in &blk.0 {
-                print!("{} ", sw);
-                utils::io_flush();
-                play_swar(&dev, &sw);
+            for _ in 0..2 {
+                for sw in &blk.0 {
+                    print!("{} ", sw);
+                    utils::io_flush();
+                    play_swar(&dev, &sw);
+                }
+                println!();
             }
-            println!();
         }
         println!();
         let line_a = sthayi.get(0).unwrap();
@@ -199,12 +210,14 @@ impl Melody for Swarmaalika {
         println!();
 
         for blk in antara {
-            for sw in &blk.0 {
-                print!("{} ", sw);
-                utils::io_flush();
-                play_swar(&dev, sw);
+            for _ in (0..2) {
+                for sw in &blk.0 {
+                    print!("{} ", sw);
+                    utils::io_flush();
+                    play_swar(&dev, sw);
+                }
+                println!();
             }
-            println!();
         }
         println!();
 
