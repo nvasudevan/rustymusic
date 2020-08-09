@@ -1,9 +1,9 @@
 use getopts::Options;
 
-use crate::raagas::elements::{Melody, SwarBlock, Swar, Pitch};
-use std::error::Error;
+use crate::raagas::elements::{Melody, Pitch, Swar, SwarBlock};
 use crate::raagas::random::randomiser;
 use crate::raagas::{raag, utils};
+use std::error::Error;
 
 pub fn build_opts() -> Options {
     let mut opts = getopts::Options::new();
@@ -20,9 +20,12 @@ pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
 }
 
-pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melody>, Box<dyn Error>> {
+pub fn parse_opts<'a>(
+    opts: &Options,
+    args: Vec<String>,
+) -> Result<Box<dyn Melody>, Box<dyn Error>> {
     let matches = match opts.parse(&args[1..]) {
-        Ok(m) => {m},
+        Ok(m) => m,
         Err(e) => {
             panic!("Nothing matched: {}", e.to_string());
         }
@@ -45,21 +48,23 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
             let lines = utils::lines_from_file(fp);
             let mut swars: Vec<Swar> = vec![];
             for l in lines {
-                let swars_vec: Vec<String> = l.split(" ")
-                                          .map(|x| x.to_ascii_uppercase())
-                                          .collect();
+                let swars_vec: Vec<String> = l.split(" ").map(|x| x.to_ascii_uppercase()).collect();
                 for swr in swars_vec {
                     if swr.eq("-") {
                         let prev = swars.pop().unwrap();
                         let beat_cnt = prev.beat_cnt + 1.0;
 
-                        swars.push(Swar { pitch: prev.pitch, beat_cnt});
-
+                        swars.push(Swar {
+                            pitch: prev.pitch,
+                            beat_cnt,
+                        });
                     } else {
-                        swars.push(Swar { pitch: Some(Pitch::new(swr)), beat_cnt: 1.0 });
+                        swars.push(Swar {
+                            pitch: Some(Pitch::new(swr)),
+                            beat_cnt: 1.0,
+                        });
                     }
                 }
-
             }
             let swarblk = SwarBlock(swars);
             return Ok(Box::new(swarblk));
@@ -83,8 +88,6 @@ pub fn parse_opts<'a>(opts: &Options, args: Vec<String>) -> Result<Box<dyn Melod
                 }
             }
         }
-        _ => {
-            Err("A valid option was not passed!".into())
-        }
+        _ => Err("A valid option was not passed!".into()),
     }
 }

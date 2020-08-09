@@ -59,7 +59,9 @@ mod tests {
         for sw in aroha {
             let mut dash: String = "".to_string();
             if sw.beat_cnt > 1.0 {
-                dash = (1..sw.beat_cnt as usize -1).map(|_|  " - ").collect::<String>();
+                dash = (1..sw.beat_cnt as usize - 1)
+                    .map(|_| " - ")
+                    .collect::<String>();
             }
             aroha_s = format!("{} {}{}", aroha_s, sw, dash);
         }

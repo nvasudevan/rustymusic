@@ -8,9 +8,7 @@ pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
     let _path = std::path::Path::new(fp.as_str());
     let f = File::open(_path);
     let buf = std::io::BufReader::new(f.unwrap());
-    let lines: Vec<String> = buf.lines()
-        .map(|x| x.unwrap())
-        .collect();
+    let lines: Vec<String> = buf.lines().map(|x| x.unwrap()).collect();
 
     lines
 }
@@ -18,12 +16,8 @@ pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
 pub(crate) fn file_as_str(fp: String) -> String {
     let f = std::fs::read_to_string(fp);
     match &f {
-        Ok(_s) => {
-            String::from(_s)
-        },
-        _ => {
-            String::new()
-        }
+        Ok(_s) => String::from(_s),
+        _ => String::new(),
     }
 }
 
@@ -33,7 +27,7 @@ pub fn delay(t: f32) {
 
 pub(crate) fn io_flush() {
     match std::io::stdout().flush() {
-        Ok(()) => {},
-        _ => { panic!("I/O couldn't be flushed to terminal!")}
+        Ok(()) => {}
+        _ => panic!("I/O couldn't be flushed to terminal!"),
     }
 }

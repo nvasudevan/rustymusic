@@ -1,18 +1,18 @@
-use std::fmt;
-use std::io::BufReader;
-use std::fmt::Formatter;
 use std::collections::HashMap;
+use std::fmt;
+use std::fmt::Formatter;
+use std::io::BufReader;
 use std::ops::Sub;
 
-use rodio::{Sink, source::SineWave, Device, Source};
+use rodio::{source::SineWave, Device, Sink, Source};
 
 use crate::raagas::utils;
 use crate::SWARS;
-use std::fs::File;
 use rodio::decoder::Decoder;
-use rodio::source::{TakeDuration, Repeat};
+use rodio::source::{Repeat, TakeDuration};
+use std::fs::File;
 
-pub const BPS: f32 = 0.5;  // equivalent to 120 BPM
+pub const BPS: f32 = 0.5; // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
 pub const BEATMP3: (&str, f32) = ("./samples/1beat.mp3", BPS);
 
@@ -124,7 +124,7 @@ impl Swar {
     pub fn new(pitch: Pitch, beat_cnt: f32) -> Swar {
         Swar {
             pitch: Some(pitch),
-            beat_cnt
+            beat_cnt,
         }
     }
 
@@ -141,13 +141,15 @@ impl fmt::Display for Swar {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut dash = String::new();
         if self.beat_cnt > 1.0 {
-            dash = (0..(self.beat_cnt as usize-1)).map(|_| " - ").collect::<String>();
+            dash = (0..(self.beat_cnt as usize - 1))
+                .map(|_| " - ")
+                .collect::<String>();
         }
         let mut _s = "".to_string();
         match &self.pitch {
             Some(sw) => {
-                _s  = format!("{}{}", sw, dash);
-            },
+                _s = format!("{}{}", sw, dash);
+            }
             _ => {}
         }
         write!(f, "{}", _s)
@@ -163,11 +165,11 @@ pub struct SwarBlock(pub Vec<Swar>);
 
 impl Melody for SwarBlock {
     fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
-       for bt in &self.0 {
-           print!("{} ", bt);
-           utils::io_flush();
-           play_swar_with_taal(&dev, &bt, Some(&beat_src));
-       }
+        for bt in &self.0 {
+            print!("{} ", bt);
+            utils::io_flush();
+            play_swar_with_taal(&dev, &bt, Some(&beat_src));
+        }
     }
 }
 
@@ -179,10 +181,7 @@ pub struct Swarmaalika {
 
 impl Swarmaalika {
     pub fn new(sthayi: Vec<SwarBlock>, antara: Vec<SwarBlock>) -> Self {
-       Swarmaalika {
-           sthayi,
-           antara
-       }
+        Swarmaalika { sthayi, antara }
     }
 }
 
@@ -237,7 +236,7 @@ impl Melody for Swarmaalika {
         let _n = 3;
         for _i in 0..3 {
             // we only play the first j beats
-            let j = (line_a.0.len()/2)-1;
+            let j = (line_a.0.len() / 2) - 1;
             let tihyai = &line_a.0[..j];
             for sw in tihyai {
                 print!("{} ", sw);
@@ -261,12 +260,14 @@ pub struct Raag {
 }
 
 impl Raag {
-    pub fn new(name: String,
-               aroha: Vec<Swar>,
-               avroha: Vec<Swar>,
-               pakad: Vec<SwarBlock>,
-               alankars: Vec<Vec<Swar>>,
-               swarmaalika: Swarmaalika) -> Raag {
+    pub fn new(
+        name: String,
+        aroha: Vec<Swar>,
+        avroha: Vec<Swar>,
+        pakad: Vec<SwarBlock>,
+        alankars: Vec<Vec<Swar>>,
+        swarmaalika: Swarmaalika,
+    ) -> Raag {
         Raag {
             name,
             aroha,
@@ -301,7 +302,7 @@ impl Raag {
         &self.swarmaalika
     }
 
-    fn play_aroha(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_aroha(&self, dev: &AudioDevice) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         for sw in self.aroha() {
             print!("{} ", sw);
@@ -310,7 +311,7 @@ impl Raag {
         }
     }
 
-    fn play_avroha(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_avroha(&self, dev: &AudioDevice) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         for sw in self.avroha() {
             print!("{} ", sw);
@@ -319,7 +320,7 @@ impl Raag {
         }
     }
 
-    fn play_pakad(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_pakad(&self, dev: &AudioDevice) {
         println!("\n=> Playing pakad for raag: {}", self.name());
         let mut _comma: bool = false;
         for blk in self.pakad() {
@@ -337,7 +338,11 @@ impl Raag {
     }
 
     #[allow(dead_code)]
-    fn play_alankars(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_alankars(
+        &self,
+        dev: &AudioDevice,
+        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+    ) {
         println!("\n=> Playing alankars for raag: {}", self.name());
         for alankar in self.alankars() {
             for sw in alankar {
@@ -348,17 +353,16 @@ impl Raag {
             println!();
         }
     }
-
 }
 
 impl Melody for Raag {
     fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
         let gap: f32 = 1.0; //no of beats
-        self.play_aroha(&dev, &beat_src);
+        self.play_aroha(&dev);
         utils::delay(gap * BPS);
-        self.play_avroha(&dev, &beat_src);
+        self.play_avroha(&dev);
         utils::delay(gap * BPS);
-        self.play_pakad(&dev, &beat_src);
+        self.play_pakad(&dev);
         utils::delay(gap * BPS);
         self.swarmaalika.play(dev, beat_src.clone());
         utils::delay(gap * BPS);
@@ -366,17 +370,21 @@ impl Melody for Raag {
     }
 }
 
-pub fn play_swar_with_taal(dev: &AudioDevice, sw: &Swar, beat_source: Option<&Repeat<TakeDuration<Decoder<BufReader<File>>>>>) {
+pub fn play_swar_with_taal(
+    dev: &AudioDevice,
+    sw: &Swar,
+    beat_source: Option<&Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+) {
     let sink = Sink::new(&dev.dev);
     match &sw.pitch {
-        Some(p) =>  {
+        Some(p) => {
             let sinew = SineWave::from(p.to_owned());
             match beat_source {
                 Some(src) => {
                     let _bt_src = src.clone();
                     sink.append(sinew.mix(_bt_src));
-                },
-                _  => {
+                }
+                _ => {
                     sink.append(sinew);
                 }
             };
@@ -384,7 +392,7 @@ pub fn play_swar_with_taal(dev: &AudioDevice, sw: &Swar, beat_source: Option<&Re
             sink.play();
             utils::delay(sw.beat_cnt * BPS);
             sink.stop();
-        },
+        }
         _ => {}
     }
 }
@@ -392,7 +400,7 @@ pub fn play_swar_with_taal(dev: &AudioDevice, sw: &Swar, beat_source: Option<&Re
 pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
     let sink = Sink::new(&dev.dev);
     match &sw.pitch {
-        Some(p) =>  {
+        Some(p) => {
             // let mixr =  mixer(1, 1); //DynamicMixerController::add(beep);
             // mixr.0.add(beep);
             // mixr.0.add(sinew);
@@ -402,7 +410,7 @@ pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
             sink.play();
             utils::delay(sw.beat_cnt * BPS);
             sink.stop();
-        },
+        }
         _ => {}
     }
 }

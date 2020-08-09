@@ -1,15 +1,16 @@
 extern crate yaml_rust;
 
-use crate::raagas::elements::{Raag, Swar, SwarBlock, Pitch, CONF_DIR, Swarmaalika};
+use crate::raagas::elements::{Pitch, Raag, Swar, SwarBlock, Swarmaalika, CONF_DIR};
 use crate::raagas::utils;
 use yaml_rust::YamlLoader;
 
 use self::yaml_rust::{yaml, Yaml};
 
-
 fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
-    let swars: Vec<String> = s.trim().split(" ")
+    let swars: Vec<String> = s
+        .trim()
+        .split(" ")
         .map(|x| x.to_ascii_uppercase())
         .collect();
     for sw in swars {
@@ -20,7 +21,7 @@ fn to_swars(s: &str) -> Vec<Swar> {
                 Some(_sw) => {
                     let p = _sw.pitch.as_ref().unwrap();
                     _blk.push(Swar::new(p.clone(), _sw.beat_cnt + 1.0))
-                },
+                }
                 None => {
                     // TODO: no previous swar, so we should be playing just thaalam.
                 }
@@ -28,7 +29,7 @@ fn to_swars(s: &str) -> Vec<Swar> {
         } else {
             if sw.contains(":") {
                 let _swrs: Vec<String> = sw.split(":").map(|x| x.to_string()).collect();
-                let beat_cnt: f32 = 1.0/_swrs.len() as f32;
+                let beat_cnt: f32 = 1.0 / _swrs.len() as f32;
                 for _sw in _swrs {
                     _blk.push(Swar::new(Pitch::new(_sw), beat_cnt));
                 }
@@ -51,10 +52,8 @@ fn aroha_avroha(doc: &Yaml, comp: &str) -> Option<Vec<Swar>> {
             let line = v.get(0).unwrap();
             let swars = to_swars(line.as_str().unwrap());
             Some(swars)
-        },
-        _ => {
-            None
         }
+        _ => None,
     }
 }
 
@@ -72,10 +71,8 @@ fn pakad(doc: &Yaml) -> Option<Vec<SwarBlock>> {
             }
 
             Some(pakad)
-        },
-        _ => {
-            None
         }
+        _ => None,
     }
 }
 
@@ -89,10 +86,8 @@ fn alankars(doc: &Yaml) -> Option<Vec<Vec<Swar>>> {
                 alankars.push(alankar);
             }
             Some(alankars)
-        },
-        _ => {
-            None
         }
+        _ => None,
     }
 }
 
@@ -104,21 +99,25 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     match sthayi_s {
         yaml::Yaml::Array(ref v) => {
             for line in v {
-                let _blk = to_swars(line.as_str()
-                                          .expect(&format!("{:?} can't be converted to swars", line)));
+                let _blk = to_swars(
+                    line.as_str()
+                        .expect(&format!("{:?} can't be converted to swars", line)),
+                );
                 sthayi.push(SwarBlock(_blk));
             }
-        },
+        }
         _ => {}
     }
     match antara_s {
         yaml::Yaml::Array(ref v) => {
-             for line in v {
-                 let _blk = to_swars(line.as_str()
-                                           .expect(&format!("{:?} can't be converted to swars", line)));
-                 antara.push(SwarBlock(_blk));
-             }
-        },
+            for line in v {
+                let _blk = to_swars(
+                    line.as_str()
+                        .expect(&format!("{:?} can't be converted to swars", line)),
+                );
+                antara.push(SwarBlock(_blk));
+            }
+        }
         _ => {}
     }
 
@@ -140,9 +139,7 @@ pub fn raag(name: String) -> Option<Raag> {
             let swarmaalika = swarmaalika(&doc)?;
 
             Some(Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika))
-        },
-        _ => {
-            None
         }
+        _ => None,
     }
 }
