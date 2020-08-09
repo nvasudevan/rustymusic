@@ -58,7 +58,7 @@ fn aroha_avroha(doc: &Yaml, comp: &str) -> Option<Vec<Swar>> {
     }
 }
 
-fn pakad(doc: &Yaml) -> Vec<SwarBlock> {
+fn pakad(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     let pakad_s = &doc["pakad"];
     let mut pakad: Vec<SwarBlock> = Vec::new();
     match pakad_s {
@@ -70,14 +70,16 @@ fn pakad(doc: &Yaml) -> Vec<SwarBlock> {
                     pakad.push(SwarBlock(_blk));
                 }
             }
-        },
-        _ => {}
-    }
 
-    pakad
+            Some(pakad)
+        },
+        _ => {
+            None
+        }
+    }
 }
 
-fn alankars(doc: &Yaml) -> Vec<Vec<Swar>> {
+fn alankars(doc: &Yaml) -> Option<Vec<Vec<Swar>>> {
     let alanakars_s = &doc["alankars"];
     let mut alankars: Vec<Vec<Swar>> = Vec::new();
     match alanakars_s {
@@ -86,14 +88,15 @@ fn alankars(doc: &Yaml) -> Vec<Vec<Swar>> {
                 let alankar = to_swars(line.as_str().unwrap());
                 alankars.push(alankar);
             }
+            Some(alankars)
         },
-        _ => {}
+        _ => {
+            None
+        }
     }
-
-    alankars
 }
 
-fn swarmaalika(doc: &Yaml) -> Swarmaalika {
+fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     let sthayi_s = &doc["sthayi"];
     let antara_s = &doc["antara"];
     let mut sthayi: Vec<SwarBlock> = Vec::new();
@@ -101,7 +104,8 @@ fn swarmaalika(doc: &Yaml) -> Swarmaalika {
     match sthayi_s {
         yaml::Yaml::Array(ref v) => {
             for line in v {
-                let _blk = to_swars(line.as_str().unwrap());
+                let _blk = to_swars(line.as_str()
+                                          .expect(&format!("{:?} can't be converted to swars", line)));
                 sthayi.push(SwarBlock(_blk));
             }
         },
@@ -110,14 +114,15 @@ fn swarmaalika(doc: &Yaml) -> Swarmaalika {
     match antara_s {
         yaml::Yaml::Array(ref v) => {
              for line in v {
-                 let _blk = to_swars(line.as_str().unwrap());
+                 let _blk = to_swars(line.as_str()
+                                           .expect(&format!("{:?} can't be converted to swars", line)));
                  antara.push(SwarBlock(_blk));
              }
         },
         _ => {}
     }
 
-    Swarmaalika::new(sthayi, antara)
+    Some(Swarmaalika::new(sthayi, antara))
 }
 
 pub fn raag(name: String) -> Option<Raag> {
@@ -128,11 +133,11 @@ pub fn raag(name: String) -> Option<Raag> {
     match &yamlldr {
         Ok(docs) => {
             let doc = &docs[0];
-            let aroha = aroha_avroha(&doc, "aroha").unwrap();
-            let avroha = aroha_avroha(&doc, "avroha").unwrap();
-            let pakad = pakad(&doc);
-            let alankars = alankars(&doc);
-            let swarmaalika = swarmaalika(&doc);
+            let aroha = aroha_avroha(&doc, "aroha")?;
+            let avroha = aroha_avroha(&doc, "avroha")?;
+            let pakad = pakad(&doc)?;
+            let alankars = alankars(&doc)?;
+            let swarmaalika = swarmaalika(&doc)?;
 
             Some(Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika))
         },

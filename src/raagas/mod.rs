@@ -1,4 +1,4 @@
-mod utils;
+pub mod utils;
 pub mod raag;
 pub mod elements;
 pub mod random;
