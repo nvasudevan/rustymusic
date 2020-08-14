@@ -15,6 +15,7 @@ use std::fs::File;
 pub const BPS: f32 = 0.5; // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
 pub const BEATMP3: (&str, f32) = ("./samples/1beat.mp3", BPS);
+pub const TIHAYI_TIMES: i8 = 3;
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();
@@ -157,93 +158,197 @@ impl fmt::Display for Swar {
 }
 
 pub trait Melody {
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>);
+    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8);
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SwarBlock(pub Vec<Swar>);
+
+impl SwarBlock {
+    fn count_swars(&self) -> usize {
+        self.0.len()
+    }
+
+    fn n_swars(&self, n: usize) -> Option<SwarBlock> {
+        let _swars: Vec<Swar> = (&self.0).clone();
+        let swars = &_swars[0..n];
+        Some(SwarBlock(Vec::from(swars)))
+    }
+}
+
+impl Melody for SwarBlock {
+    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8) {
+        for _ in 0..n {
+            for bt in &self.0 {
+                print!("{} ", bt);
+                utils::io_flush();
+                play_swar_with_taal(&dev, &bt, Some(&beat_src));
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
-pub struct SwarBlock(pub Vec<Swar>);
+pub struct Sthayi {
+    pub lineA: Option<Vec<SwarBlock>>,
+    pub lineB: Option<Vec<SwarBlock>>,
+    pub lineC: Option<Vec<SwarBlock>>,
+}
 
-impl Melody for SwarBlock {
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
-        for bt in &self.0 {
-            print!("{} ", bt);
-            utils::io_flush();
-            play_swar_with_taal(&dev, &bt, Some(&beat_src));
+impl Sthayi {
+    pub fn new(lineA: Option<Vec<SwarBlock>>, lineB: Option<Vec<SwarBlock>>, lineC: Option<Vec<SwarBlock>>) -> Self {
+        Sthayi {
+            lineA,
+            lineB,
+            lineC
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Antara {
+    pub lineC: Option<Vec<SwarBlock>>,
+    pub lineD: Option<Vec<SwarBlock>>,
+    pub lineE: Option<Vec<SwarBlock>>,
+}
+
+impl Antara {
+    pub fn new(lineC: Option<Vec<SwarBlock>>, lineD: Option<Vec<SwarBlock>>, lineE: Option<Vec<SwarBlock>>) -> Self {
+       Antara  {
+            lineC,
+            lineD,
+            lineE
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Swarmaalika {
-    pub sthayi: Vec<SwarBlock>,
-    pub antara: Vec<SwarBlock>,
+    pub mukra: Option<Vec<SwarBlock>>,
+    pub sthayi: Sthayi,
+    pub antara: Antara,
+    pub tihayi: Option<Vec<SwarBlock>>,
 }
 
 impl Swarmaalika {
-    pub fn new(sthayi: Vec<SwarBlock>, antara: Vec<SwarBlock>) -> Self {
-        Swarmaalika { sthayi, antara }
+    pub fn new(mukra: Option<Vec<SwarBlock>>,
+               sthayi: Sthayi,
+               antara: Antara,
+               tihayi: Option<Vec<SwarBlock>>) -> Self {
+        Swarmaalika { mukra, sthayi, antara, tihayi }
     }
 }
 
 impl Melody for Swarmaalika {
     // TODO: should the beat_src be a reference (&beat_src)?
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    // [mukra] <sthayi> A <antara> A <tihayi> X 3
+    // [mukra] <A A B B [C]> A <C C D D E E] A <tihayi> X 3
+    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
         println!("\nPlaying swarmaalika");
         let sthayi = &self.sthayi;
         let antara = &self.antara;
-        // let _gap:i32 = 1;
 
-        // play each line of sthayi twice
-        for blk in sthayi {
-            for _ in 0..2 {
-                for sw in &blk.0 {
-                    print!("{} ", sw);
-                    utils::io_flush();
-                    play_swar_with_taal(&dev, &sw, Some(&beat_src));
+        match &self.mukra {
+            Some(line) => {
+                for blk in line{
+                    blk.play(&dev, beat_src.clone(), 1);
                 }
-                println!();
-            }
+            },
+            _ => {}
         }
-        println!();
-        let line_a = sthayi.get(0).unwrap();
-        for sw in &line_a.0 {
-            print!("{} ", sw);
-            utils::io_flush();
-            play_swar_with_taal(&dev, &sw, Some(&beat_src));
-        }
-        println!();
 
-        for blk in antara {
-            for _ in 0..2 {
-                for sw in &blk.0 {
-                    print!("{} ", sw);
-                    utils::io_flush();
-                    play_swar_with_taal(&dev, sw, Some(&beat_src));
+        // TODO: closure for iteration
+        match &sthayi.lineA {
+            Some(line) => {
+                for  _ in 0..2 {
+                    for blk in line {
+                        blk.play(&dev, beat_src.clone(), 1);
+                    }
+                    println!();
                 }
-                println!();
-            }
+            },
+            _ => {}
         }
-        println!();
 
-        for sw in &line_a.0 {
-            print!("{} ", sw);
-            utils::io_flush();
-            play_swar_with_taal(&dev, sw, Some(&beat_src));
+        match &sthayi.lineB {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 2);
+                    println!();
+                }
+            },
+            _ => {}
         }
-        println!();
-        // tihayi is played n (=3) times
-        let _n = 3;
-        for _i in 0..3 {
-            // we only play the first j beats
-            let j = (line_a.0.len() / 2) - 1;
-            let tihyai = &line_a.0[..j];
-            for sw in tihyai {
-                print!("{} ", sw);
-                utils::io_flush();
-                play_swar_with_taal(&dev, &sw, Some(&beat_src));
-            }
-            println!();
+
+        //  if line C exists, play it once
+        match &sthayi.lineC {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 2);
+                    println!();
+                }
+            },
+            _ => {}
+        }
+
+        match &sthayi.lineA {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 1);
+                    println!();
+                }
+            },
+            _ => {}
+        }
+
+        match &antara.lineC {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 2);
+                    println!();
+                }
+            },
+            _ => {}
+        }
+
+        match &antara.lineD {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 2);
+                    println!();
+                }
+            },
+            _ => {}
+        }
+
+        match &antara.lineE {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 2);
+                    println!();
+                }
+            },
+            _ => {}
+        }
+
+        match &sthayi.lineA {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 1);
+                    println!();
+                }
+            },
+            _ => {}
+        }
+
+        match &self.tihayi {
+            Some(line) => {
+                for blk in line{
+                    blk.play(&dev, beat_src.clone(), TIHAYI_TIMES);
+                }
+            },
+            _ => {}
         }
         println!();
     }
@@ -252,20 +357,20 @@ impl Melody for Swarmaalika {
 #[derive(Debug, Clone)]
 pub struct Raag {
     name: String,
-    aroha: Vec<Swar>,
-    avroha: Vec<Swar>,
-    pakad: Vec<SwarBlock>,
-    alankars: Vec<Vec<Swar>>,
+    aroha: Option<Vec<SwarBlock>>,
+    avroha: Option<Vec<SwarBlock>>,
+    pakad: Option<Vec<SwarBlock>>,
+    alankars: Option<Vec<SwarBlock>>,
     swarmaalika: Swarmaalika,
 }
 
 impl Raag {
     pub fn new(
         name: String,
-        aroha: Vec<Swar>,
-        avroha: Vec<Swar>,
-        pakad: Vec<SwarBlock>,
-        alankars: Vec<Vec<Swar>>,
+        aroha: Option<Vec<SwarBlock>>,
+        avroha: Option<Vec<SwarBlock>>,
+        pakad: Option<Vec<SwarBlock>>,
+        alankars: Option<Vec<SwarBlock>>,
         swarmaalika: Swarmaalika,
     ) -> Raag {
         Raag {
@@ -282,19 +387,19 @@ impl Raag {
         self.name.to_string()
     }
 
-    pub fn aroha(&self) -> &Vec<Swar> {
+    pub fn aroha(&self) -> &Option<Vec<SwarBlock>> {
         &self.aroha
     }
 
-    pub fn avroha(&self) -> &Vec<Swar> {
+    pub fn avroha(&self) -> &Option<Vec<SwarBlock>> {
         &self.avroha
     }
 
-    pub fn pakad(&self) -> &Vec<SwarBlock> {
+    pub fn pakad(&self) -> &Option<Vec<SwarBlock>> {
         &self.pakad
     }
 
-    pub fn alankars(&self) -> &Vec<Vec<Swar>> {
+    pub fn alankars(&self) -> &Option<Vec<SwarBlock>> {
         &self.alankars
     }
 
@@ -302,38 +407,47 @@ impl Raag {
         &self.swarmaalika
     }
 
-    fn play_aroha(&self, dev: &AudioDevice) {
+    fn play_aroha(&self,
+                  dev: &AudioDevice,
+                  beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
         println!("\n=> Playing aroha for raag: {}", self.name());
-        for sw in self.aroha() {
-            print!("{} ", sw);
-            utils::io_flush();
-            play_swar_with_taal(&dev, &sw, None);
+        match self.aroha() {
+            Some(_aroha) => {
+                for blk in _aroha {
+                    blk.play(&dev, (*beat_src).clone(), 1);
+                }
+            },
+            _ => {}
         }
     }
 
-    fn play_avroha(&self, dev: &AudioDevice) {
+    fn play_avroha(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
         println!("\n=> Playing avroha for raag: {}", self.name());
-        for sw in self.avroha() {
-            print!("{} ", sw);
-            utils::io_flush();
-            play_swar_with_taal(&dev, &sw, None);
+        match self.avroha() {
+            Some(_avroha) => {
+                for blk in _avroha {
+                    blk.play(&dev, (*beat_src).clone(), 1);
+                }
+            },
+            _ => {}
         }
     }
 
-    fn play_pakad(&self, dev: &AudioDevice) {
+    fn play_pakad(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
         println!("\n=> Playing pakad for raag: {}", self.name());
-        let mut _comma: bool = false;
-        for blk in self.pakad() {
-            if _comma {
-                print!(", ");
-                utils::io_flush();
-            }
-            _comma = true;
-            for sw in &blk.0 {
-                print!("{} ", sw);
-                utils::io_flush();
-                play_swar_with_taal(&dev, &sw, None);
-            }
+        match self.pakad() {
+            Some(_pakad) => {
+                let mut _comma: bool = false;
+                for blk in _pakad {
+                    if _comma {
+                        print!(", ");
+                        utils::io_flush();
+                    }
+                    _comma = true;
+                    blk.play(&dev, (*beat_src).clone(), 1);
+                }
+            },
+            _ => {}
         }
     }
 
@@ -344,27 +458,32 @@ impl Raag {
         beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
     ) {
         println!("\n=> Playing alankars for raag: {}", self.name());
-        for alankar in self.alankars() {
-            for sw in alankar {
-                print!("{} ", sw);
-                utils::io_flush();
-                play_swar_with_taal(&dev, &sw, Some(&beat_src));
-            }
-            println!();
+        match self.alankars() {
+            Some(_alankar) => {
+                let mut _comma: bool = false;
+                for blk in _alankar {
+                    if _comma {
+                        print!(", ");
+                        utils::io_flush();
+                    }
+                    blk.play(&dev, (*beat_src).clone(), 1);
+                }
+            },
+            _ => {}
         }
     }
 }
 
 impl Melody for Raag {
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8) {
         let gap: f32 = 1.0; //no of beats
-        self.play_aroha(&dev);
+        self.play_aroha(&dev, &beat_src);
         utils::delay(gap * BPS);
-        self.play_avroha(&dev);
+        self.play_avroha(&dev, &beat_src);
         utils::delay(gap * BPS);
-        self.play_pakad(&dev);
+        self.play_pakad(&dev, &beat_src);
         utils::delay(gap * BPS);
-        self.swarmaalika.play(dev, beat_src.clone());
+        self.swarmaalika.play(dev, beat_src.clone(), n);
         utils::delay(gap * BPS);
         self.play_alankars(&dev, &beat_src);
     }

@@ -3,6 +3,7 @@ mod tests {
     use crate::raagas::elements;
     use crate::raagas::raag;
     use crate::raagas::random;
+    use crate::raagas::elements::SwarBlock;
 
     #[test]
     fn test_hertz_sub_op() {
@@ -54,25 +55,31 @@ mod tests {
         let raag = raag::raag(s.to_string()).unwrap();
         let expected = " S R M P D S. - ";
 
-        let aroha = raag.aroha();
         let mut aroha_s = String::new();
-        for sw in aroha {
-            let mut dash: String = "".to_string();
-            if sw.beat_cnt > 1.0 {
-                dash = (1..sw.beat_cnt as usize - 1)
-                    .map(|_| " - ")
-                    .collect::<String>();
-            }
-            aroha_s = format!("{} {}{}", aroha_s, sw, dash);
+        match raag.aroha() {
+            Some(aroha) => {
+                for blk in aroha {
+                    for sw in &blk.0 {
+                        let mut dash: String = "".to_string();
+                        if sw.beat_cnt > 1.0 {
+                            dash = (1..sw.beat_cnt as usize - 1)
+                                .map(|_| " - ")
+                                .collect::<String>();
+                        }
+                        aroha_s = format!("{} {}{}", aroha_s, sw, dash);
+                    }
+                }
+                assert_eq!(aroha_s, expected);
+            },
+            _ => {}
         }
-        assert_eq!(aroha_s, expected);
     }
 
     #[test]
     fn test_raag_avroha() {
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
-        let expected: Vec<elements::Swar> = vec![
+        let swars: Vec<elements::Swar> = vec![
             elements::Swar::new(elements::Pitch::new("S.".to_string()), 1.0),
             elements::Swar::new(elements::Pitch::new("D".to_string()), 1.0),
             elements::Swar::new(elements::Pitch::new("P".to_string()), 1.0),
@@ -80,9 +87,14 @@ mod tests {
             elements::Swar::new(elements::Pitch::new("R".to_string()), 1.0),
             elements::Swar::new(elements::Pitch::new("S".to_string()), 2.0),
         ];
+        let expected: Vec<SwarBlock> = vec![SwarBlock(swars)];
 
-        let avroha = raag.avroha().clone();
-        assert_eq!(avroha, expected);
+        match raag.avroha() {
+            Some(avroha) => {
+                assert_eq!(avroha.clone(), expected);
+            },
+            _ => {}
+        }
     }
 
     #[test]

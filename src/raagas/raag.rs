@@ -1,6 +1,6 @@
 extern crate yaml_rust;
 
-use crate::raagas::elements::{Pitch, Raag, Swar, SwarBlock, Swarmaalika, CONF_DIR};
+use crate::raagas::elements::{Pitch, Raag, Swar, SwarBlock, Swarmaalika, CONF_DIR, Sthayi, Antara};
 use crate::raagas::utils;
 use yaml_rust::YamlLoader;
 
@@ -42,86 +42,62 @@ fn to_swars(s: &str) -> Vec<Swar> {
     _blk
 }
 
-fn aroha_avroha(doc: &Yaml, comp: &str) -> Option<Vec<Swar>> {
-    let _s = &doc[comp];
-
-    match _s {
+fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+    let mut blk: Vec<SwarBlock> = Vec::new();
+    match doc {
         yaml::Yaml::Array(ref v) => {
-            // aroha/avroha is always in one line
-            assert_eq!(v.len(), 1);
             let line = v.get(0).unwrap();
-            let swars = to_swars(line.as_str().unwrap());
-            Some(swars)
+            let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
+            for _s in blks_s {
+                blk.push(SwarBlock(to_swars(_s)));
+            }
+            Some(blk)
         }
         _ => None,
     }
+}
+
+fn aroha_avroha(doc: &Yaml, comp: &str) -> Option<Vec<SwarBlock>> {
+    swar_line(&doc[comp])
 }
 
 fn pakad(doc: &Yaml) -> Option<Vec<SwarBlock>> {
-    let pakad_s = &doc["pakad"];
-    let mut pakad: Vec<SwarBlock> = Vec::new();
-    match pakad_s {
-        yaml::Yaml::Array(ref v) => {
-            for line in v {
-                let blks: Vec<&str> = line.as_str().unwrap().split(",").collect();
-                for blk in blks {
-                    let _blk = to_swars(blk);
-                    pakad.push(SwarBlock(_blk));
-                }
-            }
-
-            Some(pakad)
-        }
-        _ => None,
-    }
+    swar_line(&doc["pakad"])
 }
 
-fn alankars(doc: &Yaml) -> Option<Vec<Vec<Swar>>> {
-    let alanakars_s = &doc["alankars"];
-    let mut alankars: Vec<Vec<Swar>> = Vec::new();
-    match alanakars_s {
-        yaml::Yaml::Array(ref v) => {
-            for line in v {
-                let alankar = to_swars(line.as_str().unwrap());
-                alankars.push(alankar);
-            }
-            Some(alankars)
-        }
-        _ => None,
-    }
+fn alankars(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+    swar_line(&doc["alankars"])
+}
+
+fn sthayi(doc: &Yaml) -> Sthayi {
+    let lineA = swar_line(&doc["lineA"]);
+    let lineB = swar_line(&doc["lineB"]);
+    let lineC = swar_line(&doc["lineC"]);
+
+    Sthayi::new(lineA, lineB, lineC)
+}
+
+fn antara(doc: &Yaml) -> Antara {
+    let lineC = swar_line(&doc["lineC"]);
+    let lineD = swar_line(&doc["lineD"]);
+    let lineE = swar_line(&doc["lineE"]);
+
+    Antara::new(lineC, lineD, lineE)
+}
+
+fn tihayi(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+    swar_line(&doc["tihayi"])
 }
 
 fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     let sthayi_s = &doc["sthayi"];
     let antara_s = &doc["antara"];
-    let mut sthayi: Vec<SwarBlock> = Vec::new();
-    let mut antara: Vec<SwarBlock> = Vec::new();
-    match sthayi_s {
-        yaml::Yaml::Array(ref v) => {
-            for line in v {
-                let _blk = to_swars(
-                    line.as_str()
-                        .expect(&format!("{:?} can't be converted to swars", line)),
-                );
-                sthayi.push(SwarBlock(_blk));
-            }
-        }
-        _ => {}
-    }
-    match antara_s {
-        yaml::Yaml::Array(ref v) => {
-            for line in v {
-                let _blk = to_swars(
-                    line.as_str()
-                        .expect(&format!("{:?} can't be converted to swars", line)),
-                );
-                antara.push(SwarBlock(_blk));
-            }
-        }
-        _ => {}
-    }
+    let sthayi: Sthayi = sthayi(sthayi_s);
+    let antara: Antara = antara(antara_s);
+    let tihayi_s = &doc["tihayi"];
+    let tihayi = tihayi(tihayi_s);
 
-    Some(Swarmaalika::new(sthayi, antara))
+    Some(Swarmaalika::new( None, sthayi, antara, tihayi))
 }
 
 pub fn raag(name: String) -> Option<Raag> {
@@ -138,7 +114,13 @@ pub fn raag(name: String) -> Option<Raag> {
             let alankars = alankars(&doc)?;
             let swarmaalika = swarmaalika(&doc)?;
 
-            Some(Raag::new(name, aroha, avroha, pakad, alankars, swarmaalika))
+            Some(Raag::new(name,
+                           Some(aroha),
+                           Some(avroha),
+                           Some(pakad),
+                           Some(alankars),
+                           swarmaalika)
+            )
         }
         _ => None,
     }
