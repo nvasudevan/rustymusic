@@ -1,9 +1,9 @@
-use crate::raagas::elements::elements::{Melody, Swar, play_swar_with_taal, AudioDevice};
+use crate::raagas::elements::elements::{play_swar_with_taal, AudioDevice, Melody, Swar};
 use crate::raagas::utils;
-use rodio::source::{Repeat, TakeDuration};
 use rodio::decoder::Decoder;
-use std::io::BufReader;
+use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
+use std::io::BufReader;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SwarBlock(pub Vec<Swar>);
@@ -21,7 +21,12 @@ impl SwarBlock {
 }
 
 impl Melody for SwarBlock {
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8) {
+    fn play(
+        &self,
+        dev: &AudioDevice,
+        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        n: i8,
+    ) {
         for _ in 0..n {
             for bt in &self.0 {
                 print!("{} ", bt);
@@ -31,4 +36,3 @@ impl Melody for SwarBlock {
         }
     }
 }
-

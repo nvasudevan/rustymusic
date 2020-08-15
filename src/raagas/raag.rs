@@ -1,9 +1,9 @@
 extern crate yaml_rust;
 
 use crate::raagas::elements::elements::{Pitch, Swar, CONF_DIR};
-use crate::raagas::elements::swarblock::SwarBlock;
-use crate::raagas::elements::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::elements::raag::Raag;
+use crate::raagas::elements::swarblock::SwarBlock;
+use crate::raagas::elements::swarmaalika::{Antara, Sthayi, Swarmaalika};
 use crate::raagas::utils;
 use yaml_rust::YamlLoader;
 
@@ -73,19 +73,19 @@ fn alankars(doc: &Yaml) -> Option<Vec<SwarBlock>> {
 }
 
 fn sthayi(doc: &Yaml) -> Sthayi {
-    let lineA = swar_line(&doc["lineA"]);
-    let lineB = swar_line(&doc["lineB"]);
-    let lineC = swar_line(&doc["lineC"]);
+    let line_a = swar_line(&doc["lineA"]);
+    let line_b = swar_line(&doc["lineB"]);
+    let line_c = swar_line(&doc["lineC"]);
 
-    Sthayi::new(lineA, lineB, lineC)
+    Sthayi::new(line_a, line_b, line_c)
 }
 
 fn antara(doc: &Yaml) -> Antara {
-    let lineC = swar_line(&doc["lineC"]);
-    let lineD = swar_line(&doc["lineD"]);
-    let lineE = swar_line(&doc["lineE"]);
+    let line_c = swar_line(&doc["lineC"]);
+    let line_d = swar_line(&doc["lineD"]);
+    let line_e = swar_line(&doc["lineE"]);
 
-    Antara::new(lineC, lineD, lineE)
+    Antara::new(line_c, line_d, line_e)
 }
 
 fn tihayi(doc: &Yaml) -> Option<Vec<SwarBlock>> {
@@ -100,7 +100,7 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     let tihayi_s = &doc["tihayi"];
     let tihayi = tihayi(tihayi_s);
 
-    Some(Swarmaalika::new( None, sthayi, antara, tihayi))
+    Some(Swarmaalika::new(None, sthayi, antara, tihayi))
 }
 
 pub fn raag(name: String) -> Option<Raag> {
@@ -117,13 +117,14 @@ pub fn raag(name: String) -> Option<Raag> {
             let alankars = alankars(&doc)?;
             let swarmaalika = swarmaalika(&doc)?;
 
-            Some(Raag::new(name,
-                           Some(aroha),
-                           Some(avroha),
-                           Some(pakad),
-                           Some(alankars),
-                           swarmaalika)
-            )
+            Some(Raag::new(
+                name,
+                Some(aroha),
+                Some(avroha),
+                Some(pakad),
+                Some(alankars),
+                swarmaalika,
+            ))
         }
         _ => None,
     }

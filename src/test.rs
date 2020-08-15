@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use crate::raagas::elements::elements::{Hertz, Pitch, Swar};
     use crate::raagas::raag;
     use crate::raagas::random;
-    use crate::raagas::elements::elements::{Hertz, Pitch, Swar};
-    use crate::raagas::elements::swarmaalika;
+
     use crate::raagas::elements::swarblock::SwarBlock;
 
     #[test]
@@ -71,7 +71,7 @@ mod tests {
                     }
                 }
                 assert_eq!(aroha_s, expected);
-            },
+            }
             _ => {}
         }
     }
@@ -93,7 +93,7 @@ mod tests {
         match raag.avroha() {
             Some(avroha) => {
                 assert_eq!(avroha.clone(), expected);
-            },
+            }
             _ => {}
         }
     }

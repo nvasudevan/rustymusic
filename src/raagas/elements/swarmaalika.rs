@@ -1,40 +1,48 @@
+use crate::raagas::elements::elements::{AudioDevice, Melody};
 use crate::raagas::elements::swarblock::SwarBlock;
-use crate::raagas::elements::elements::{Melody, AudioDevice};
-use rodio::source::{Repeat, TakeDuration};
 use rodio::decoder::Decoder;
-use std::io::BufReader;
+use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
+use std::io::BufReader;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
-    pub lineA: Option<Vec<SwarBlock>>,
-    pub lineB: Option<Vec<SwarBlock>>,
-    pub lineC: Option<Vec<SwarBlock>>,
+    pub line_a: Option<Vec<SwarBlock>>,
+    pub line_b: Option<Vec<SwarBlock>>,
+    pub line_c: Option<Vec<SwarBlock>>,
 }
 
 impl Sthayi {
-    pub fn new(lineA: Option<Vec<SwarBlock>>, lineB: Option<Vec<SwarBlock>>, lineC: Option<Vec<SwarBlock>>) -> Self {
+    pub fn new(
+        line_a: Option<Vec<SwarBlock>>,
+        line_b: Option<Vec<SwarBlock>>,
+        line_c: Option<Vec<SwarBlock>>,
+    ) -> Self {
         Sthayi {
-            lineA,
-            lineB,
-            lineC
+            line_a,
+            line_b,
+            line_c,
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Antara {
-    pub lineC: Option<Vec<SwarBlock>>,
-    pub lineD: Option<Vec<SwarBlock>>,
-    pub lineE: Option<Vec<SwarBlock>>,
+    pub line_c: Option<Vec<SwarBlock>>,
+    pub line_d: Option<Vec<SwarBlock>>,
+    pub line_e: Option<Vec<SwarBlock>>,
 }
 
 impl Antara {
-    pub fn new(lineC: Option<Vec<SwarBlock>>, lineD: Option<Vec<SwarBlock>>, lineE: Option<Vec<SwarBlock>>) -> Self {
-        Antara  {
-            lineC,
-            lineD,
-            lineE
+    pub fn new(
+        line_c: Option<Vec<SwarBlock>>,
+        line_d: Option<Vec<SwarBlock>>,
+        line_e: Option<Vec<SwarBlock>>,
+    ) -> Self {
+        Antara {
+            line_c,
+            line_d,
+            line_e,
         }
     }
 }
@@ -48,11 +56,18 @@ pub struct Swarmaalika {
 }
 
 impl Swarmaalika {
-    pub fn new(mukra: Option<Vec<SwarBlock>>,
-               sthayi: Sthayi,
-               antara: Antara,
-               tihayi: Option<Vec<SwarBlock>>) -> Self {
-        Swarmaalika { mukra, sthayi, antara, tihayi }
+    pub fn new(
+        mukra: Option<Vec<SwarBlock>>,
+        sthayi: Sthayi,
+        antara: Antara,
+        tihayi: Option<Vec<SwarBlock>>,
+    ) -> Self {
+        Swarmaalika {
+            mukra,
+            sthayi,
+            antara,
+            tihayi,
+        }
     }
 }
 
@@ -60,58 +75,59 @@ impl Melody for Swarmaalika {
     // TODO: should the beat_src be a reference (&beat_src)?
     // [mukra] <sthayi> A <antara> A <tihayi> X 3
     // [mukra] <A A B B [C]> A <C C D D E E] A <tihayi> X 3
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8) {
+    fn play(
+        &self,
+        dev: &AudioDevice,
+        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        _n: i8,
+    ) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
         println!("\nPlaying swarmaalika");
-        let play = |line: &Option<Vec<SwarBlock>>| {
-            match &line {
-                Some(line) => {
-                    for blk in line {
-                        blk.play(&dev, beat_src.clone(), 1);
-                    };
-                },
-                _ => {}
+        let play = |line: &Option<Vec<SwarBlock>>| match &line {
+            Some(line) => {
+                for blk in line {
+                    blk.play(&dev, beat_src.clone(), 1);
+                }
             }
+            _ => {}
         };
 
         play(&self.mukra);
 
-        play(&self.sthayi.lineA);
+        play(&self.sthayi.line_a);
         println!();
-        play(&self.sthayi.lineA);
-        println!();
-
-        play(&self.sthayi.lineB);
-        println!();
-        play(&self.sthayi.lineB);
+        play(&self.sthayi.line_a);
         println!();
 
-        play(&self.sthayi.lineC);
+        play(&self.sthayi.line_b);
         println!();
-        play(&self.sthayi.lineC);
-        println!();
-
-        play(&self.sthayi.lineA);
+        play(&self.sthayi.line_b);
         println!();
 
-        play(&self.antara.lineC);
+        play(&self.sthayi.line_c);
         println!();
-        play(&self.antara.lineC);
-        println!();
-
-        play(&self.antara.lineD);
-        println!();
-        play(&self.antara.lineD);
+        play(&self.sthayi.line_c);
         println!();
 
-        play(&self.sthayi.lineA);
+        play(&self.sthayi.line_a);
+        println!();
+
+        play(&self.antara.line_c);
+        println!();
+        play(&self.antara.line_c);
+        println!();
+
+        play(&self.antara.line_d);
+        println!();
+        play(&self.antara.line_d);
+        println!();
+
+        play(&self.sthayi.line_a);
         println!();
 
         play(&self.tihayi);
         play(&self.tihayi);
         play(&self.tihayi);
         println!();
-
     }
 }
-

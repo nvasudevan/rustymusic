@@ -1,11 +1,11 @@
+use crate::raagas::elements::elements::{AudioDevice, Melody, BPS};
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::elements::swarmaalika::Swarmaalika;
-use rodio::source::{Repeat, TakeDuration};
-use rodio::decoder::Decoder;
-use std::io::BufReader;
-use std::fs::File;
-use crate::raagas::elements::elements::{AudioDevice, Melody, BPS};
 use crate::raagas::utils;
+use rodio::decoder::Decoder;
+use rodio::source::{Repeat, TakeDuration};
+use std::fs::File;
+use std::io::BufReader;
 
 #[derive(Debug, Clone)]
 pub struct Raag {
@@ -60,33 +60,43 @@ impl Raag {
         &self.swarmaalika
     }
 
-    fn play_aroha(&self,
-                  dev: &AudioDevice,
-                  beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_aroha(
+        &self,
+        dev: &AudioDevice,
+        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+    ) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         match self.aroha() {
             Some(_aroha) => {
                 for blk in _aroha {
                     blk.play(&dev, (*beat_src).clone(), 1);
                 }
-            },
+            }
             _ => {}
         }
     }
 
-    fn play_avroha(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_avroha(
+        &self,
+        dev: &AudioDevice,
+        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+    ) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         match self.avroha() {
             Some(_avroha) => {
                 for blk in _avroha {
                     blk.play(&dev, (*beat_src).clone(), 1);
                 }
-            },
+            }
             _ => {}
         }
     }
 
-    fn play_pakad(&self, dev: &AudioDevice, beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>) {
+    fn play_pakad(
+        &self,
+        dev: &AudioDevice,
+        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+    ) {
         println!("\n=> Playing pakad for raag: {}", self.name());
         match self.pakad() {
             Some(_pakad) => {
@@ -99,7 +109,7 @@ impl Raag {
                     _comma = true;
                     blk.play(&dev, (*beat_src).clone(), 1);
                 }
-            },
+            }
             _ => {}
         }
     }
@@ -121,14 +131,19 @@ impl Raag {
                     }
                     blk.play(&dev, (*beat_src).clone(), 1);
                 }
-            },
+            }
             _ => {}
         }
     }
 }
 
 impl Melody for Raag {
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8) {
+    fn play(
+        &self,
+        dev: &AudioDevice,
+        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        n: i8,
+    ) {
         let gap: f32 = 1.0; //no of beats
         self.play_aroha(&dev, &beat_src);
         utils::delay(gap * BPS);
@@ -141,4 +156,3 @@ impl Melody for Raag {
         self.play_alankars(&dev, &beat_src);
     }
 }
-

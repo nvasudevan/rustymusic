@@ -11,8 +11,6 @@ use crate::SWARS;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
-use crate::raagas::elements::swarblock::SwarBlock;
-use crate::raagas::elements::swarmaalika::Swarmaalika;
 
 pub const BPS: f32 = 0.5; // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
@@ -160,7 +158,12 @@ impl fmt::Display for Swar {
 }
 
 pub trait Melody {
-    fn play(&self, dev: &AudioDevice, beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>, n: i8);
+    fn play(
+        &self,
+        dev: &AudioDevice,
+        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        n: i8,
+    );
 }
 
 pub fn play_swar_with_taal(
