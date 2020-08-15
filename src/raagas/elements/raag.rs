@@ -63,7 +63,7 @@ impl Raag {
     fn play_aroha(
         &self,
         dev: &AudioDevice,
-        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
     ) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         match self.aroha() {
@@ -79,7 +79,7 @@ impl Raag {
     fn play_avroha(
         &self,
         dev: &AudioDevice,
-        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
     ) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         match self.avroha() {
@@ -95,7 +95,7 @@ impl Raag {
     fn play_pakad(
         &self,
         dev: &AudioDevice,
-        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
     ) {
         println!("\n=> Playing pakad for raag: {}", self.name());
         match self.pakad() {
@@ -114,11 +114,10 @@ impl Raag {
         }
     }
 
-    #[allow(dead_code)]
     fn play_alankars(
         &self,
         dev: &AudioDevice,
-        beat_src: &Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
     ) {
         println!("\n=> Playing alankars for raag: {}", self.name());
         match self.alankars() {
@@ -141,7 +140,7 @@ impl Melody for Raag {
     fn play(
         &self,
         dev: &AudioDevice,
-        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
         n: i8,
     ) {
         let gap: f32 = 1.0; //no of beats

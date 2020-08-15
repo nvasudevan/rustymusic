@@ -78,7 +78,7 @@ impl Melody for Swarmaalika {
     fn play(
         &self,
         dev: &AudioDevice,
-        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
         _n: i8,
     ) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi

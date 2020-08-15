@@ -161,52 +161,39 @@ pub trait Melody {
     fn play(
         &self,
         dev: &AudioDevice,
-        beat_src: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
         n: i8,
     );
 }
 
-pub fn play_swar_with_taal(
-    dev: &AudioDevice,
-    sw: &Swar,
-    beat_source: Option<&Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-) {
-    let sink = Sink::new(&dev.dev);
-    match &sw.pitch {
-        Some(p) => {
-            let sinew = SineWave::from(p.to_owned());
-            match beat_source {
-                Some(src) => {
-                    let _bt_src = src.clone();
-                    sink.append(sinew.mix(_bt_src));
-                }
-                _ => {
-                    sink.append(sinew);
-                }
-            };
-            sink.set_volume(*&dev.vol as f32);
-            sink.play();
-            utils::delay(sw.beat_cnt * BPS);
-            sink.stop();
+impl Melody for Swar {
+    fn play(
+        &self,
+        dev: &AudioDevice,
+        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        n: i8,
+    ) {
+        let sink = Sink::new(&dev.dev);
+        match &self.pitch {
+            Some(p) => {
+                // let mixr =  mixer(1, 1); //DynamicMixerController::add(beep);
+                // mixr.0.add(beep);
+                // mixr.0.add(sinew);
+                let sinew = SineWave::from(p.to_owned());
+                match beat_src {
+                    Some(src) => {
+                        sink.append(sinew.mix(src));
+                    }
+                    _ => {
+                        sink.append(sinew);
+                    }
+                };
+                sink.set_volume(*&dev.vol as f32);
+                sink.play();
+                utils::delay(self.beat_cnt * BPS);
+                sink.stop();
+            }
+            _ => {}
         }
-        _ => {}
-    }
-}
-
-pub fn play_swar(dev: &AudioDevice, sw: &Swar) {
-    let sink = Sink::new(&dev.dev);
-    match &sw.pitch {
-        Some(p) => {
-            // let mixr =  mixer(1, 1); //DynamicMixerController::add(beep);
-            // mixr.0.add(beep);
-            // mixr.0.add(sinew);
-            let sinew = SineWave::from(p.to_owned());
-            sink.append(sinew);
-            sink.set_volume(*&dev.vol as f32);
-            sink.play();
-            utils::delay(sw.beat_cnt * BPS);
-            sink.stop();
-        }
-        _ => {}
     }
 }

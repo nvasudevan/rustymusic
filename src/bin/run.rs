@@ -37,7 +37,7 @@ fn main() {
     let beat_source = play_raw_beats_forever(elements::BEATMP3);
 
     match raag {
-        Ok(r) => r.play(&audio_dev, beat_source, 1),
+        Ok(r) => r.play(&audio_dev, Some(beat_source), 1),
         Err(e) => opts::print_usage(&e.to_string(), &opts),
     }
 }
