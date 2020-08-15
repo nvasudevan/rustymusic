@@ -1,0 +1,21 @@
+alankars:
+  - .N R G M' P D N S. S. N D P M' G R S
+  - .N G R M' G P M' D P N D S. S. D N P D M' P G M' R G S
+aroha:
+  - .N R G M' P D N S. -
+avroha:
+  - S. N D P M' G R S -
+pakad:
+  - .N R - G R S -, P M' - G R S -
+mukra:
+  - G M'
+sthayi:
+  lineA:
+    - N D P - - R - S G R G G - - P P
+  lineB:
+    - G M' G P P D M' P N N:D P P R R S S
+antara:
+  lineC:
+    - P P S. S. S. - S. S. N S. N D N N:D P P
+  lineD:
+    - P G. R. S. N N:D M' P N N:D P - R R S S
