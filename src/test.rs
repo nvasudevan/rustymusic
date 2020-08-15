@@ -1,44 +1,45 @@
 #[cfg(test)]
 mod tests {
-    use crate::raagas::elements;
     use crate::raagas::raag;
     use crate::raagas::random;
-    use crate::raagas::elements::SwarBlock;
+    use crate::raagas::elements::elements::{Hertz, Pitch, Swar};
+    use crate::raagas::elements::swarmaalika;
+    use crate::raagas::elements::swarblock::SwarBlock;
 
     #[test]
     fn test_hertz_sub_op() {
-        let base_hz = elements::Hertz(440.0);
-        assert_eq!(elements::Hertz(439.0), base_hz - elements::Hertz(1.0))
+        let base_hz = Hertz(440.0);
+        assert_eq!(Hertz(439.0), base_hz - Hertz(1.0))
     }
 
     #[test]
     fn test_base_pitch_value() {
-        let base_hz = elements::Hertz(277.18);
-        let p = elements::Pitch::default().hertz().unwrap();
+        let base_hz = Hertz(277.18);
+        let p = Pitch::default().hertz().unwrap();
         assert_eq!(base_hz, p);
     }
 
     #[test]
     fn test_base_swar_is_sa() {
-        let base_hz = elements::Hertz(277.18);
-        let sa_pitch = elements::Pitch::new("S".to_string());
-        let sa = elements::Swar::new(sa_pitch, 1.0);
+        let base_hz = Hertz(277.18);
+        let sa_pitch = Pitch::new("S".to_string());
+        let sa = Swar::new(sa_pitch, 1.0);
         assert_eq!(sa.pitch.unwrap().hertz().unwrap(), base_hz);
     }
 
     #[test]
     fn test_swar_single_beat() {
         // test string version of swar
-        let sa_pitch = elements::Pitch::new("s".to_string());
-        let sa = elements::Swar::new(sa_pitch, 1.0);
+        let sa_pitch = Pitch::new("s".to_string());
+        let sa = Swar::new(sa_pitch, 1.0);
         assert_eq!(sa.to_string(), "s");
     }
 
     #[test]
     fn test_swar_multiple_beats() {
         // test string version of swar
-        let sa_pitch = elements::Pitch::new("s".to_string());
-        let sa = elements::Swar::new(sa_pitch, 3.0);
+        let sa_pitch = Pitch::new("s".to_string());
+        let sa = Swar::new(sa_pitch, 3.0);
         assert_eq!(sa.to_string(), "s -  - ");
     }
 
@@ -79,13 +80,13 @@ mod tests {
     fn test_raag_avroha() {
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
-        let swars: Vec<elements::Swar> = vec![
-            elements::Swar::new(elements::Pitch::new("S.".to_string()), 1.0),
-            elements::Swar::new(elements::Pitch::new("D".to_string()), 1.0),
-            elements::Swar::new(elements::Pitch::new("P".to_string()), 1.0),
-            elements::Swar::new(elements::Pitch::new("M".to_string()), 1.0),
-            elements::Swar::new(elements::Pitch::new("R".to_string()), 1.0),
-            elements::Swar::new(elements::Pitch::new("S".to_string()), 2.0),
+        let swars: Vec<Swar> = vec![
+            Swar::new(Pitch::new("S.".to_string()), 1.0),
+            Swar::new(Pitch::new("D".to_string()), 1.0),
+            Swar::new(Pitch::new("P".to_string()), 1.0),
+            Swar::new(Pitch::new("M".to_string()), 1.0),
+            Swar::new(Pitch::new("R".to_string()), 1.0),
+            Swar::new(Pitch::new("S".to_string()), 2.0),
         ];
         let expected: Vec<SwarBlock> = vec![SwarBlock(swars)];
 

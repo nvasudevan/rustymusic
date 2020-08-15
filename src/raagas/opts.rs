@@ -1,6 +1,7 @@
 use getopts::Options;
 
-use crate::raagas::elements::{Melody, Pitch, Swar, SwarBlock};
+use crate::raagas::elements::elements::{Melody, Pitch, Swar};
+use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::random::randomiser;
 use crate::raagas::{raag, utils};
 use std::error::Error;

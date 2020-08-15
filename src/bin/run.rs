@@ -5,8 +5,8 @@ use std::env;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use rodio::{decoder, default_output_device, Source};
-use rustymusic::raagas::elements::BEATMP3;
-use rustymusic::raagas::{elements, opts};
+use rustymusic::raagas::opts;
+use rustymusic::raagas::elements::elements;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
@@ -34,7 +34,7 @@ fn main() {
     let raag = opts::parse_opts(&opts, args);
     pub const VOL: f32 = 0.5;
     let audio_dev = elements::AudioDevice::new(dev, VOL);
-    let beat_source = play_raw_beats_forever(BEATMP3);
+    let beat_source = play_raw_beats_forever(elements::BEATMP3);
 
     match raag {
         Ok(r) => r.play(&audio_dev, beat_source, 1),

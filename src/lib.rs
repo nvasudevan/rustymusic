@@ -6,7 +6,7 @@ mod test;
 
 use std::collections::HashMap;
 
-use crate::raagas::elements::{initialise_swars, Hertz};
+use crate::raagas::elements::elements::{initialise_swars, Hertz};
 
 lazy_static! {
     pub static ref SWARS: HashMap<&'static str, Hertz> = initialise_swars();

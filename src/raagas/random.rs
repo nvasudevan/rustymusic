@@ -1,5 +1,4 @@
-use crate::raagas::elements::Pitch;
-use crate::raagas::elements::Swar;
+use crate::raagas::elements::elements::{Pitch, Swar};
 use crate::SWARS;
 use rand;
 use rand::seq::SliceRandom;
