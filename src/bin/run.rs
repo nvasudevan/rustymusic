@@ -29,14 +29,14 @@ fn play_raw_beats_forever(beatp: (&str, f32)) -> Repeat<TakeDuration<Decoder<Buf
 fn main() {
     let args: Vec<String> = env::args().collect();
     let dev = default_output_device().unwrap();
+    pub const VOL: f32 = 0.5;
 
     let opts = opts::build_opts();
-    let raag = opts::parse_opts(&opts, args);
-    pub const VOL: f32 = 0.5;
+    let comp = opts::parse_opts(&opts, args);
     let audio_dev = elements::AudioDevice::new(dev, VOL);
     let beat_source = play_raw_beats_forever(elements::BEATMP3);
 
-    match raag {
+    match comp {
         Ok(r) => r.play(&audio_dev, Some(beat_source), 1),
         Err(e) => opts::print_usage(&e.to_string(), &opts),
     }
