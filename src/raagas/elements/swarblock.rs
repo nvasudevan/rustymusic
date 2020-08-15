@@ -28,11 +28,16 @@ impl Melody for SwarBlock {
         n: i8,
     ) {
         for _ in 0..n {
+            let mut prev_sw_bt: f32 = 1.0;
             for bt in &self.0 {
-                print!("{} ", bt);
+                if (prev_sw_bt < 1.0) && (bt.beat_cnt > 1.0) {
+                    print!(" {}", bt);
+                } else {
+                    print!("{}", bt);
+                }
                 utils::io_flush();
-                // play_swar_with_taal(&dev, &bt, Some(&beat_src));
                 bt.play(&dev, beat_src.clone(), 1);
+                prev_sw_bt = bt.beat_cnt;
             }
         }
     }

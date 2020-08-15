@@ -140,19 +140,18 @@ impl Swar {
 
 impl fmt::Display for Swar {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mut dash = String::new();
-        if self.beat_cnt > 1.0 {
-            dash = (0..(self.beat_cnt as usize - 1))
+        let dash = match self.beat_cnt {
+            1.0 => String::from(" "),
+            2.0..=8.0 => (0..(self.beat_cnt as usize - 1))
                 .map(|_| " - ")
-                .collect::<String>();
-        }
-        let mut _s = "".to_string();
-        match &self.pitch {
-            Some(sw) => {
-                _s = format!("{}{}", sw, dash);
-            }
-            _ => {}
-        }
+                .collect::<String>(),
+            _ => String::new(),
+        };
+
+        let _s = match &self.pitch {
+            Some(sw) => format!("{}{}", sw, dash),
+            _ => String::new(),
+        };
         write!(f, "{}", _s)
     }
 }
