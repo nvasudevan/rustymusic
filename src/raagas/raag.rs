@@ -88,19 +88,25 @@ fn antara(doc: &Yaml) -> Antara {
     Antara::new(line_c, line_d, line_e)
 }
 
+fn mukra(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+    swar_line(doc)
+}
+
 fn tihayi(doc: &Yaml) -> Option<Vec<SwarBlock>> {
-    swar_line(&doc["tihayi"])
+    swar_line(doc)
 }
 
 fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
+    let mukra_s = &doc["mukra"];
     let sthayi_s = &doc["sthayi"];
     let antara_s = &doc["antara"];
     let sthayi: Sthayi = sthayi(sthayi_s);
     let antara: Antara = antara(antara_s);
     let tihayi_s = &doc["tihayi"];
+    let mukra = mukra(mukra_s);
     let tihayi = tihayi(tihayi_s);
 
-    Some(Swarmaalika::new(None, sthayi, antara, tihayi))
+    Some(Swarmaalika::new(mukra, sthayi, antara, tihayi))
 }
 
 pub fn raag(name: String) -> Option<Raag> {

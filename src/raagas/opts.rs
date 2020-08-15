@@ -80,7 +80,7 @@ pub fn parse_opts<'a>(
             let _r = r.to_lowercase();
             println!("playing raag: {}", _r);
             match _r.as_ref() {
-                "bhupali" | "durga" | "yaman" | "hamsadhwani" => {
+                "bhupali" | "durga" | "yaman" | "hamsadhwani" | "yeri_aali" => {
                     let raag = raag::raag(_r).unwrap();
                     Ok(Box::new(raag))
                 }

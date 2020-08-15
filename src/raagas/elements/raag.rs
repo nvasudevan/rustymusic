@@ -144,11 +144,12 @@ impl Melody for Raag {
         n: i8,
     ) {
         let gap: f32 = 1.0; //no of beats
-        self.play_aroha(&dev, &beat_src);
+        let bt = None;
+        self.play_aroha(&dev, &bt);
         utils::delay(gap * BPS);
-        self.play_avroha(&dev, &beat_src);
+        self.play_avroha(&dev, &bt);
         utils::delay(gap * BPS);
-        self.play_pakad(&dev, &beat_src);
+        self.play_pakad(&dev, &bt);
         utils::delay(gap * BPS);
         self.swarmaalika.play(dev, beat_src.clone(), n);
         utils::delay(gap * BPS);

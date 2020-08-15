@@ -92,6 +92,7 @@ impl Melody for Swarmaalika {
             _ => {}
         };
 
+        println!("mukra: {:?}", self.mukra);
         play(&self.mukra);
 
         play(&self.sthayi.line_a);
