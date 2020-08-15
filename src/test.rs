@@ -32,7 +32,7 @@ mod tests {
         // test string version of swar
         let sa_pitch = Pitch::new("s".to_string());
         let sa = Swar::new(sa_pitch, 1.0);
-        assert_eq!(sa.to_string(), "s");
+        assert_eq!(sa.to_string(), "s ");
     }
 
     #[test]
@@ -54,7 +54,7 @@ mod tests {
     fn test_raag_aroha_as_string() {
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
-        let expected = " S R M P D S. - ";
+        let expected = "S R M P D S. - ";
 
         let mut aroha_s = String::new();
         match raag.aroha() {
@@ -67,7 +67,7 @@ mod tests {
                                 .map(|_| " - ")
                                 .collect::<String>();
                         }
-                        aroha_s = format!("{} {}{}", aroha_s, sw, dash);
+                        aroha_s = format!("{}{}", aroha_s, sw);
                     }
                 }
                 assert_eq!(aroha_s, expected);

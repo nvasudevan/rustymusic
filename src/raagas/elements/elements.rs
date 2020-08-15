@@ -170,7 +170,7 @@ impl Melody for Swar {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-        n: i8,
+        _n: i8,
     ) {
         let sink = Sink::new(&dev.dev);
         match &self.pitch {
