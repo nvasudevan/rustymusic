@@ -8,6 +8,16 @@ avroha:
 pakad:
   - G R S .D, S R G, P G D P, G R S
 sthayi:
-  - G R S .D S R G P G D P, G R S
+  lineA:
+    - S. S. D P G R S R S .D S R G R G -
+  lineB:
+    - G G G R G P D S. P D S. S. S.:S. D:P G:R S
 antara:
-  - G R S .D S R G P G D P, G R S
+  lineC:
+    - G - G G P - S. D S. S. S. - S. R. S. -
+  lineD:
+    - S. - D - S. S. R. R. S. R. G. R. S. D P -
+  lineE:
+    - G G R G P D S. S. P D S. S. S.:S. D:P G:R S
+tihayi:
+  - S. S. D P G R S R
