@@ -53,6 +53,7 @@ pub struct Swarmaalika {
     pub sthayi: Sthayi,
     pub antara: Antara,
     pub tihayi: Option<Vec<SwarBlock>>,
+    pub sam: i32,
 }
 
 impl Swarmaalika {
@@ -61,12 +62,22 @@ impl Swarmaalika {
         sthayi: Sthayi,
         antara: Antara,
         tihayi: Option<Vec<SwarBlock>>,
+        sam: Option<i32>
     ) -> Self {
+        let mut _sam = match sam {
+            Some(n) => {
+                n
+            },
+            _ => {
+                9
+            }
+        };
         Swarmaalika {
             mukra,
             sthayi,
             antara,
             tihayi,
+            sam: _sam
         }
     }
 }
@@ -79,6 +90,7 @@ impl Melody for Swarmaalika {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        mix: bool,
         _n: i8,
     ) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
@@ -86,7 +98,7 @@ impl Melody for Swarmaalika {
         let play = |line: &Option<Vec<SwarBlock>>| match &line {
             Some(line) => {
                 for blk in line {
-                    blk.play(&dev, beat_src.clone(), 1);
+                    blk.play(&dev, beat_src.clone(), false, 1);
                 }
             }
             _ => {}

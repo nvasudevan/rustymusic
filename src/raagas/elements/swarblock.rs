@@ -25,6 +25,7 @@ impl Melody for SwarBlock {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        mix: bool,
         n: i8,
     ) {
         for _ in 0..n {
@@ -36,7 +37,7 @@ impl Melody for SwarBlock {
                     print!("{}", bt);
                 }
                 utils::io_flush();
-                bt.play(&dev, beat_src.clone(), 1);
+                bt.play(&dev, beat_src.clone(), false, 1);
                 prev_sw_bt = bt.beat_cnt;
             }
         }

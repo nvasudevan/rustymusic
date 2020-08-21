@@ -49,7 +49,7 @@ pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
 }
 
 pub struct AudioDevice {
-    dev: Device,
+    pub(crate) dev: Device,
     vol: f32,
 }
 
@@ -161,6 +161,7 @@ pub trait Melody {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        mix: bool,
         n: i8,
     );
 }
@@ -170,6 +171,7 @@ impl Melody for Swar {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        mix: bool,
         _n: i8,
     ) {
         let sink = Sink::new(&dev.dev);
@@ -178,21 +180,41 @@ impl Melody for Swar {
                 // let mixr =  mixer(1, 1); //DynamicMixerController::add(beep);
                 // mixr.0.add(beep);
                 // mixr.0.add(sinew);
-                let sinew = SineWave::from(p.to_owned());
                 match beat_src {
                     Some(src) => {
-                        sink.append(sinew.mix(src));
+                        let sinew = SineWave::from(p.to_owned());
+                        sink.append(src.mix(sinew));
+                        sink.set_volume(*&dev.vol as f32);
+                        sink.play();
+                        utils::delay(self.beat_cnt * BPS);
+                        sink.stop();
                     }
                     _ => {
+                        let sinew = SineWave::from(p.to_owned());
                         sink.append(sinew);
+                        sink.set_volume(*&dev.vol as f32);
+                        sink.play();
+                        utils::delay(self.beat_cnt * BPS);
+                        sink.stop();
                     }
                 };
-                sink.set_volume(*&dev.vol as f32);
-                sink.play();
-                utils::delay(self.beat_cnt * BPS);
-                sink.stop();
             }
             _ => {}
         }
+    }
+}
+
+pub struct Taal {
+   taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+   bps: f32
+}
+
+impl Taal {
+    pub fn new(taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>, bps: f32) -> Self {
+        Taal { taal, bps }
+    }
+
+    pub fn play(&self, sink: Sink) {
+        sink.append(self.taal.clone());
     }
 }

@@ -1,4 +1,4 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody, BPS};
+use crate::raagas::elements::elements::{AudioDevice, Melody, Taal, BPS};
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::elements::swarmaalika::Swarmaalika;
 use crate::raagas::utils;
@@ -6,6 +6,7 @@ use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
 use std::io::BufReader;
+use rodio::Sink;
 
 #[derive(Debug, Clone)]
 pub struct Raag {
@@ -69,7 +70,7 @@ impl Raag {
         match self.aroha() {
             Some(_aroha) => {
                 for blk in _aroha {
-                    blk.play(&dev, (*beat_src).clone(), 1);
+                    blk.play(&dev, (*beat_src).clone(), false, 1);
                 }
             }
             _ => {}
@@ -85,7 +86,7 @@ impl Raag {
         match self.avroha() {
             Some(_avroha) => {
                 for blk in _avroha {
-                    blk.play(&dev, (*beat_src).clone(), 1);
+                    blk.play(&dev, (*beat_src).clone(), false, 1);
                 }
             }
             _ => {}
@@ -107,7 +108,7 @@ impl Raag {
                         utils::io_flush();
                     }
                     _comma = true;
-                    blk.play(&dev, (*beat_src).clone(), 1);
+                    blk.play(&dev, (*beat_src).clone(),  false,1);
                 }
             }
             _ => {}
@@ -128,12 +129,22 @@ impl Raag {
                         print!(", ");
                         utils::io_flush();
                     }
-                    blk.play(&dev, (*beat_src).clone(), 1);
+                    blk.play(&dev, (*beat_src).clone(), false, 1);
                 }
             }
             _ => {}
         }
     }
+
+    // fn play_taal(&self, sink: &AudioDevice, beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>) {
+    //     match &beat_src {
+    //         Some(src)  => {
+    //             let taal = Taal::new((*src).clone(), 1.0 * BPS);
+    //             taal.play(&dev);
+    //         },
+    //         _ => {}
+    //     }
+    // }
 }
 
 impl Melody for Raag {
@@ -141,18 +152,25 @@ impl Melody for Raag {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        mix: bool,
         n: i8,
     ) {
         let gap: f32 = 1.0; //no of beats
         let bt = None;
+        let sink = Sink::new(&dev.dev);
         self.play_aroha(&dev, &bt);
-        utils::delay(gap * BPS);
-        self.play_avroha(&dev, &bt);
-        utils::delay(gap * BPS);
-        self.play_pakad(&dev, &bt);
-        utils::delay(gap * BPS);
-        self.swarmaalika.play(dev, beat_src.clone(), n);
-        utils::delay(gap * BPS);
-        self.play_alankars(&dev, &beat_src);
+        // utils::delay(gap * BPS);
+        // self.play_avroha(&dev, &bt);
+        // utils::delay(gap * BPS);
+        // self.play_pakad(&dev, &bt);
+        // utils::delay(gap * BPS);
+        // self.play_taal(&sink, beat_src);
+        //sink.set_volume(*&dev.vol as f32);
+        self.swarmaalika.play(dev, beat_src.clone(), false, n);
+        // utils::delay(gap * BPS);
+        // self.play_alankars(&dev, &beat_src);
+        sink.play();
+        utils::delay(2.0);
+        sink.stop();
     }
 }
