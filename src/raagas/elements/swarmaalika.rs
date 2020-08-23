@@ -1,9 +1,10 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody};
+use crate::raagas::elements::elements::{AudioDevice, Melody, Swar, Pitch};
 use crate::raagas::elements::swarblock::SwarBlock;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
 use std::io::BufReader;
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
@@ -53,7 +54,7 @@ pub struct Swarmaalika {
     pub sthayi: Sthayi,
     pub antara: Antara,
     pub tihayi: Option<Vec<SwarBlock>>,
-    pub sam: i32,
+    pub sam: usize,
 }
 
 impl Swarmaalika {
@@ -62,14 +63,14 @@ impl Swarmaalika {
         sthayi: Sthayi,
         antara: Antara,
         tihayi: Option<Vec<SwarBlock>>,
-        sam: Option<i32>
+        sam: Option<usize>
     ) -> Self {
         let mut _sam = match sam {
             Some(n) => {
                 n
             },
             _ => {
-                9
+                1
             }
         };
         Swarmaalika {
@@ -103,6 +104,10 @@ impl Melody for Swarmaalika {
             }
             _ => {}
         };
+
+        // play taal until sam
+        let sam_blk = SwarBlock::from_iter((0..self.sam as i32).into_iter());
+        play(&Some(vec![sam_blk]));
 
         println!("mukra: {:?}", self.mukra);
         play(&self.mukra);

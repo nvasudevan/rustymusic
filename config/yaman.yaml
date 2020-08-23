@@ -7,15 +7,21 @@ avroha:
   - S. N D P M' G R S -
 pakad:
   - .N R - G R S -, P M' - G R S -
-sthayi:
-  lineA:
-    - .N D - P M' P G M' P - P - P M' G R
-  lineB:
-    - S R G R G M' P D P M' G R G R S -
-  lineC:
-     - .N R G M' P D N S. R. S. N D P M' G M'
-antara:
-  lineD:
-    - G G P D P S. - S. .N R. G. R. S. N D P
-  lineE:
-    - G. R. S. N D P N D P M' G R G R S -
+swarmaalika:
+  - sam: 9
+  - mukra:
+      -
+  - sthayi:
+    - lineA:
+      - .N D - P M' P G M' P - P - P M' G R
+    - lineB:
+      - S R G R G M' P D P M' G R G R S -
+    - lineC:
+       - .N R G M' P D N S. R. S. N D P M' G M'
+  - antara:
+    - lineD:
+      - G G P D P S. - S. .N R. G. R. S. N D P
+    - lineE:
+      - G. R. S. N D P N D P M' G R G R S -
+  - tihayi:
+      - .N D - P M' P G M'

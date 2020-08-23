@@ -49,12 +49,21 @@ fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     let mut blk: Vec<SwarBlock> = Vec::new();
     match doc {
         yaml::Yaml::Array(ref v) => {
-            let line = v.get(0).unwrap();
-            let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
-            for _s in blks_s {
-                blk.push(SwarBlock(to_swars(_s)));
+            match v.get(0) {
+                Some(line) => {
+                    if line.is_null() {
+                        None
+                    } else {
+                        println!("line: {:#?}", line);
+                        let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
+                        for _s in blks_s {
+                            blk.push(SwarBlock(to_swars(_s)));
+                        }
+                        Some(blk)
+                    }
+                },
+                _ => { None }
             }
-            Some(blk)
         }
         _ => None,
     }
@@ -72,20 +81,50 @@ fn alankars(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     swar_line(&doc["alankars"])
 }
 
-fn sthayi(doc: &Yaml) -> Sthayi {
-    let line_a = swar_line(&doc["lineA"]);
-    let line_b = swar_line(&doc["lineB"]);
-    let line_c = swar_line(&doc["lineC"]);
+fn sthayi(doc: &Yaml) -> Option<Sthayi> {
+    match doc {
+        yaml::Yaml::Array(ref v) => {
+            let parse = |i: usize, s: &str| {
+                let _y = v.get(i);
+                return match _y {
+                    Some(line) => {
+                        swar_line(&line[s])
+                    },
+                    _ => { None }
+                };
+            };
 
-    Sthayi::new(line_a, line_b, line_c)
+            let line_a = parse(0, "lineA");
+            let line_b = parse(1, "lineB");
+            let line_c = parse(2, "lineC");
+
+            Some(Sthayi::new(line_a, line_b, line_c))
+        },
+        _ => { None }
+    }
 }
 
-fn antara(doc: &Yaml) -> Antara {
-    let line_c = swar_line(&doc["lineC"]);
-    let line_d = swar_line(&doc["lineD"]);
-    let line_e = swar_line(&doc["lineE"]);
+fn antara(doc: &Yaml) -> Option<Antara> {
+    match doc {
+        yaml::Yaml::Array(ref v) => {
+            let parse = |i: usize, s: &str| {
+                let _y = v.get(i);
+                return match _y {
+                    Some(line) => {
+                        swar_line(&line[s])
+                    },
+                    _ => { None }
+                };
+            };
 
-    Antara::new(line_c, line_d, line_e)
+            let line_c = None;
+            let line_d = parse(0, "lineD");
+            let line_e = parse(1, "lineE");
+
+            Some(Antara::new(line_c, line_d, line_e))
+        },
+        _ => { None }
+    }
 }
 
 fn mukra(doc: &Yaml) -> Option<Vec<SwarBlock>> {
@@ -96,17 +135,51 @@ fn tihayi(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     swar_line(doc)
 }
 
-fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
-    let mukra_s = &doc["mukra"];
-    let sthayi_s = &doc["sthayi"];
-    let antara_s = &doc["antara"];
-    let sthayi: Sthayi = sthayi(sthayi_s);
-    let antara: Antara = antara(antara_s);
-    let tihayi_s = &doc["tihayi"];
-    let mukra = mukra(mukra_s);
-    let tihayi = tihayi(tihayi_s);
+fn sam(doc: &Yaml) -> Option<usize> {
+    println!("sam: {:#?}", doc);
+    match doc {
+        yaml::Yaml::Integer(ref n) => {
+            println!("n: {}", n);
+            let _sam: usize = *n as usize;
+            Some(_sam)
+        },
+        _ => {
+            Some(1)
+        }
+    }
+}
 
-    Some(Swarmaalika::new(mukra, sthayi, antara, tihayi))
+fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
+    let swarmaalika = &doc["swarmaalika"];
+    println!("swarmaalika: {:#?}", swarmaalika);
+    match swarmaalika {
+        yaml::Yaml::Array(ref v) => {
+            let sam_yaml = v.get(0).unwrap();
+            let sam_s = &sam_yaml["sam"];
+            let sam = sam(sam_s);
+
+            let mukra_yaml = v.get(1).unwrap();
+            let mukra_s = &mukra_yaml["mukra"];
+            let mukra = mukra(mukra_s);
+
+            let sthayi_yaml = v.get(2).unwrap();
+            let sthayi_s = &sthayi_yaml["sthayi"];
+            let sthayi: Sthayi = sthayi(sthayi_s).unwrap();
+
+            let antara_yaml = v.get(3).unwrap();
+            let antara_s = &antara_yaml["antara"];
+            let antara: Antara = antara(antara_s).unwrap();
+
+            let tihayi_yaml = v.get(4).unwrap();
+            let tihayi_s = &tihayi_yaml["tihayi"];
+            let tihayi = tihayi(tihayi_s);
+
+            Some(Swarmaalika::new(mukra, sthayi, antara, tihayi, sam))
+        },
+        _ => {
+            None
+        }
+    }
 }
 
 pub fn raag(name: String) -> Option<Raag> {
