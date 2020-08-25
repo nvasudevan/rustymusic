@@ -21,8 +21,8 @@ impl SwarBlock {
     // }
 }
 
-impl FromIterator<i32> for SwarBlock {
-    fn from_iter<T: IntoIterator<Item=i32>>(iter: T) -> Self {
+impl FromIterator<usize> for SwarBlock {
+    fn from_iter<T: IntoIterator<Item=usize>>(iter: T) -> Self {
         let mut _blk: Vec<Swar> = Vec::new();
         for _ in iter {
             _blk.push(Swar { pitch: None, beat_cnt: 1.0 });

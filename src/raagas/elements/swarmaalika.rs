@@ -105,11 +105,22 @@ impl Melody for Swarmaalika {
             _ => {}
         };
 
-        // play taal until sam
-        let sam_blk = SwarBlock::from_iter((0..self.sam as i32).into_iter());
+        // play taal until sam - count(mukra)
+        let _sam = match &self.mukra {
+            Some(mukra) => {
+                let mut _n = 0;
+                for blk in mukra {
+                    _n = _n + blk.0.len();
+                }
+                self.sam - _n
+            },
+            _ => {
+                self.sam
+            }
+        };
+        let sam_blk = SwarBlock::from_iter((0.._sam).into_iter());
         play(&Some(vec![sam_blk]));
 
-        println!("mukra: {:?}", self.mukra);
         play(&self.mukra);
 
         play(&self.sthayi.line_a);

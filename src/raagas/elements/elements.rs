@@ -140,9 +140,10 @@ impl Swar {
 
 impl fmt::Display for Swar {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let dash = match self.beat_cnt {
-            1.0 => String::from(" "),
-            2.0..=8.0 => (0..(self.beat_cnt as usize - 1))
+        let _cnt = self.beat_cnt as usize;
+        let dash = match _cnt {
+            1 => String::from(" "),
+            2..=8 => (0..(_cnt - 1))
                 .map(|_| " - ")
                 .collect::<String>(),
             _ => String::new(),
