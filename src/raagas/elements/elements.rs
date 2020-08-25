@@ -206,32 +206,6 @@ impl Melody for Swar {
         sink.play();
         utils::delay(self.beat_cnt * BPS);
         sink.stop();
-        // match &self.pitch {
-        //     Some(p) => {
-        //         // let mixr =  mixer(1, 1); //DynamicMixerController::add(beep);
-        //         // mixr.0.add(beep);
-        //         // mixr.0.add(sinew);
-        //         match beat_src {
-        //             Some(src) => {
-        //                 let sinew = SineWave::from(p.to_owned());
-        //                 sink.append(src.mix(sinew));
-        //                 sink.set_volume(*&dev.vol as f32);
-        //                 sink.play();
-        //                 utils::delay(self.beat_cnt * BPS);
-        //                 sink.stop();
-        //             }
-        //             _ => {
-        //                 let sinew = SineWave::from(p.to_owned());
-        //                 sink.append(sinew);
-        //                 sink.set_volume(*&dev.vol as f32);
-        //                 sink.play();
-        //                 utils::delay(self.beat_cnt * BPS);
-        //                 sink.stop();
-        //             }
-        //         };
-        //     }
-        //     _ => {}
-        // }
     }
 }
 

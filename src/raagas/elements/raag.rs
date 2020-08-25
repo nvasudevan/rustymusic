@@ -135,16 +135,6 @@ impl Raag {
             _ => {}
         }
     }
-
-    // fn play_taal(&self, sink: &AudioDevice, beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>) {
-    //     match &beat_src {
-    //         Some(src)  => {
-    //             let taal = Taal::new((*src).clone(), 1.0 * BPS);
-    //             taal.play(&dev);
-    //         },
-    //         _ => {}
-    //     }
-    // }
 }
 
 impl Melody for Raag {
