@@ -8,6 +8,7 @@ use crate::raagas::utils;
 use yaml_rust::YamlLoader;
 
 use self::yaml_rust::{yaml, Yaml};
+use std::collections::HashMap;
 
 fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
@@ -93,12 +94,24 @@ fn sthayi(doc: &Yaml) -> Option<Sthayi> {
                     _ => { None }
                 };
             };
+            let mut lines: HashMap<String, Vec<SwarBlock>> = HashMap::new();
+            let tags: Vec<&str> = vec!["lineA", "lineB", "lineC"];
 
-            let line_a = parse(0, "lineA");
-            let line_b = parse(1, "lineB");
-            let line_c = parse(2, "lineC");
+            for t in tags {
+                for i in 0..v.len() {
+                    let line = parse(i, t);
+                    match line {
+                        Some(blk) => {
+                            lines.insert(t.to_string(), blk);
+                            break
+                        },
+                        _ => {}
+                    }
 
-            Some(Sthayi::new(line_a, line_b, line_c))
+                }
+            }
+
+            Some(Sthayi::new(lines))
         },
         _ => { None }
     }
@@ -117,11 +130,24 @@ fn antara(doc: &Yaml) -> Option<Antara> {
                 };
             };
 
-            let line_c = None;
-            let line_d = parse(0, "lineD");
-            let line_e = parse(1, "lineE");
+            let mut lines: HashMap<String, Vec<SwarBlock>> = HashMap::new();
+            let tags: Vec<&str> = vec!["lineC", "lineD", "lineE"];
 
-            Some(Antara::new(line_c, line_d, line_e))
+            for t in tags {
+                for i in 0..v.len() {
+                    let line = parse(i, t);
+                    match line {
+                        Some(blk) => {
+                            lines.insert(t.to_string(), blk);
+                            break
+                        },
+                        _ => {}
+                    }
+
+                }
+            }
+
+            Some(Antara::new(lines))
         },
         _ => { None }
     }

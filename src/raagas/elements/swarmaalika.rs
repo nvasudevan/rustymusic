@@ -5,45 +5,30 @@ use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
-    pub line_a: Option<Vec<SwarBlock>>,
-    pub line_b: Option<Vec<SwarBlock>>,
-    pub line_c: Option<Vec<SwarBlock>>,
+    pub lines: HashMap<String, Vec<SwarBlock>>
 }
 
 impl Sthayi {
-    pub fn new(
-        line_a: Option<Vec<SwarBlock>>,
-        line_b: Option<Vec<SwarBlock>>,
-        line_c: Option<Vec<SwarBlock>>,
-    ) -> Self {
+    pub fn new(lines: HashMap<String, Vec<SwarBlock>>) -> Self {
         Sthayi {
-            line_a,
-            line_b,
-            line_c,
+            lines
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Antara {
-    pub line_c: Option<Vec<SwarBlock>>,
-    pub line_d: Option<Vec<SwarBlock>>,
-    pub line_e: Option<Vec<SwarBlock>>,
+    pub lines: HashMap<String, Vec<SwarBlock>>
 }
 
 impl Antara {
-    pub fn new(
-        line_c: Option<Vec<SwarBlock>>,
-        line_d: Option<Vec<SwarBlock>>,
-        line_e: Option<Vec<SwarBlock>>,
-    ) -> Self {
+    pub fn new(lines: HashMap<String, Vec<SwarBlock>>) -> Self {
         Antara {
-            line_c,
-            line_d,
-            line_e,
+            lines
         }
     }
 }
@@ -96,10 +81,13 @@ impl Melody for Swarmaalika {
     ) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
         println!("\nPlaying swarmaalika");
-        let play = |line: &Option<Vec<SwarBlock>>| match &line {
+        let play = |line: &Option<Vec<SwarBlock>>, cnt: usize| match &line {
             Some(line) => {
                 for blk in line {
-                    blk.play(&dev, beat_src.clone(), false, 1);
+                    for i in 0..cnt {
+                        blk.play(&dev, beat_src.clone(), false, 1);
+                        println!();
+                    }
                 }
             }
             _ => {}
@@ -119,44 +107,36 @@ impl Melody for Swarmaalika {
             }
         };
         let sam_blk = SwarBlock::from_iter((0.._sam).into_iter());
-        play(&Some(vec![sam_blk]));
+        play(&Some(vec![sam_blk]), 1);
 
-        play(&self.mukra);
+        play(&self.mukra, 1);
 
-        play(&self.sthayi.line_a);
-        println!();
-        play(&self.sthayi.line_a);
-        println!();
+        let sthayi_tags: Vec<&str> = vec!["lineA", "lineB", "lineC"];
+        for t in sthayi_tags {
+            let line = self.sthayi.lines.get(t);
+            match line {
+                Some(l) => {
+                    let _line = l.to_owned();
+                    play(&Some(_line), 2);
+                },
+                _ => {}
+            }
+        }
 
-        play(&self.sthayi.line_b);
-        println!();
-        play(&self.sthayi.line_b);
-        println!();
+        // antara
+        let antara_tags: Vec<&str> = vec!["lineC", "lineD", "lineE"];
+        for t in antara_tags {
+            let line = self.antara.lines.get(t);
+            match line {
+                Some(l) => {
+                    let _line = l.to_owned();
+                    play(&Some(_line), 2);
+                },
+                _ => {}
+            }
+        }
 
-        play(&self.sthayi.line_c);
-        println!();
-        play(&self.sthayi.line_c);
-        println!();
-
-        play(&self.sthayi.line_a);
-        println!();
-
-        play(&self.antara.line_c);
-        println!();
-        play(&self.antara.line_c);
-        println!();
-
-        play(&self.antara.line_d);
-        println!();
-        play(&self.antara.line_d);
-        println!();
-
-        play(&self.sthayi.line_a);
-        println!();
-
-        play(&self.tihayi);
-        play(&self.tihayi);
-        play(&self.tihayi);
+        play(&self.tihayi, 3);
         println!();
     }
 }
