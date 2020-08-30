@@ -149,11 +149,11 @@ impl Melody for Raag {
         let bt = None;
         let sink = Sink::new(&dev.dev);
         self.play_aroha(&dev, &bt);
-        // utils::delay(gap * BPS);
+        utils::delay(gap * BPS);
         // self.play_avroha(&dev, &bt);
         // utils::delay(gap * BPS);
-        // self.play_pakad(&dev, &bt);
-        // utils::delay(gap * BPS);
+        self.play_pakad(&dev, &bt);
+        utils::delay(gap * BPS);
         // self.play_taal(&sink, beat_src);
         //sink.set_volume(*&dev.vol as f32);
         self.swarmaalika.play(dev, beat_src.clone(), false, n);

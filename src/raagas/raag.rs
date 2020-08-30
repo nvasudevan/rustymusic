@@ -1,6 +1,6 @@
 extern crate yaml_rust;
 
-use crate::raagas::elements::elements::{Pitch, Swar, CONF_DIR};
+use crate::raagas::elements::elements::{Pitch, Swar, CONF_DIR, KAN_SWAR_BEAT_COUNT};
 use crate::raagas::elements::raag::Raag;
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::elements::swarmaalika::{Antara, Sthayi, Swarmaalika};
@@ -37,6 +37,14 @@ fn to_swars(s: &str) -> Vec<Swar> {
                 for _sw in _swrs {
                     _blk.push(Swar::new(Pitch::new(_sw), beat_cnt));
                 }
+            } else if sw.contains("/") {
+                // kan swar
+                let _swrs: Vec<String> = sw.split("/").map(|x| x.to_string()).collect();
+                let _kan = _swrs.get(0).unwrap();
+                let _kan_bt_cnt: f32 = 1.0 * KAN_SWAR_BEAT_COUNT;
+                _blk.push(Swar::new(Pitch::new(_kan.to_string()), _kan_bt_cnt));
+                let _sw = _swrs.get(1).unwrap();
+                _blk.push(Swar::new(Pitch::new(_sw.to_string()), 1.0 - _kan_bt_cnt));
             } else {
                 _blk.push(Swar::new(Pitch::new(sw), 1.0));
             }
