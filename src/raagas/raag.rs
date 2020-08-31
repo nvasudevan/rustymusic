@@ -16,7 +16,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
 
-fn to_swars(s: &str) -> Vec<Swar> {
+pub fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
     let swars: Vec<String> = s
         .trim()

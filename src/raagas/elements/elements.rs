@@ -16,7 +16,7 @@ pub const BPS: f32 = 0.5; // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
 pub const BEATMP3: (&str, f32) = ("./samples/1beat.mp3", BPS);
 pub const TIHAYI_TIMES: i8 = 3;
-pub const KAN_SWAR_BEAT_COUNT: f32 = 0.3;
+pub const KAN_SWAR_BEAT_COUNT: f32 = 0.2;
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();

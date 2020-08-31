@@ -48,25 +48,12 @@ pub fn parse_opts<'a>(
             println!("Playing swars from the file {}", fp);
             let lines = utils::lines_from_file(fp);
             let mut swars: Vec<Swar> = vec![];
-            for l in lines {
-                let swars_vec: Vec<String> = l.split(" ").map(|x| x.to_ascii_uppercase()).collect();
-                for swr in swars_vec {
-                    if swr.eq("-") {
-                        let prev = swars.pop().unwrap();
-                        let beat_cnt = prev.beat_cnt + 1.0;
 
-                        swars.push(Swar {
-                            pitch: prev.pitch,
-                            beat_cnt,
-                        });
-                    } else {
-                        swars.push(Swar {
-                            pitch: Some(Pitch::new(swr)),
-                            beat_cnt: 1.0,
-                        });
-                    }
-                }
+            for l in lines {
+                let mut _swars = raag::to_swars(&l);
+                swars.append(&mut _swars);
             }
+
             let swarblk = SwarBlock(swars);
             return Ok(Box::new(swarblk));
         }
