@@ -175,17 +175,13 @@ fn tihayi(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     swar_line(doc)
 }
 
-fn sam(doc: &Yaml) -> Option<usize> {
-    println!("sam: {:#?}", doc);
+fn parse_usize(doc: &Yaml) -> Option<usize> {
     match doc {
         yaml::Yaml::Integer(ref n) => {
-            println!("n: {}", n);
-            let _sam: usize = *n as usize;
-            Some(_sam)
+            let _n: usize = *n as usize;
+            Some(_n)
         },
-        _ => {
-            Some(1)
-        }
+        _ => { None }
     }
 }
 
@@ -196,7 +192,7 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
         yaml::Yaml::Array(ref v) => {
             let sam_yaml = v.get(0).unwrap();
             let sam_s = &sam_yaml["sam"];
-            let sam = sam(sam_s);
+            let sam = parse_usize(sam_s);
 
             let mukra_yaml = v.get(1).unwrap();
             let mukra_s = &mukra_yaml["mukra"];
@@ -212,7 +208,7 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
 
             let tihayi_yaml = v.get(4).unwrap();
             let tihayi_s = &tihayi_yaml["tihayi"];
-            let tihayi = tihayi(tihayi_s);
+            let tihayi = parse_usize(tihayi_s);
 
             Some(Swarmaalika::new(mukra, sthayi, antara, tihayi, sam))
         },

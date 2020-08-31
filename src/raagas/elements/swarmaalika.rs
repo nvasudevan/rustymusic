@@ -1,4 +1,4 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody, Swar, Pitch};
+use crate::raagas::elements::elements::{AudioDevice, Melody, Pitch, Swar};
 use crate::raagas::elements::swarblock::SwarBlock;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
@@ -38,7 +38,7 @@ pub struct Swarmaalika {
     pub mukra: Option<Vec<SwarBlock>>,
     pub sthayi: Sthayi,
     pub antara: Antara,
-    pub tihayi: Option<Vec<SwarBlock>>,
+    pub tihayi: usize,
     pub sam: usize,
 }
 
@@ -47,10 +47,18 @@ impl Swarmaalika {
         mukra: Option<Vec<SwarBlock>>,
         sthayi: Sthayi,
         antara: Antara,
-        tihayi: Option<Vec<SwarBlock>>,
+        tihayi: Option<usize>,
         sam: Option<usize>
     ) -> Self {
         let mut _sam = match sam {
+            Some(n) => {
+                n
+            },
+            _ => {
+                1
+            }
+        };
+        let mut _tihayi = match tihayi {
             Some(n) => {
                 n
             },
@@ -62,7 +70,7 @@ impl Swarmaalika {
             mukra,
             sthayi,
             antara,
-            tihayi,
+            tihayi: _tihayi,
             sam: _sam
         }
     }
@@ -76,7 +84,7 @@ impl Melody for Swarmaalika {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-        mix: bool,
+        _mix: bool,
         _n: i8,
     ) {
         // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
@@ -84,7 +92,7 @@ impl Melody for Swarmaalika {
         let play = |line: &Option<Vec<SwarBlock>>, cnt: usize| match &line {
             Some(line) => {
                 for blk in line {
-                    for i in 0..cnt {
+                    for _ in 0..cnt {
                         blk.play(&dev, beat_src.clone(), false, 1);
                         println!();
                     }
@@ -123,6 +131,15 @@ impl Melody for Swarmaalika {
             }
         }
 
+        let lineA = self.sthayi.lines.get("lineA");
+        match lineA {
+            Some(l) => {
+                let _line = l.to_owned();
+                play(&Some(_line), 1);
+            },
+            _ => {}
+        }
+
         // antara
         let antara_tags: Vec<&str> = vec!["lineC", "lineD", "lineE"];
         for t in antara_tags {
@@ -136,7 +153,46 @@ impl Melody for Swarmaalika {
             }
         }
 
-        play(&self.tihayi, 3);
-        println!();
+        match lineA {
+            Some(l) => {
+                let _line = l.to_owned();
+                play(&Some(_line.clone()), 1);
+                println!();
+
+                // play tihayi
+                let mut i = 0;
+                let mut tihayi_blk: Vec<Swar> = Vec::new();
+                let _line_tihayi = _line.clone();
+                for blk in _line_tihayi {
+                    for sw in blk.0 {
+                        let cnt = &sw.beat_cnt;
+                        i += *cnt as usize;
+                        tihayi_blk.push(sw);
+                        if i >= self.tihayi {
+                            break
+                        }
+                    }
+                    if i >= self.tihayi {
+                        break
+                    }
+                }
+                play(&Some(vec![SwarBlock(tihayi_blk)]), 3);
+
+                // finally, now play the remaining swars of line A
+                let mut j: usize = 0;
+                for blk in _line {
+                    for sw in blk.0 {
+                        let cnt = &sw.beat_cnt;
+                        j += *cnt as usize;
+                        if j > self.tihayi {
+                            let _sw = sw.to_owned();
+                            let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
+                            _sw_ext.play(&dev, None, false, 1);
+                        }
+                    }
+                }
+            },
+            _ => {}
+        }
     }
 }

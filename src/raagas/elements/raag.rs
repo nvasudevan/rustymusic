@@ -1,4 +1,4 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody, Taal, BPS};
+use crate::raagas::elements::elements::{AudioDevice, Melody, BPS};
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::elements::swarmaalika::Swarmaalika;
 use crate::raagas::utils;
@@ -148,16 +148,16 @@ impl Melody for Raag {
     fn play(
         &self,
         dev: &AudioDevice,
-        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-        mix: bool,
+        _beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        _mix: bool,
         n: i8,
     ) {
         let gap: f32 = 1.0; //no of beats
         let sink = Sink::new(&dev.dev);
         self.play_aroha(&dev);
         utils::delay(gap * BPS);
-        // self.play_avroha(&dev);
-        // utils::delay(gap * BPS);
+        self.play_avroha(&dev);
+        utils::delay(gap * BPS);
         self.play_pakad(&dev);
         utils::delay(gap * BPS);
         // self.play_taal(&sink, beat_src);

@@ -1,4 +1,4 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody, Swar, Pitch};
+use crate::raagas::elements::elements::{AudioDevice, Melody, Swar};
 use crate::raagas::utils;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
@@ -37,7 +37,7 @@ impl Melody for SwarBlock {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-        mix: bool,
+        _mix: bool,
         n: i8,
     ) {
         for _ in 0..n {
