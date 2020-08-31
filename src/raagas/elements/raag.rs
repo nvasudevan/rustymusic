@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::BufReader;
 use rodio::Sink;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Raag {
     swarmaalika: Swarmaalika,
     name: String,
@@ -16,6 +16,7 @@ pub struct Raag {
     avroha: Option<Vec<SwarBlock>>,
     pakad: Option<Vec<SwarBlock>>,
     alankars: Option<Vec<SwarBlock>>,
+    beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
 }
 
 impl Raag {
@@ -26,6 +27,7 @@ impl Raag {
         pakad: Option<Vec<SwarBlock>>,
         alankars: Option<Vec<SwarBlock>>,
         swarmaalika: Swarmaalika,
+        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
     ) -> Raag {
         Raag {
             name,
@@ -34,6 +36,7 @@ impl Raag {
             pakad,
             alankars,
             swarmaalika,
+            beat_src
         }
     }
 
@@ -61,16 +64,19 @@ impl Raag {
         &self.swarmaalika
     }
 
+    pub fn beat_src(&self) -> &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>> {
+        &self.beat_src
+    }
+
     fn play_aroha(
         &self,
-        dev: &AudioDevice,
-        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        dev: &AudioDevice
     ) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         match self.aroha() {
             Some(_aroha) => {
                 for blk in _aroha {
-                    blk.play(&dev, (*beat_src).clone(), false, 1);
+                    blk.play(&dev, None, false, 1);
                 }
             }
             _ => {}
@@ -79,14 +85,13 @@ impl Raag {
 
     fn play_avroha(
         &self,
-        dev: &AudioDevice,
-        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        dev: &AudioDevice
     ) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         match self.avroha() {
             Some(_avroha) => {
                 for blk in _avroha {
-                    blk.play(&dev, (*beat_src).clone(), false, 1);
+                    blk.play(&dev, None, false, 1);
                 }
             }
             _ => {}
@@ -95,8 +100,7 @@ impl Raag {
 
     fn play_pakad(
         &self,
-        dev: &AudioDevice,
-        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        dev: &AudioDevice
     ) {
         println!("\n=> Playing pakad for raag: {}", self.name());
         match self.pakad() {
@@ -108,7 +112,7 @@ impl Raag {
                         utils::io_flush();
                     }
                     _comma = true;
-                    blk.play(&dev, (*beat_src).clone(),  false,1);
+                    blk.play(&dev, None,  false,1);
                 }
             }
             _ => {}
@@ -117,8 +121,7 @@ impl Raag {
 
     fn play_alankars(
         &self,
-        dev: &AudioDevice,
-        beat_src: &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        dev: &AudioDevice
     ) {
         println!("\n=> Playing alankars for raag: {}", self.name());
         match self.alankars() {
@@ -129,11 +132,15 @@ impl Raag {
                         print!(", ");
                         utils::io_flush();
                     }
-                    blk.play(&dev, (*beat_src).clone(), false, 1);
+                    blk.play(&dev, self.beat_src.clone(), false, 1);
                 }
             }
             _ => {}
         }
+    }
+
+    fn play_swarmaalika(&self, dev: &AudioDevice, mix: bool, n: i8) {
+        self.swarmaalika.play(dev, self.beat_src.clone(), mix, n);
     }
 }
 
@@ -146,17 +153,16 @@ impl Melody for Raag {
         n: i8,
     ) {
         let gap: f32 = 1.0; //no of beats
-        let bt = None;
         let sink = Sink::new(&dev.dev);
-        self.play_aroha(&dev, &bt);
+        self.play_aroha(&dev);
         utils::delay(gap * BPS);
-        // self.play_avroha(&dev, &bt);
+        // self.play_avroha(&dev);
         // utils::delay(gap * BPS);
-        self.play_pakad(&dev, &bt);
+        self.play_pakad(&dev);
         utils::delay(gap * BPS);
         // self.play_taal(&sink, beat_src);
         //sink.set_volume(*&dev.vol as f32);
-        self.swarmaalika.play(dev, beat_src.clone(), false, n);
+        self.play_swarmaalika(dev, false, n);
         // utils::delay(gap * BPS);
         // self.play_alankars(&dev, &beat_src);
         sink.play();

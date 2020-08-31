@@ -1,6 +1,9 @@
 extern crate yaml_rust;
 
-use crate::raagas::elements::elements::{Pitch, Swar, CONF_DIR, KAN_SWAR_BEAT_COUNT};
+use rodio::decoder::Decoder;
+use rodio::source::{Repeat, TakeDuration};
+use rodio::{decoder, Source};
+use crate::raagas::elements::elements::{Pitch, Swar, BEATMP3, CONF_DIR, KAN_SWAR_BEAT_COUNT};
 use crate::raagas::elements::raag::Raag;
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::elements::swarmaalika::{Antara, Sthayi, Swarmaalika};
@@ -9,6 +12,9 @@ use yaml_rust::YamlLoader;
 
 use self::yaml_rust::{yaml, Yaml};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::BufReader;
+use std::time::Duration;
 
 fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
@@ -216,6 +222,21 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     }
 }
 
+fn play_raw_beats_forever(beatp: (&str, f32)) -> Repeat<TakeDuration<Decoder<BufReader<File>>>> {
+    let f = File::open(beatp.0).expect(&format!("Unable to open file {}", beatp.0));
+    let source = decoder::Decoder::new(BufReader::new(f)).unwrap();
+    // we are having to do this as the total_duration is returned none for
+    // wav, mp3 files in some cases.
+    let t = match source.total_duration() {
+        Some(_t) => _t,
+        _ => Duration::from_secs_f32(beatp.1),
+    };
+
+    let beat_src = source.take_duration(t).repeat_infinite();
+
+    beat_src
+}
+
 pub fn raag(name: String) -> Option<Raag> {
     // Given a raag name returns a Raag
     let raagp = format!("{}/{}.yaml", CONF_DIR, name);
@@ -229,6 +250,7 @@ pub fn raag(name: String) -> Option<Raag> {
             let pakad = pakad(&doc)?;
             let alankars = alankars(&doc)?;
             let swarmaalika = swarmaalika(&doc)?;
+            let beat_src = play_raw_beats_forever(BEATMP3);
 
             Some(Raag::new(
                 name,
@@ -237,6 +259,7 @@ pub fn raag(name: String) -> Option<Raag> {
                 Some(pakad),
                 Some(alankars),
                 swarmaalika,
+                Some(beat_src)
             ))
         }
         _ => None,
