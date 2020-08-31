@@ -35,7 +35,8 @@ pub fn parse_opts<'a>(
     // play N random notes
     match matches.opt_str("z") {
         Some(n) => {
-            let swars = randomiser(n.parse::<usize>().unwrap());
+            let mut swars = randomiser(n.parse::<usize>().unwrap());
+            swars.insert(0,Swar::new(Pitch::new("S".to_string()), 3.0));
             let swarblk = SwarBlock(swars);
             return Ok(Box::new(swarblk));
         }
