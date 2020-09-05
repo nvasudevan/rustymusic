@@ -19,6 +19,14 @@ impl SwarBlock {
     //     let swars = &_swars[0..n];
     //     Some(SwarBlock(Vec::from(swars)))
     // }
+
+    pub fn to_swars(&self) -> Vec<Swar> {
+        let mut swars: Vec<Swar> = Vec::new();
+        for sw in &self.0 {
+            swars.push(sw.clone());
+        }
+        swars
+    }
 }
 
 impl FromIterator<usize> for SwarBlock {
