@@ -10,16 +10,6 @@ use std::iter::FromIterator;
 pub struct SwarBlock(pub Vec<Swar>);
 
 impl SwarBlock {
-    // fn count_swars(&self) -> usize {
-    //     self.0.len()
-    // }
-    //
-    // fn n_swars(&self, n: usize) -> Option<SwarBlock> {
-    //     let _swars: Vec<Swar> = (&self.0).clone();
-    //     let swars = &_swars[0..n];
-    //     Some(SwarBlock(Vec::from(swars)))
-    // }
-
     pub fn to_swars(&self) -> Vec<Swar> {
         let mut swars: Vec<Swar> = Vec::new();
         for sw in &self.0 {

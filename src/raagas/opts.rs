@@ -66,7 +66,6 @@ pub fn parse_opts<'a>(
                             _swars.insert(0,Swar::new(
                                 Pitch::new("S".to_string()), 3.0)
                             );
-                            println!("_swars: {:#?}", _swars);
                             let swarblk = SwarBlock(_swars);
                             return Ok(Box::new(swarblk));
                         },

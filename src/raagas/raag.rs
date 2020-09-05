@@ -69,7 +69,6 @@ fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
                     if line.is_null() {
                         None
                     } else {
-                        println!("line: {:#?}", line);
                         let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
                         for _s in blks_s {
                             blk.push(SwarBlock(to_swars(_s)));
@@ -187,7 +186,6 @@ fn parse_usize(doc: &Yaml) -> Option<usize> {
 
 fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     let swarmaalika = &doc["swarmaalika"];
-    println!("swarmaalika: {:#?}", swarmaalika);
     match swarmaalika {
         yaml::Yaml::Array(ref v) => {
             let sam_yaml = v.get(0).unwrap();
