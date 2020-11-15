@@ -80,12 +80,16 @@ mod tests {
         }
     }
 
-    // #[test]
-    // fn test_randomiser() {
-    //     let z: usize = 3;
-    //     // test 3 notes are returned
-    //     let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
-    //     let swars = random::randomiser(swars, z);
-    //     assert_eq!(swars.len(), z);
-    // }
+    #[test]
+    fn test_randomiser() {
+        let z: usize = 3;
+        // test 3 notes are returned
+        let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
+        let s = "durga";
+        let raag = raag::raag(s.to_string()).unwrap();
+        let swars = random::randomiser(&raag, z);
+        let _swars = swars.unwrap();
+        println!("_swars: {:?}", _swars);
+        assert_eq!(_swars.len(), z);
+    }
 }
