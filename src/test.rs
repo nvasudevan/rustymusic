@@ -8,21 +8,8 @@ mod tests {
     use crate::raagas::elements::swarblock::SwarBlock;
 
     #[test]
-    fn test_hertz_sub_op() {
-        let base_hz = Hertz(440.0);
-        assert_eq!(Hertz(439.0), base_hz - Hertz(1.0))
-    }
-
-    #[test]
-    fn test_base_pitch_value() {
-        let base_hz = Hertz(277.18);
-        let p = Pitch::default().hertz().unwrap();
-        assert_eq!(base_hz, p);
-    }
-
-    #[test]
     fn test_base_swar_is_sa() {
-        let base_hz = Hertz(277.18);
+        let base_hz = Hertz::new(277.18, "C#".to_string());
         let sa_pitch = Pitch::new("S".to_string());
         let sa = Swar::new(sa_pitch, 1.0);
         assert_eq!(sa.pitch.unwrap().hertz().unwrap(), base_hz);
@@ -31,17 +18,17 @@ mod tests {
     #[test]
     fn test_swar_single_beat() {
         // test string version of swar
-        let sa_pitch = Pitch::new("s".to_string());
+        let sa_pitch = Pitch::new("S".to_string());
         let sa = Swar::new(sa_pitch, 1.0);
-        assert_eq!(sa.to_string(), "s ");
+        assert_eq!(sa.to_string(), "S[C#] ");
     }
 
     #[test]
     fn test_swar_multiple_beats() {
         // test string version of swar
-        let sa_pitch = Pitch::new("s".to_string());
+        let sa_pitch = Pitch::new("S".to_string());
         let sa = Swar::new(sa_pitch, 3.0);
-        assert_eq!(sa.to_string(), "s -  - ");
+        assert_eq!(sa.to_string(), "S[C#] -  - ");
     }
 
     #[test]
@@ -55,7 +42,7 @@ mod tests {
     fn test_raag_aroha_as_string() {
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
-        let expected = "S R M P D S. - ";
+        let expected = "S[C#] - R[D#] - M[F#] - P[G#] - D[A#] - S.[C#] -  - ";
 
         let mut aroha_s = String::new();
         match raag.aroha() {
@@ -76,12 +63,12 @@ mod tests {
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
         let swars: Vec<Swar> = vec![
-            Swar::new(Pitch::new("S.".to_string()), 1.0),
-            Swar::new(Pitch::new("D".to_string()), 1.0),
-            Swar::new(Pitch::new("P".to_string()), 1.0),
-            Swar::new(Pitch::new("M".to_string()), 1.0),
-            Swar::new(Pitch::new("R".to_string()), 1.0),
-            Swar::new(Pitch::new("S".to_string()), 2.0),
+            Swar::new(Pitch::new("S.".to_string()), 2.0),
+            Swar::new(Pitch::new("D".to_string()), 2.0),
+            Swar::new(Pitch::new("P".to_string()), 2.0),
+            Swar::new(Pitch::new("M".to_string()), 2.0),
+            Swar::new(Pitch::new("R".to_string()), 2.0),
+            Swar::new(Pitch::new("S".to_string()), 3.0),
         ];
         let expected: Vec<SwarBlock> = vec![SwarBlock(swars)];
 
