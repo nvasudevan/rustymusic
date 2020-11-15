@@ -14,6 +14,10 @@ fn raagas() -> Vec<String> {
         "bhupali".to_string(),
         "hamsadhwani".to_string(),
         "yeri_aali".to_string(),
+        "bairav".to_string(),
+        "bhairavi".to_string(),
+        "daesh".to_string(),
+        "malkauns".to_string(),
     ]
 }
 

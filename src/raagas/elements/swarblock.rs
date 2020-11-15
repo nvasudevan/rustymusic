@@ -17,6 +17,15 @@ impl SwarBlock {
         }
         swars
     }
+
+    pub fn no_beats(&self) -> usize {
+        let mut cnt:usize = 0;
+        for sw in &self.0 {
+            cnt = cnt + sw.beat_cnt as usize;
+        }
+
+        cnt
+    }
 }
 
 impl FromIterator<usize> for SwarBlock {

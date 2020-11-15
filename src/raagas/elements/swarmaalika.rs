@@ -38,7 +38,7 @@ pub struct Swarmaalika {
     pub mukra: Option<Vec<SwarBlock>>,
     pub sthayi: Sthayi,
     pub antara: Antara,
-    pub tihayi: usize,
+    pub tihayi: Option<Vec<SwarBlock>>,
     pub sam: usize,
 }
 
@@ -47,7 +47,7 @@ impl Swarmaalika {
         mukra: Option<Vec<SwarBlock>>,
         sthayi: Sthayi,
         antara: Antara,
-        tihayi: Option<usize>,
+        tihayi: Option<Vec<SwarBlock>>,
         sam: Option<usize>
     ) -> Self {
         let mut _sam = match sam {
@@ -58,19 +58,19 @@ impl Swarmaalika {
                 1
             }
         };
-        let mut _tihayi = match tihayi {
-            Some(n) => {
-                n
-            },
-            _ => {
-                1
-            }
-        };
+        // let mut _tihayi = match tihayi {
+        //     Some(n) => {
+        //         n
+        //     },
+        //     _ => {
+        //         1
+        //     }
+        // };
         Swarmaalika {
             mukra,
             sthayi,
             antara,
-            tihayi: _tihayi,
+            tihayi,
             sam: _sam
         }
     }
@@ -131,6 +131,7 @@ impl Melody for Swarmaalika {
             }
         }
 
+        // after sthayi play A
         let lineA = self.sthayi.lines.get("lineA");
         match lineA {
             Some(l) => {
@@ -153,38 +154,69 @@ impl Melody for Swarmaalika {
             }
         }
 
+        // match lineA {
+        //     Some(l) => {
+        //         let _line = l.to_owned();
+        //         play(&Some(_line.clone()), 1);
+        //         println!();
+        //
+        //         // play tihayi
+        //         // let mut i = 0;
+        //         // let mut tihayi_blk: Vec<Swar> = Vec::new();
+        //         // let _line_tihayi = _line.clone();
+        //         // for blk in _line_tihayi {
+        //         //     for sw in blk.0 {
+        //         //         let cnt = &sw.beat_cnt;
+        //         //         i += *cnt as usize;
+        //         //         tihayi_blk.push(sw);
+        //         //         if i >= self.tihayi {
+        //         //             break
+        //         //         }
+        //         //     }
+        //         //     if i >= self.tihayi {
+        //         //         break
+        //         //     }
+        //         // }
+        //         // println!("tihayi: {:?}", tihayi_blk);
+        //         // play(&Some(vec![SwarBlock(tihayi_blk)]), 3);
+        //         //
+        //         // // finally, now play the remaining swars of line A
+        //         // let mut j: usize = 0;
+        //         // for blk in _line {
+        //         //     for sw in blk.0 {
+        //         //         let cnt = &sw.beat_cnt;
+        //         //         j += *cnt as usize;
+        //         //         if j > self.tihayi {
+        //         //             let _sw = sw.to_owned();
+        //         //             let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
+        //         //             _sw_ext.play(&dev, None, false, 1);
+        //         //         }
+        //         //     }
+        //         // }
+        //     },
+        //     _ => {}
+        // }
+
+        // play tihayi
+        let mut t_cnt:usize = 0;
+        for blk in self.tihayi.as_ref().unwrap() {
+            t_cnt = t_cnt + blk.no_beats();
+        }
+        println!("tihayi no of beats: {}", t_cnt);
+        play(&self.tihayi, 3);
+
+        // we need to play swars from line A
+        // from the beat where tihayi finishes until beat cycle finishes
+        let lineA = self.sthayi.lines.get("lineA");
         match lineA {
             Some(l) => {
                 let _line = l.to_owned();
-                play(&Some(_line.clone()), 1);
-                println!();
-
-                // play tihayi
-                let mut i = 0;
-                let mut tihayi_blk: Vec<Swar> = Vec::new();
-                let _line_tihayi = _line.clone();
-                for blk in _line_tihayi {
-                    for sw in blk.0 {
-                        let cnt = &sw.beat_cnt;
-                        i += *cnt as usize;
-                        tihayi_blk.push(sw);
-                        if i >= self.tihayi {
-                            break
-                        }
-                    }
-                    if i >= self.tihayi {
-                        break
-                    }
-                }
-                play(&Some(vec![SwarBlock(tihayi_blk)]), 3);
-
-                // finally, now play the remaining swars of line A
                 let mut j: usize = 0;
                 for blk in _line {
                     for sw in blk.0 {
                         let cnt = &sw.beat_cnt;
                         j += *cnt as usize;
-                        if j > self.tihayi {
+                        if j > t_cnt {
                             let _sw = sw.to_owned();
                             let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
                             _sw_ext.play(&dev, None, false, 1);
@@ -194,5 +226,6 @@ impl Melody for Swarmaalika {
             },
             _ => {}
         }
+
     }
 }

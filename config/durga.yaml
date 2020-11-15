@@ -2,9 +2,9 @@ alankars:
   - S R M P D S. S. D P M R S
   - S M R P M D P S. S. P D M P R M S
 aroha:
-  - S R M P D S. -
+  - S - R - M - P - D - S. - -
 avroha:
-  - S. D P M R S -
+  - S. - D - P - M - R - S - -
 pakad:
   - P/M P D -, P/M R -, S/.D .D S - -
 swarmaalika:
@@ -21,4 +21,5 @@ swarmaalika:
       - M - M P - P D S. - S. D S.
     - lineD:
       - R. M. R. S. - D M P D M R S
-  - tihayi: 6
+  - tihayi:
+      - S. - S. D - D

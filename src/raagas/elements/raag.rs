@@ -152,7 +152,7 @@ impl Melody for Raag {
         _mix: bool,
         n: i8,
     ) {
-        let gap: f32 = 1.0; //no of beats
+        let gap: f32 = 2.0; //no of beats
         let sink = Sink::new(&dev.dev);
         self.play_aroha(&dev);
         utils::delay(gap * BPS);
@@ -161,7 +161,7 @@ impl Melody for Raag {
         self.play_pakad(&dev);
         utils::delay(gap * BPS);
         // self.play_taal(&sink, beat_src);
-        //sink.set_volume(*&dev.vol as f32);
+        // sink.set_volume(*&dev.vol as f32);
         self.play_swarmaalika(dev, false, n);
         // utils::delay(gap * BPS);
         // self.play_alankars(&dev, &beat_src);

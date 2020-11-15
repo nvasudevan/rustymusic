@@ -16,7 +16,6 @@ fn main() {
 
     let comp = opts::parse_opts(&opts, args);
     match comp {
-        // Ok(c) => c.play(&audio_dev, Some(beat_source), false, 1),
         Ok(c) => c.play(&audio_dev, None, false, 1),
         Err(e) => opts::print_usage(&e.to_string(), &opts),
     }

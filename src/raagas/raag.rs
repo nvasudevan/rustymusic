@@ -21,7 +21,7 @@ pub fn to_swars(s: &str) -> Vec<Swar> {
     let swars: Vec<String> = s
         .trim()
         .split(" ")
-        .map(|x| x.to_ascii_uppercase())
+        .map(|x| x.to_string())
         .collect();
     for sw in swars {
         if sw.eq("-") {
@@ -78,8 +78,10 @@ fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
                 },
                 _ => { None }
             }
-        }
-        _ => None,
+        },
+        _ => {
+            None
+        },
     }
 }
 
@@ -206,7 +208,7 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
 
             let tihayi_yaml = v.get(4).unwrap();
             let tihayi_s = &tihayi_yaml["tihayi"];
-            let tihayi = parse_usize(tihayi_s);
+            let tihayi = tihayi(tihayi_s);
 
             Some(Swarmaalika::new(mukra, sthayi, antara, tihayi, sam))
         },
@@ -242,7 +244,10 @@ pub fn raag(name: String) -> Option<Raag> {
             let aroha = aroha_avroha(&doc, "aroha")?;
             let avroha = aroha_avroha(&doc, "avroha")?;
             let pakad = pakad(&doc)?;
-            let alankars = alankars(&doc)?;
+            let alankars = match alankars(&doc) {
+                Some(v) => { Some(v) },
+                _ => { None }
+            };
             let swarmaalika = swarmaalika(&doc)?;
             let beat_src = play_raw_beats_forever(BEATMP3);
 
@@ -251,7 +256,7 @@ pub fn raag(name: String) -> Option<Raag> {
                 Some(aroha),
                 Some(avroha),
                 Some(pakad),
-                Some(alankars),
+                alankars,
                 swarmaalika,
                 Some(beat_src)
             ))

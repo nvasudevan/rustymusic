@@ -2,22 +2,26 @@ alankars:
   - S R G P D S. S. D P G R S
   - S G R P G D P S. S. P D G P R G S
 aroha:
-  - S R G P D S. -
+  - S - R - G - P - D - S. -
 avroha:
-  - S. D P G R S -
+  - S. - D - P - G - R - S -
 pakad:
-  - G R S .D, S R G, P G D P, G R S
-sthayi:
-  lineA:
-    - S. S. D P G R S R S .D S R G R G -
-  lineB:
-    - G G G R G P D S. P D S. S. S.:S. D:P G:R S
-antara:
-  lineC:
-    - G - G G P - S. D S. S. S. - S. R. S. -
-  lineD:
-    - S. - D - S. S. R. R. S. R. G. R. S. D P -
-  lineE:
-    - G G R G P D S. S. P D S. S. S.:S. D:P G:R S
-tihayi:
-  - S. S. D P G R S R
+  - G - R - S - .D, S R G -, P G D P -, G R S -
+swarmaalika:
+  - sam: 9
+  - mukra:
+      -
+  - sthayi:
+    - lineA:
+       - S. S. D P G R S R S .D S R G R G -
+    - lineB:
+      - G G G R G P D S. P D S. S. S.:S. D:P G:R S
+  - antara:
+    - lineC:
+      - G - G G P - S. D S. S. S. - S. R. S. -
+    - lineD:
+      - S. - D - S. S. R. R. S. R. G. R. S. D P -
+    - lineE:
+      - G G R G P D S. S. P D S. S. S.:S. D:P G:R S
+  - tihayi:
+    - S. S. D P G R S R

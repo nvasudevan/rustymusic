@@ -3,11 +3,13 @@ use std::fmt;
 use std::fmt::Formatter;
 use std::io::BufReader;
 use std::ops::Sub;
+use std::cmp::Eq;
+use std::hash::{Hash, Hasher};
 
 use rodio::{source::SineWave, Device, Sink, Source};
 
 use crate::raagas::utils;
-use crate::SWARS;
+use crate::{SWARS};
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
@@ -20,31 +22,31 @@ pub const KAN_SWAR_BEAT_COUNT: f32 = 0.2;
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();
-    swars.insert(".P", Hertz(207.65));
-    swars.insert(".d", Hertz(220.00));
-    swars.insert(".D", Hertz(233.08));
-    swars.insert(".n", Hertz(246.94)); //komal ni in lower octave
-    swars.insert(".N", Hertz(261.63));
+    swars.insert(".P", Hertz::new(207.65, "G#".to_string()));
+    swars.insert(".d", Hertz::new(220.00, "A".to_string()));
+    swars.insert(".D", Hertz::new(233.08, "A#".to_string()));
+    swars.insert(".n", Hertz::new(246.94, "B".to_string()));
+    swars.insert(".N", Hertz::new(261.63, "C".to_string()));
 
-    swars.insert("S", Hertz(277.18)); // C#
-    swars.insert("r", Hertz(293.66));
-    swars.insert("R", Hertz(311.13));
-    swars.insert("g", Hertz(329.63));
-    swars.insert("G", Hertz(349.23));
-    swars.insert("M", Hertz(369.99));
-    swars.insert("M'", Hertz(392.00));
-    swars.insert("P", Hertz(415.30));
-    swars.insert("d", Hertz(440.0));
-    swars.insert("D", Hertz(466.16));
-    swars.insert("n", Hertz(493.88));
-    swars.insert("N", Hertz(523.25));
-    swars.insert("S.", Hertz(554.37));
-    swars.insert("r.", Hertz(587.33));
-    swars.insert("R.", Hertz(622.25));
-    swars.insert("g.", Hertz(659.25));
-    swars.insert("G.", Hertz(698.46));
-    swars.insert("M.", Hertz(739.99));
-    swars.insert("M'.", Hertz(783.99));
+    swars.insert("S", Hertz::new(277.18, "C#".to_string()));
+    swars.insert("r", Hertz::new(293.66, "D".to_string()));
+    swars.insert("R", Hertz::new(311.13, "D#".to_string()));
+    swars.insert("g", Hertz::new(329.63, "E".to_string()));
+    swars.insert("G", Hertz::new(349.23, "F".to_string()));
+    swars.insert("M", Hertz::new(369.99, "F#".to_string()));
+    swars.insert("M'", Hertz::new(392.00, "G".to_string()));
+    swars.insert("P", Hertz::new(415.30, "G#".to_string()));
+    swars.insert("d", Hertz::new(440.0, "A".to_string()));
+    swars.insert("D", Hertz::new(466.16, "A#".to_string()));
+    swars.insert("n", Hertz::new(493.88, "B".to_string()));
+    swars.insert("N", Hertz::new(523.25, "C".to_string()));
+    swars.insert("S.", Hertz::new(554.37, "C#".to_string()));
+    swars.insert("r.", Hertz::new(587.33, "D".to_string()));
+    swars.insert("R.", Hertz::new(622.25, "D#".to_string()));
+    swars.insert("g.", Hertz::new(659.25, "E".to_string()));
+    swars.insert("G.", Hertz::new(698.46, "F".to_string()));
+    swars.insert("M.", Hertz::new(739.99, "F#".to_string()));
+    swars.insert("M'.", Hertz::new(783.99, "G".to_string()));
 
     swars
 }
@@ -60,28 +62,51 @@ impl AudioDevice {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Hertz(pub f64);
+#[derive(Debug, Clone, PartialEq)]
+pub struct Hertz {
+    freq: f64,
+    tone: String
+}
 
-impl Sub for Hertz {
-    type Output = Self;
+impl Hertz {
+    pub fn new(freq: f64, tone: String) -> Self {
+        Hertz {
+            freq,
+            tone
+        }
+    }
 
-    fn sub(self, rhs: Self) -> Self::Output {
-        Hertz(self.0 - rhs.0)
+    pub fn freq(&self) -> f64 {
+        self.freq
+    }
+
+    pub fn tone(&self) -> &str {
+        self.tone.as_ref()
     }
 }
+
+// impl Sub for Hertz {
+//     type Output = Self;
+//
+//     fn sub(self, rhs: Self) -> Self::Output {
+//         Hertz::new(self.freq - rhs.freq, self)
+//     }
+// }
 
 impl From<Hertz> for f64 {
     fn from(h: Hertz) -> Self {
-        h.0
+        h.freq
     }
 }
 
-impl From<f64> for Hertz {
-    fn from(f: f64) -> Self {
-        Self(f)
-    }
-}
+// impl From<f64> for Hertz {
+//     fn from(f: f64) -> Self {
+//         Hertz {
+//             freq: f,
+//             tone: "".to_string(),
+//         }
+//     }
+// }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Pitch(String);
@@ -106,13 +131,16 @@ impl Default for Pitch {
 
 impl From<Pitch> for SineWave {
     fn from(p: Pitch) -> Self {
-        SineWave::new(p.hertz().unwrap().0 as u32)
+        SineWave::new(p.hertz().unwrap().freq as u32)
     }
 }
 
 impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
+        let hz = SWARS.get(&*self.0);
+        let _hz = hz.unwrap();
+        let tone = _hz.tone();
+        write!(f, "{}[{}]", self.0, tone)
     }
 }
 
