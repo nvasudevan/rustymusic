@@ -1,4 +1,4 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody, Pitch, Swar};
+use crate::raagas::elements::elements::{AudioDevice, Melody, Swar};
 use crate::raagas::elements::swarblock::SwarBlock;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};

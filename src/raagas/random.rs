@@ -1,9 +1,9 @@
-use crate::raagas::elements::elements::{Pitch, Swar};
+use crate::raagas::elements::elements::{Swar};
 use crate::raagas::elements::raag;
 use rand;
 use rand::seq::SliceRandom;
-use rand::Rng;
-use std::ops::Range;
+
+
 use rand::prelude::ThreadRng;
 
 fn get_rnd_monotonic(mut rnd: &mut ThreadRng, max: usize, n: usize) -> Vec<usize> {

@@ -2,11 +2,11 @@ use std::error::Error;
 
 use getopts::Options;
 
-use crate::raagas::{raag, utils};
+use crate::raagas::{raag};
 use crate::raagas::elements::elements::{Melody, Pitch, Swar};
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::random::randomiser;
-use crate::SWARS;
+
 
 fn raagas() -> Vec<String> {
     vec![
@@ -65,7 +65,7 @@ pub fn parse_opts<'a>(
             // check if play random swars flag is set
             if let Some(n) = matches.opt_str("z") {
                 // let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
-                let mut rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
+                let rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
                 match rnd_swars {
                     Ok(mut _swars) => {
                         _swars.insert(0, Swar::new(

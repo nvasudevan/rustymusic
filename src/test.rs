@@ -84,7 +84,7 @@ mod tests {
     fn test_randomiser() {
         let z: usize = 3;
         // test 3 notes are returned
-        let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
+        let _swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
         let s = "durga";
         let raag = raag::raag(s.to_string()).unwrap();
         let swars = random::randomiser(&raag, z);

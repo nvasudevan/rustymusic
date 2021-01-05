@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Formatter;
 use std::io::BufReader;
-use std::hash::{Hash, Hasher};
+
 
 use rodio::{source::SineWave, Device, Sink, Source};
 
@@ -199,7 +199,7 @@ impl Melody for Swar {
         &self,
         dev: &AudioDevice,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-        mix: bool,
+        _mix: bool,
         _n: i8,
     ) {
         let sink = Sink::new(&dev.dev);
