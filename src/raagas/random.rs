@@ -1,8 +1,7 @@
-use crate::raagas::elements::elements::{Swar};
+use crate::raagas::elements::elements::Swar;
 use crate::raagas::elements::raag;
 use rand;
 use rand::seq::SliceRandom;
-
 
 use rand::prelude::ThreadRng;
 
@@ -40,7 +39,10 @@ pub fn randomiser(raag: &raag::Raag, n: usize) -> Result<Vec<Swar>, String> {
                 return Err(format!("Pitch can't be empty!"));
             }
         } else {
-            return Err(format!("Can't retrieve swar at index {} in aroha/avroha!", i));
+            return Err(format!(
+                "Can't retrieve swar at index {} in aroha/avroha!",
+                i
+            ));
         }
     }
 

@@ -2,34 +2,30 @@ use crate::raagas::elements::elements::{AudioDevice, Melody, Swar};
 use crate::raagas::elements::swarblock::SwarBlock;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
-    pub lines: HashMap<String, Vec<SwarBlock>>
+    pub lines: HashMap<String, Vec<SwarBlock>>,
 }
 
 impl Sthayi {
     pub fn new(lines: HashMap<String, Vec<SwarBlock>>) -> Self {
-        Sthayi {
-            lines
-        }
+        Sthayi { lines }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Antara {
-    pub lines: HashMap<String, Vec<SwarBlock>>
+    pub lines: HashMap<String, Vec<SwarBlock>>,
 }
 
 impl Antara {
     pub fn new(lines: HashMap<String, Vec<SwarBlock>>) -> Self {
-        Antara {
-            lines
-        }
+        Antara { lines }
     }
 }
 
@@ -48,15 +44,11 @@ impl Swarmaalika {
         sthayi: Sthayi,
         antara: Antara,
         tihayi: Option<Vec<SwarBlock>>,
-        sam: Option<usize>
+        sam: Option<usize>,
     ) -> Self {
         let mut _sam = match sam {
-            Some(n) => {
-                n
-            },
-            _ => {
-                1
-            }
+            Some(n) => n,
+            _ => 1,
         };
         // let mut _tihayi = match tihayi {
         //     Some(n) => {
@@ -71,7 +63,7 @@ impl Swarmaalika {
             sthayi,
             antara,
             tihayi,
-            sam: _sam
+            sam: _sam,
         }
     }
 }
@@ -109,10 +101,8 @@ impl Melody for Swarmaalika {
                     _n = _n + blk.0.len();
                 }
                 self.sam - _n
-            },
-            _ => {
-                self.sam
             }
+            _ => self.sam,
         };
         let sam_blk = SwarBlock::from_iter((0.._sam).into_iter());
         play(&Some(vec![sam_blk]), 1);
@@ -126,7 +116,7 @@ impl Melody for Swarmaalika {
                 Some(l) => {
                     let _line = l.to_owned();
                     play(&Some(_line), 2);
-                },
+                }
                 _ => {}
             }
         }
@@ -137,7 +127,7 @@ impl Melody for Swarmaalika {
             Some(l) => {
                 let _line = l.to_owned();
                 play(&Some(_line), 1);
-            },
+            }
             _ => {}
         }
 
@@ -149,7 +139,7 @@ impl Melody for Swarmaalika {
                 Some(l) => {
                     let _line = l.to_owned();
                     play(&Some(_line), 2);
-                },
+                }
                 _ => {}
             }
         }
@@ -198,7 +188,7 @@ impl Melody for Swarmaalika {
         // }
 
         // play tihayi
-        let mut t_cnt:usize = 0;
+        let mut t_cnt: usize = 0;
         for blk in self.tihayi.as_ref().unwrap() {
             t_cnt = t_cnt + blk.no_beats();
         }
@@ -223,9 +213,8 @@ impl Melody for Swarmaalika {
                         }
                     }
                 }
-            },
+            }
             _ => {}
         }
-
     }
 }

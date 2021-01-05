@@ -1,13 +1,13 @@
 extern crate yaml_rust;
 
-use rodio::decoder::Decoder;
-use rodio::source::{Repeat, TakeDuration};
-use rodio::{decoder, Source};
 use crate::raagas::elements::elements::{Pitch, Swar, BEATMP3, CONF_DIR, KAN_SWAR_BEAT_COUNT};
 use crate::raagas::elements::raag::Raag;
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::elements::swarmaalika::{Antara, Sthayi, Swarmaalika};
 use crate::raagas::utils;
+use rodio::decoder::Decoder;
+use rodio::source::{Repeat, TakeDuration};
+use rodio::{decoder, Source};
 use yaml_rust::YamlLoader;
 
 use self::yaml_rust::{yaml, Yaml};
@@ -18,11 +18,7 @@ use std::time::Duration;
 
 pub fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
-    let swars: Vec<String> = s
-        .trim()
-        .split(" ")
-        .map(|x| x.to_string())
-        .collect();
+    let swars: Vec<String> = s.trim().split(" ").map(|x| x.to_string()).collect();
     for sw in swars {
         if sw.eq("-") {
             //add an extra beat to previous swar
@@ -63,25 +59,21 @@ pub fn to_swars(s: &str) -> Vec<Swar> {
 fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     let mut blk: Vec<SwarBlock> = Vec::new();
     match doc {
-        yaml::Yaml::Array(ref v) => {
-            match v.get(0) {
-                Some(line) => {
-                    if line.is_null() {
-                        None
-                    } else {
-                        let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
-                        for _s in blks_s {
-                            blk.push(SwarBlock(to_swars(_s)));
-                        }
-                        Some(blk)
+        yaml::Yaml::Array(ref v) => match v.get(0) {
+            Some(line) => {
+                if line.is_null() {
+                    None
+                } else {
+                    let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
+                    for _s in blks_s {
+                        blk.push(SwarBlock(to_swars(_s)));
                     }
-                },
-                _ => { None }
+                    Some(blk)
+                }
             }
+            _ => None,
         },
-        _ => {
-            None
-        },
+        _ => None,
     }
 }
 
@@ -103,10 +95,8 @@ fn sthayi(doc: &Yaml) -> Option<Sthayi> {
             let parse = |i: usize, s: &str| {
                 let _y = v.get(i);
                 return match _y {
-                    Some(line) => {
-                        swar_line(&line[s])
-                    },
-                    _ => { None }
+                    Some(line) => swar_line(&line[s]),
+                    _ => None,
                 };
             };
             let mut lines: HashMap<String, Vec<SwarBlock>> = HashMap::new();
@@ -118,17 +108,16 @@ fn sthayi(doc: &Yaml) -> Option<Sthayi> {
                     match line {
                         Some(blk) => {
                             lines.insert(t.to_string(), blk);
-                            break
-                        },
+                            break;
+                        }
                         _ => {}
                     }
-
                 }
             }
 
             Some(Sthayi::new(lines))
-        },
-        _ => { None }
+        }
+        _ => None,
     }
 }
 
@@ -138,10 +127,8 @@ fn antara(doc: &Yaml) -> Option<Antara> {
             let parse = |i: usize, s: &str| {
                 let _y = v.get(i);
                 return match _y {
-                    Some(line) => {
-                        swar_line(&line[s])
-                    },
-                    _ => { None }
+                    Some(line) => swar_line(&line[s]),
+                    _ => None,
                 };
             };
 
@@ -154,17 +141,16 @@ fn antara(doc: &Yaml) -> Option<Antara> {
                     match line {
                         Some(blk) => {
                             lines.insert(t.to_string(), blk);
-                            break
-                        },
+                            break;
+                        }
                         _ => {}
                     }
-
                 }
             }
 
             Some(Antara::new(lines))
-        },
-        _ => { None }
+        }
+        _ => None,
     }
 }
 
@@ -181,8 +167,8 @@ fn parse_usize(doc: &Yaml) -> Option<usize> {
         yaml::Yaml::Integer(ref n) => {
             let _n: usize = *n as usize;
             Some(_n)
-        },
-        _ => { None }
+        }
+        _ => None,
     }
 }
 
@@ -211,10 +197,8 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
             let tihayi = tihayi(tihayi_s);
 
             Some(Swarmaalika::new(mukra, sthayi, antara, tihayi, sam))
-        },
-        _ => {
-            None
         }
+        _ => None,
     }
 }
 
@@ -245,8 +229,8 @@ pub fn raag(name: String) -> Option<Raag> {
             let avroha = aroha_avroha(&doc, "avroha")?;
             let pakad = pakad(&doc)?;
             let alankars = match alankars(&doc) {
-                Some(v) => { Some(v) },
-                _ => { None }
+                Some(v) => Some(v),
+                _ => None,
             };
             let swarmaalika = swarmaalika(&doc)?;
             let beat_src = play_raw_beats_forever(BEATMP3);
@@ -258,7 +242,7 @@ pub fn raag(name: String) -> Option<Raag> {
                 Some(pakad),
                 alankars,
                 swarmaalika,
-                Some(beat_src)
+                Some(beat_src),
             ))
         }
         _ => None,

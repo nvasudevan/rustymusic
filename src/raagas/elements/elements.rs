@@ -3,11 +3,10 @@ use std::fmt;
 use std::fmt::Formatter;
 use std::io::BufReader;
 
-
 use rodio::{source::SineWave, Device, Sink, Source};
 
 use crate::raagas::utils;
-use crate::{SWARS};
+use crate::SWARS;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::fs::File;
@@ -63,15 +62,12 @@ impl AudioDevice {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hertz {
     freq: f64,
-    tone: String
+    tone: String,
 }
 
 impl Hertz {
     pub fn new(freq: f64, tone: String) -> Self {
-        Hertz {
-            freq,
-            tone
-        }
+        Hertz { freq, tone }
     }
 
     pub fn freq(&self) -> f64 {
@@ -170,9 +166,7 @@ impl fmt::Display for Swar {
         let _cnt = self.beat_cnt as usize;
         let dash = match _cnt {
             1 => String::from(" "),
-            2..=8 => (0..(_cnt - 1))
-                .map(|_| " - ")
-                .collect::<String>(),
+            2..=8 => (0..(_cnt - 1)).map(|_| " - ").collect::<String>(),
             _ => String::new(),
         };
 
@@ -210,20 +204,20 @@ impl Melody for Swar {
                     Some(p) => {
                         let sinew = SineWave::from(p.to_owned());
                         sink.append(src.mix(sinew));
-                    },
+                    }
                     _ => {
                         // play taal
                         sink.append(src);
                     }
                 }
-            },
+            }
             _ => {
                 // play swar
                 match &self.pitch {
                     Some(p) => {
                         let sinew = SineWave::from(p.to_owned());
                         sink.append(sinew);
-                    },
+                    }
                     _ => {}
                 }
             }
@@ -237,8 +231,8 @@ impl Melody for Swar {
 }
 
 pub struct Taal {
-   taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
-   bps: f32
+    taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
+    bps: f32,
 }
 
 impl Taal {

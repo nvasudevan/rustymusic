@@ -4,9 +4,9 @@ use crate::raagas::elements::swarmaalika::Swarmaalika;
 use crate::raagas::utils;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
+use rodio::Sink;
 use std::fs::File;
 use std::io::BufReader;
-use rodio::Sink;
 
 #[derive(Clone)]
 pub struct Raag {
@@ -36,7 +36,7 @@ impl Raag {
             pakad,
             alankars,
             swarmaalika,
-            beat_src
+            beat_src,
         }
     }
 
@@ -68,10 +68,7 @@ impl Raag {
         &self.beat_src
     }
 
-    fn play_aroha(
-        &self,
-        dev: &AudioDevice
-    ) {
+    fn play_aroha(&self, dev: &AudioDevice) {
         println!("\n=> Playing aroha for raag: {}", self.name());
         match self.aroha() {
             Some(_aroha) => {
@@ -83,10 +80,7 @@ impl Raag {
         }
     }
 
-    fn play_avroha(
-        &self,
-        dev: &AudioDevice
-    ) {
+    fn play_avroha(&self, dev: &AudioDevice) {
         println!("\n=> Playing avroha for raag: {}", self.name());
         match self.avroha() {
             Some(_avroha) => {
@@ -98,10 +92,7 @@ impl Raag {
         }
     }
 
-    fn play_pakad(
-        &self,
-        dev: &AudioDevice
-    ) {
+    fn play_pakad(&self, dev: &AudioDevice) {
         println!("\n=> Playing pakad for raag: {}", self.name());
         match self.pakad() {
             Some(_pakad) => {
@@ -112,17 +103,14 @@ impl Raag {
                         utils::io_flush();
                     }
                     _comma = true;
-                    blk.play(&dev, None,  false,1);
+                    blk.play(&dev, None, false, 1);
                 }
             }
             _ => {}
         }
     }
 
-    fn play_alankars(
-        &self,
-        dev: &AudioDevice
-    ) {
+    fn play_alankars(&self, dev: &AudioDevice) {
         println!("\n=> Playing alankars for raag: {}", self.name());
         match self.alankars() {
             Some(_alankar) => {

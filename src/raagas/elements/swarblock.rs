@@ -19,7 +19,7 @@ impl SwarBlock {
     }
 
     pub fn no_beats(&self) -> usize {
-        let mut cnt:usize = 0;
+        let mut cnt: usize = 0;
         for sw in &self.0 {
             cnt = cnt + sw.beat_cnt as usize;
         }
@@ -29,10 +29,13 @@ impl SwarBlock {
 }
 
 impl FromIterator<usize> for SwarBlock {
-    fn from_iter<T: IntoIterator<Item=usize>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = usize>>(iter: T) -> Self {
         let mut _blk: Vec<Swar> = Vec::new();
         for _ in iter {
-            _blk.push(Swar { pitch: None, beat_cnt: 1.0 });
+            _blk.push(Swar {
+                pitch: None,
+                beat_cnt: 1.0,
+            });
         }
 
         SwarBlock(_blk)
