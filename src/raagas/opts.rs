@@ -1,10 +1,11 @@
+use std::error::Error;
+
 use getopts::Options;
 
+use crate::raagas::{raag, utils};
 use crate::raagas::elements::elements::{Melody, Pitch, Swar};
 use crate::raagas::elements::swarblock::SwarBlock;
 use crate::raagas::random::randomiser;
-use crate::raagas::{raag, utils};
-use std::error::Error;
 use crate::SWARS;
 
 fn raagas() -> Vec<String> {
@@ -24,7 +25,7 @@ fn raagas() -> Vec<String> {
 pub fn build_opts() -> Options {
     let mut opts = getopts::Options::new();
     opts.optopt("v", "vol", "set volume", "1.0 (default)");
-    opts.optopt("z", "rand", "no of random swars to play", "<-z 5>");
+    opts.optopt("z", "rand", "no of random swars to play for a raag", "<-z 5>");
     let raagas = raagas().join(",");
     opts.optopt("r", "raag", "raag to play", &format!("-r {}", raagas));
     opts.optopt("f", "play", "play swars from file", "<file>");
@@ -52,7 +53,7 @@ pub fn parse_opts<'a>(
         Some(r) => {
             let _r = r.to_lowercase();
             // is raag supported?
-            if ! raagas().contains(&_r) {
+            if !raagas().contains(&_r) {
                 let raagas = raagas().join(",");
                 return Err(
                     format!("Raag {} is unsupported; supported raagas: {}", r, raagas).into()
@@ -63,24 +64,24 @@ pub fn parse_opts<'a>(
 
             // check if play random swars flag is set
             if let Some(n) = matches.opt_str("z") {
-                    // let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
-                    let mut rnd_swars = randomiser(&raag,n.parse::<usize>().unwrap());
-                    match rnd_swars {
-                        Ok(mut _swars) => {
-                            _swars.insert(0,Swar::new(
-                                Pitch::new("S".to_string()), 3.0)
-                            );
-                            let swarblk = SwarBlock(_swars);
-                            return Ok(Box::new(swarblk));
-                        },
-                        Err(e) => {
-                            return Err(e.into());
-                        }
+                // let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
+                let mut rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
+                match rnd_swars {
+                    Ok(mut _swars) => {
+                        _swars.insert(0, Swar::new(
+                            Pitch::new("S".to_string()), 3.0),
+                        );
+                        let swarblk = SwarBlock(_swars);
+                        return Ok(Box::new(swarblk));
                     }
-                } else {
-                    return Ok(Box::new(raag));
+                    Err(e) => {
+                        return Err(e.into());
+                    }
                 }
-        },
+            } else {
+                return Ok(Box::new(raag));
+            }
+        }
         _ => Err("A valid option was not passed!".into()),
     }
 
@@ -101,5 +102,4 @@ pub fn parse_opts<'a>(
     //     }
     //     _ => {}
     // }
-
 }

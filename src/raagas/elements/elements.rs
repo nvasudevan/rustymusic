@@ -2,8 +2,6 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Formatter;
 use std::io::BufReader;
-use std::ops::Sub;
-use std::cmp::Eq;
 use std::hash::{Hash, Hasher};
 
 use rodio::{source::SineWave, Device, Sink, Source};

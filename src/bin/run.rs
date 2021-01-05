@@ -3,6 +3,7 @@ extern crate getopts;
 use std::env;
 
 use rodio::default_output_device;
+
 use rustymusic::raagas::elements::elements;
 use rustymusic::raagas::opts;
 
