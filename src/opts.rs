@@ -21,7 +21,7 @@ fn raagas() -> Vec<String> {
     ]
 }
 
-pub fn build_opts() -> Options {
+pub fn my_opts() -> Options {
     let mut opts = getopts::Options::new();
     opts.optopt("v", "vol", "set volume", "1.0 (default)");
     opts.optopt(
@@ -30,8 +30,9 @@ pub fn build_opts() -> Options {
         "no of random swars to play for a raag",
         "<-z 5>",
     );
-    let raagas = raagas().join(",");
-    opts.optopt("r", "raag", "raag to play", &format!("-r {}", raagas));
+    let supported_raagas = raagas().join(",");
+    opts.optopt("r", "raag", "raag to play",
+                &format!("-r {}", supported_raagas));
     opts.optopt("f", "play", "play swars from file", "<file>");
     opts.optflag("h", "help", "usage");
 
@@ -42,7 +43,7 @@ pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
 }
 
-pub fn parse_opts<'a>(
+pub fn parse<'a>(
     opts: &Options,
     args: Vec<String>,
 ) -> Result<Box<dyn Melody>, Box<dyn Error>> {
@@ -60,10 +61,9 @@ pub fn parse_opts<'a>(
             if !raagas().contains(&_r) {
                 let raagas = raagas().join(",");
                 return Err(
-                    format!("Raag {} is unsupported; supported raagas: {}", r, raagas).into(),
+                    format!("Raag {} is unsupported, raagas allowed: {}", r, raagas).into(),
                 );
             }
-            println!("playing raag: {}", _r);
             let raag = raag::raag(_r).unwrap();
 
             // check if play random swars flag is set

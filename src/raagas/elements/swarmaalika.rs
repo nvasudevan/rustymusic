@@ -79,8 +79,7 @@ impl Melody for Swarmaalika {
         _mix: bool,
         _n: i8,
     ) {
-        // play: sthayi, line A of sthayi, antara, line A of sthayi, tihayi
-        println!("\nPlaying swarmaalika");
+        println!("\n=> swarmaalika");
         let play = |line: &Option<Vec<SwarBlock>>, cnt: usize| match &line {
             Some(line) => {
                 for blk in line {
@@ -122,8 +121,7 @@ impl Melody for Swarmaalika {
         }
 
         // after sthayi play A
-        let lineA = self.sthayi.lines.get("lineA");
-        match lineA {
+        match self.sthayi.lines.get("lineA") {
             Some(l) => {
                 let _line = l.to_owned();
                 play(&Some(_line), 1);
@@ -197,8 +195,7 @@ impl Melody for Swarmaalika {
 
         // we need to play swars from line A
         // from the beat where tihayi finishes until beat cycle finishes
-        let lineA = self.sthayi.lines.get("lineA");
-        match lineA {
+        match self.sthayi.lines.get("lineA") {
             Some(l) => {
                 let _line = l.to_owned();
                 let mut j: usize = 0;

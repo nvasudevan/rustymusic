@@ -69,7 +69,7 @@ impl Raag {
     }
 
     fn play_aroha(&self, dev: &AudioDevice) {
-        println!("\n=> Playing aroha for raag: {}", self.name());
+        println!("\n=> aroha for raag: {}", self.name());
         match self.aroha() {
             Some(_aroha) => {
                 for blk in _aroha {
@@ -81,7 +81,7 @@ impl Raag {
     }
 
     fn play_avroha(&self, dev: &AudioDevice) {
-        println!("\n=> Playing avroha for raag: {}", self.name());
+        println!("\n=> avroha for raag: {}", self.name());
         match self.avroha() {
             Some(_avroha) => {
                 for blk in _avroha {
@@ -93,7 +93,7 @@ impl Raag {
     }
 
     fn play_pakad(&self, dev: &AudioDevice) {
-        println!("\n=> Playing pakad for raag: {}", self.name());
+        println!("\n=> pakad for raag: {}", self.name());
         match self.pakad() {
             Some(_pakad) => {
                 let mut _comma: bool = false;
@@ -111,7 +111,7 @@ impl Raag {
     }
 
     fn play_alankars(&self, dev: &AudioDevice) {
-        println!("\n=> Playing alankars for raag: {}", self.name());
+        println!("\n=> alankars for raag: {}", self.name());
         match self.alankars() {
             Some(_alankar) => {
                 let mut _comma: bool = false;
@@ -140,6 +140,7 @@ impl Melody for Raag {
         _mix: bool,
         n: i8,
     ) {
+        println!("=> playing raag: {}", self.name());
         let gap: f32 = 2.0; //no of beats
         let sink = Sink::new(&dev.dev);
         self.play_aroha(&dev);
