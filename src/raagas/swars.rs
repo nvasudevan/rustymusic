@@ -71,7 +71,8 @@ impl Melody for Swar {
         _mix: bool,
         _n: i8,
     ) {
-        let sink = Sink::new(&dev.dev);
+        // let sink = Sink::new(&dev.dev);
+        let sink = Sink::try_new(&dev.out_stream_handle).unwrap();
         match beat_src {
             Some(src) => {
                 match &self.pitch {
@@ -79,6 +80,8 @@ impl Melody for Swar {
                     Some(p) => {
                         let sinew = SineWave::from(p.to_owned());
                         sink.append(src.mix(sinew));
+                        let sa = Pitch::default().hertz().unwrap().freq() as u32;
+                        // sink.append(src.mix(SineWave::new(sa)));
                     }
                     _ => {
                         // play taal

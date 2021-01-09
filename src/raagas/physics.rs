@@ -1,19 +1,17 @@
-use rodio::{source::SineWave, Device};
-use rodio::default_output_device;
+use rodio::{source::SineWave, Device, OutputStream, OutputStreamHandle};
 use std::fmt::Formatter;
 use std::fmt;
 
 use crate::raagas::constants;
 
 pub struct AudioDevice {
-    pub(crate) dev: Device,
+    pub(crate) out_stream_handle: OutputStreamHandle,
     pub(crate) vol: f32,
 }
 
 impl AudioDevice {
-    pub fn new() -> AudioDevice {
-        let dev = default_output_device().unwrap();
-        AudioDevice { dev, vol: constants::VOL }
+    pub fn new(out_stream_handle: OutputStreamHandle) -> AudioDevice {
+        AudioDevice { out_stream_handle, vol: constants::VOL }
     }
 }
 

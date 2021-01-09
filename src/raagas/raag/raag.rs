@@ -144,7 +144,7 @@ impl Melody for Raag {
     ) {
         println!("=> playing raag: {}", self.name());
         let gap: f32 = 2.0; //no of beats
-        let sink = Sink::new(&dev.dev);
+        let sink = Sink::try_new(&dev.out_stream_handle).unwrap();
         self.play_aroha(&dev, vol);
         utils::delay(gap * BPS);
         self.play_avroha(&dev, vol);
