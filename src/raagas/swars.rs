@@ -6,6 +6,7 @@ use crate::raagas::physics::{Pitch, AudioDevice};
 use rodio::{Sink, Source};
 use crate::raagas::constants::BPS;
 use std::iter::FromIterator;
+use std::io::sink;
 
 pub trait Melody {
     fn play(
@@ -71,40 +72,44 @@ impl Melody for Swar {
         _mix: bool,
         _n: i8,
     ) {
-        // let sink = Sink::new(&dev.dev);
-        let sink = Sink::try_new(&dev.out_stream_handle).unwrap();
-        match beat_src {
-            Some(src) => {
-                match &self.pitch {
-                    // play swar with taal
-                    Some(p) => {
-                        let sinew = SineWave::from(p.to_owned());
-                        sink.append(src.mix(sinew));
-                        let sa = Pitch::default().hertz().unwrap().freq() as u32;
-                        // sink.append(src.mix(SineWave::new(sa)));
+        match Sink::try_new(&dev.out_stream_handle) {
+            Ok(sink) => {
+                match beat_src {
+                    Some(src) => {
+                        match &self.pitch {
+                            // play swar with taal
+                            Some(p) => {
+                                let sinew = SineWave::from(p.to_owned());
+                                sink.append(src.mix(sinew));
+                                // let sa = Pitch::default().hertz().unwrap().freq() as u32;
+                                // sink.append(src.mix(SineWave::new(sa)));
+                            }
+                            _ => {
+                                // play taal
+                                sink.append(src);
+                            }
+                        }
                     }
                     _ => {
-                        // play taal
-                        sink.append(src);
+                        // play swar
+                        match &self.pitch {
+                            Some(p) => {
+                                let sinew = SineWave::from(p.to_owned());
+                                sink.append(sinew);
+                            }
+                            _ => {}
+                        }
                     }
                 }
-            }
-            _ => {
-                // play swar
-                match &self.pitch {
-                    Some(p) => {
-                        let sinew = SineWave::from(p.to_owned());
-                        sink.append(sinew);
-                    }
-                    _ => {}
-                }
+                sink.set_volume(vol);
+                sink.play();
+                utils::delay(self.beat_cnt * BPS);
+                sink.stop();
+            },
+            Err(e) => {
+                println!("error in creating sink: {}", e);
             }
         }
-
-        sink.set_volume(vol);
-        sink.play();
-        utils::delay(self.beat_cnt * BPS);
-        sink.stop();
     }
 }
 

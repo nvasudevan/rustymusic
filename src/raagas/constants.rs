@@ -11,6 +11,7 @@ pub const BEAT_MP3: (&str, f32) = ("./samples/1beat.mp3", BPS);
 pub const TIHAYI_TIMES: i8 = 3;
 pub const KAN_SWAR_BEAT_COUNT: f32 = 0.2;
 pub const VOL: f32 = 0.5;
+pub const PLAY_PAUSE_DURATION: f32 = 2.0;
 
 lazy_static! {
     pub static ref SWARS: HashMap<&'static str, Hertz> = initialise_swars();

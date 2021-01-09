@@ -6,7 +6,7 @@ use std::io::BufReader;
 use crate::raagas::swarmaalika::Swarmaalika;
 use crate::raagas::swars::{SwarBlock, Melody};
 use crate::raagas::physics::AudioDevice;
-use crate::raagas::constants::BPS;
+use crate::raagas::constants::{PLAY_PAUSE_DURATION, BPS};
 use crate::raagas::utils;
 
 #[derive(Clone)]
@@ -143,21 +143,26 @@ impl Melody for Raag {
         n: i8,
     ) {
         println!("=> playing raag: {}", self.name());
-        let gap: f32 = 2.0; //no of beats
-        let sink = Sink::try_new(&dev.out_stream_handle).unwrap();
-        self.play_aroha(&dev, vol);
-        utils::delay(gap * BPS);
-        self.play_avroha(&dev, vol);
-        utils::delay(gap * BPS);
-        self.play_pakad(&dev, vol);
-        utils::delay(gap * BPS);
-        // self.play_taal(&sink, beat_src);
-        // sink.set_volume(*&dev.vol as f32);
-        self.play_swarmaalika(dev, vol, false, n);
-        // utils::delay(gap * BPS);
-        // self.play_alankars(&dev, &beat_src);
-        sink.play();
-        utils::delay(2.0);
-        sink.stop();
+        match Sink::try_new(&dev.out_stream_handle) {
+            Ok(sink) => {
+                self.play_aroha(&dev, vol);
+                utils::delay(PLAY_PAUSE_DURATION * BPS);
+                self.play_avroha(&dev, vol);
+                utils::delay(PLAY_PAUSE_DURATION  * BPS);
+                self.play_pakad(&dev, vol);
+                utils::delay(PLAY_PAUSE_DURATION * BPS);
+                // self.play_taal(&sink, beat_src);
+                // sink.set_volume(*&dev.vol as f32);
+                self.play_swarmaalika(dev, vol, false, n);
+                utils::delay(PLAY_PAUSE_DURATION * BPS);
+                // self.play_alankars(&dev, &beat_src);
+                sink.play();
+                utils::delay(2.0);
+                // sink.stop();
+            },
+            Err(e) => {
+                println!("error: {}", e);
+            }
+        }
     }
 }
