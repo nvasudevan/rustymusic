@@ -1,4 +1,4 @@
-use rodio::{source::SineWave, Device, Sink, Source};
+use rodio::{source::SineWave, Device};
 use rodio::default_output_device;
 use std::fmt::Formatter;
 use std::fmt;
