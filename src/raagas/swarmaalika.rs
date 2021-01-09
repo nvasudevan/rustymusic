@@ -1,11 +1,11 @@
-use crate::raagas::elements::elements::{AudioDevice, Melody, Swar};
-use crate::raagas::elements::swarblock::SwarBlock;
+use crate::raagas::swars::{Melody, Swar, SwarBlock};
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
+use crate::raagas::physics::AudioDevice;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
@@ -75,6 +75,7 @@ impl Melody for Swarmaalika {
     fn play(
         &self,
         dev: &AudioDevice,
+        vol: f32,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
         _mix: bool,
         _n: i8,
@@ -84,7 +85,7 @@ impl Melody for Swarmaalika {
             Some(line) => {
                 for blk in line {
                     for _ in 0..cnt {
-                        blk.play(&dev, beat_src.clone(), false, 1);
+                        blk.play(&dev, vol, beat_src.clone(), false, 1);
                         println!();
                     }
                 }
@@ -206,7 +207,7 @@ impl Melody for Swarmaalika {
                         if j > t_cnt {
                             let _sw = sw.to_owned();
                             let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
-                            _sw_ext.play(&dev, None, false, 1);
+                            _sw_ext.play(&dev, vol, None, false, 1);
                         }
                     }
                 }

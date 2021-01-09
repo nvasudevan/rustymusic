@@ -1,9 +1,9 @@
-use crate::raagas::elements::elements::Swar;
-use crate::raagas::elements::raag;
+use crate::raagas::swars::Swar;
 use rand;
 use rand::seq::SliceRandom;
 
 use rand::prelude::ThreadRng;
+use crate::raagas::raag::raag;
 
 fn get_rnd_monotonic(mut rnd: &mut ThreadRng, max: usize, n: usize) -> Vec<usize> {
     let _v: Vec<usize> = (0..max).collect();

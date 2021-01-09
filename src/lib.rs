@@ -3,12 +3,10 @@ extern crate lazy_static;
 
 use std::collections::HashMap;
 
-use crate::raagas::elements::elements::{Hertz, initialise_swars};
+use crate::raagas::physics::Hertz;
+use crate::raagas::constants::initialise_swars;
 
 pub mod raagas;
 mod test;
 pub mod opts;
 
-lazy_static! {
-    pub static ref SWARS: HashMap<&'static str, Hertz> = initialise_swars();
-}

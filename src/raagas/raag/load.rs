@@ -1,10 +1,5 @@
 extern crate yaml_rust;
 
-use crate::raagas::elements::elements::{Pitch, Swar, BEATMP3, CONF_DIR, KAN_SWAR_BEAT_COUNT};
-use crate::raagas::elements::raag::Raag;
-use crate::raagas::elements::swarblock::SwarBlock;
-use crate::raagas::elements::swarmaalika::{Antara, Sthayi, Swarmaalika};
-use crate::raagas::utils;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use rodio::{decoder, Source};
@@ -15,6 +10,12 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
+use crate::raagas::swars::{Swar, SwarBlock};
+use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, CONF_DIR, BEAT_MP3};
+use crate::raagas::physics::Pitch;
+use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
+use crate::raagas::raag::raag::Raag;
+use crate::raagas::utils;
 
 pub fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];
@@ -217,9 +218,9 @@ fn play_raw_beats_forever(beatp: (&str, f32)) -> Repeat<TakeDuration<Decoder<Buf
     beat_src
 }
 
-pub fn raag(name: String) -> Option<Raag> {
+pub fn load_yaml(raag: String) -> Option<Raag> {
     // Given a raag name returns a Raag
-    let raagp = format!("{}/{}.yaml", CONF_DIR, name);
+    let raagp = format!("{}/{}.yaml", CONF_DIR, raag);
     let s = utils::file_as_str(raagp);
     let yamlldr = YamlLoader::load_from_str(&s);
     match &yamlldr {
@@ -233,10 +234,10 @@ pub fn raag(name: String) -> Option<Raag> {
                 _ => None,
             };
             let swarmaalika = swarmaalika(&doc)?;
-            let beat_src = play_raw_beats_forever(BEATMP3);
+            let beat_src = play_raw_beats_forever(BEAT_MP3);
 
             Some(Raag::new(
-                name,
+                raag,
                 Some(aroha),
                 Some(avroha),
                 Some(pakad),

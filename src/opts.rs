@@ -2,23 +2,14 @@ use std::error::Error;
 
 use getopts::Options;
 
-use crate::raagas::elements::elements::{Melody, Pitch, Swar};
-use crate::raagas::elements::swarblock::SwarBlock;
-use crate::raagas::raag;
+use crate::raagas::swars::{Melody, Swar, SwarBlock};
+use crate::raagas::constants::RAAGAS;
 use crate::raagas::random::randomiser;
+use crate::raagas::raag;
+use crate::raagas::physics::Pitch;
 
-fn raagas() -> Vec<String> {
-    vec![
-        "durga".to_string(),
-        "yaman".to_string(),
-        "bhupali".to_string(),
-        "hamsadhwani".to_string(),
-        "yeri_aali".to_string(),
-        "bairav".to_string(),
-        "bhairavi".to_string(),
-        "daesh".to_string(),
-        "malkauns".to_string(),
-    ]
+pub fn print_usage(msg: &str, opts: &Options) {
+    println!("Usage: {}", opts.usage(msg));
 }
 
 pub fn my_opts() -> Options {
@@ -30,7 +21,7 @@ pub fn my_opts() -> Options {
         "no of random swars to play for a raag",
         "<-z 5>",
     );
-    let supported_raagas = raagas().join(",");
+    let supported_raagas = RAAGAS.join(",");
     opts.optopt("r", "raag", "raag to play",
                 &format!("-r {}", supported_raagas));
     opts.optopt("f", "play", "play swars from file", "<file>");
@@ -39,32 +30,22 @@ pub fn my_opts() -> Options {
     opts
 }
 
-pub fn print_usage(msg: &str, opts: &Options) {
-    println!("Usage: {}", opts.usage(msg));
-}
-
-pub fn parse<'a>(
+pub fn parse(
     opts: &Options,
     args: Vec<String>,
 ) -> Result<Box<dyn Melody>, Box<dyn Error>> {
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(e) => {
-            panic!("Nothing matched: {}", e.to_string());
-        }
-    };
-
+    let matches = opts.parse(&args[1..])?;
     match matches.opt_str("r") {
         Some(r) => {
             let _r = r.to_lowercase();
             // is raag supported?
-            if !raagas().contains(&_r) {
-                let raagas = raagas().join(",");
+            if !RAAGAS.contains(&_r.as_str()) {
+                let _raagas = RAAGAS.join(",");
                 return Err(
-                    format!("Raag {} is unsupported, raagas allowed: {}", r, raagas).into(),
+                    format!("Raag {} is unsupported, raagas allowed: {}", r, _raagas).into(),
                 );
             }
-            let raag = raag::raag(_r).unwrap();
+            let raag = raag::load::load_yaml(_r).unwrap();
 
             // check if play random swars flag is set
             if let Some(n) = matches.opt_str("z") {
@@ -72,7 +53,7 @@ pub fn parse<'a>(
                 let rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
                 match rnd_swars {
                     Ok(mut _swars) => {
-                        _swars.insert(0, Swar::new(Pitch::new("S".to_string()), 3.0));
+                        _swars.insert(0,Swar::new(Pitch::new("S".to_string()), 3.0));
                         let swarblk = SwarBlock(_swars);
                         return Ok(Box::new(swarblk));
                     }
