@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
 use crate::raagas::physics::AudioDevice;
+use rodio::Sink;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
@@ -74,7 +75,7 @@ impl Melody for Swarmaalika {
     // [mukra] <A A B B [C]> A <C C D D E E] A <tihayi> X 3
     fn play(
         &self,
-        dev: &AudioDevice,
+        sink: &Sink,
         vol: f32,
         beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
         _mix: bool,
@@ -85,7 +86,7 @@ impl Melody for Swarmaalika {
             Some(line) => {
                 for blk in line {
                     for _ in 0..cnt {
-                        blk.play(&dev, vol, beat_src.clone(), false, 1);
+                        blk.play(&sink, vol, beat_src.clone(), false, 1);
                         println!();
                     }
                 }
@@ -207,7 +208,7 @@ impl Melody for Swarmaalika {
                         if j > t_cnt {
                             let _sw = sw.to_owned();
                             let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
-                            _sw_ext.play(&dev, vol, None, false, 1);
+                            _sw_ext.play(&sink, vol, None, false, 1);
                         }
                     }
                 }

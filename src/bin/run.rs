@@ -14,8 +14,18 @@ fn main() {
             let opts = opts::my_opts();
             match opts::parse(&opts, env::args().collect()) {
                 Ok(melody) => {
-                    let audio_dev = AudioDevice::new(stream_handle);
-                    melody.play(&audio_dev, constants::VOL, None, false, 1)
+                    // let audio_dev = AudioDevice::new(stream_handle);
+                    match Sink::try_new(&stream_handle) {
+                        Ok(sink) => {
+                            melody.play(&sink, constants::VOL, None, false, 1);
+                            sink.stop();
+                            println!("sink: {}", sink.len());
+                            println!("sink empty: {}", sink.empty());
+                        },
+                        Err(e) => {
+                            println!("error: {}", e);
+                        }
+                    }
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),
             }

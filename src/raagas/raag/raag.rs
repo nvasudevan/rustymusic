@@ -69,31 +69,31 @@ impl Raag {
         &self.beat_src
     }
 
-    fn play_aroha(&self, dev: &AudioDevice, vol: f32) {
+    fn play_aroha(&self, sink: &Sink, vol: f32) {
         println!("\n=> aroha for raag: {}", self.name());
         match self.aroha() {
             Some(_aroha) => {
                 for blk in _aroha {
-                    blk.play(&dev, vol, None, false, 1);
+                    blk.play(&sink, vol, None, false, 1);
                 }
             }
             _ => {}
         }
     }
 
-    fn play_avroha(&self, dev: &AudioDevice, vol: f32) {
+    fn play_avroha(&self, sink: &Sink, vol: f32) {
         println!("\n=> avroha for raag: {}", self.name());
         match self.avroha() {
             Some(_avroha) => {
                 for blk in _avroha {
-                    blk.play(&dev, vol, None, false, 1);
+                    blk.play(&sink, vol, None, false, 1);
                 }
             }
             _ => {}
         }
     }
 
-    fn play_pakad(&self, dev: &AudioDevice, vol: f32) {
+    fn play_pakad(&self, sink: &Sink, vol: f32) {
         println!("\n=> pakad for raag: {}", self.name());
         match self.pakad() {
             Some(_pakad) => {
@@ -104,14 +104,14 @@ impl Raag {
                         utils::io_flush();
                     }
                     _comma = true;
-                    blk.play(&dev, vol,None, false, 1);
+                    blk.play(&sink, vol,None, false, 1);
                 }
             }
             _ => {}
         }
     }
 
-    fn play_alankars(&self, dev: &AudioDevice, vol: f32) {
+    fn play_alankars(&self, sink: &Sink, vol: f32) {
         println!("\n=> alankars for raag: {}", self.name());
         match self.alankars() {
             Some(_alankar) => {
@@ -121,48 +121,44 @@ impl Raag {
                         print!(", ");
                         utils::io_flush();
                     }
-                    blk.play(&dev, vol, self.beat_src.clone(), false, 1);
+                    blk.play(&sink, vol, self.beat_src.clone(), false, 1);
                 }
             }
             _ => {}
         }
     }
 
-    fn play_swarmaalika(&self, dev: &AudioDevice, vol: f32, mix: bool, n: i8) {
-        self.swarmaalika.play(dev, vol, self.beat_src.clone(), mix, n);
+    fn play_swarmaalika(&self, sink: &Sink, vol: f32, mix: bool, n: i8) {
+        self.swarmaalika.play(&sink, vol, self.beat_src.clone(), mix, n);
     }
 }
 
 impl Melody for Raag {
     fn play(
         &self,
-        dev: &AudioDevice,
+        sink: &Sink,
         vol: f32,
         _beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
         _mix: bool,
         n: i8,
     ) {
         println!("=> playing raag: {}", self.name());
-        match Sink::try_new(&dev.out_stream_handle) {
-            Ok(sink) => {
-                self.play_aroha(&dev, vol);
-                utils::delay(PLAY_PAUSE_DURATION * BPS);
-                self.play_avroha(&dev, vol);
-                utils::delay(PLAY_PAUSE_DURATION  * BPS);
-                self.play_pakad(&dev, vol);
-                utils::delay(PLAY_PAUSE_DURATION * BPS);
-                // self.play_taal(&sink, beat_src);
-                // sink.set_volume(*&dev.vol as f32);
-                self.play_swarmaalika(dev, vol, false, n);
-                utils::delay(PLAY_PAUSE_DURATION * BPS);
-                // self.play_alankars(&dev, &beat_src);
-                sink.play();
-                utils::delay(2.0);
-                // sink.stop();
-            },
-            Err(e) => {
-                println!("error: {}", e);
-            }
-        }
+        self.play_aroha(&sink, vol);
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // self.play_avroha(&sink, vol);
+        // println!("sink: {}", sink.len());
+        // utils::delay(PLAY_PAUSE_DURATION  * BPS);
+        // sink.set_volume(vol*2.0);
+        // sink.stop();
+        // self.play_pakad(&dev, vol);
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // // self.play_taal(&sink, beat_src);
+        // // sink.set_volume(*&dev.vol as f32);
+        // self.play_swarmaalika(dev, vol, false, n);
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // self.play_alankars(&dev, &beat_src);
+        // sink.play();
+        // utils::delay(2.0);
+        // sink.stop();
     }
 }
