@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
-use crate::raagas::swars::{Swar, SwarBlock};
+use crate::raagas::swars::{Swar, SwarBlock, SwarBlocks};
 use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, CONF_DIR, BEAT_MP3};
 use crate::raagas::physics::Pitch;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
@@ -57,7 +57,7 @@ pub fn to_swars(s: &str) -> Vec<Swar> {
     _blk
 }
 
-fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
     let mut blk: Vec<SwarBlock> = Vec::new();
     match doc {
         yaml::Yaml::Array(ref v) => match v.get(0) {
@@ -69,7 +69,7 @@ fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
                     for _s in blks_s {
                         blk.push(SwarBlock(to_swars(_s)));
                     }
-                    Some(blk)
+                    Some(SwarBlocks(blk))
                 }
             }
             _ => None,
@@ -78,15 +78,15 @@ fn swar_line(doc: &Yaml) -> Option<Vec<SwarBlock>> {
     }
 }
 
-fn aroha_avroha(doc: &Yaml, comp: &str) -> Option<Vec<SwarBlock>> {
+fn aroha_avroha(doc: &Yaml, comp: &str) -> Option<SwarBlocks> {
     swar_line(&doc[comp])
 }
 
-fn pakad(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+fn pakad(doc: &Yaml) -> Option<SwarBlocks> {
     swar_line(&doc["pakad"])
 }
 
-fn alankars(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+fn alankars(doc: &Yaml) -> Option<SwarBlocks> {
     swar_line(&doc["alankars"])
 }
 
@@ -100,7 +100,7 @@ fn sthayi(doc: &Yaml) -> Option<Sthayi> {
                     _ => None,
                 };
             };
-            let mut lines: HashMap<String, Vec<SwarBlock>> = HashMap::new();
+            let mut lines: HashMap<String, SwarBlocks> = HashMap::new();
             let tags: Vec<&str> = vec!["lineA", "lineB", "lineC"];
 
             for t in tags {
@@ -133,7 +133,7 @@ fn antara(doc: &Yaml) -> Option<Antara> {
                 };
             };
 
-            let mut lines: HashMap<String, Vec<SwarBlock>> = HashMap::new();
+            let mut lines: HashMap<String, SwarBlocks> = HashMap::new();
             let tags: Vec<&str> = vec!["lineC", "lineD", "lineE"];
 
             for t in tags {
@@ -155,11 +155,11 @@ fn antara(doc: &Yaml) -> Option<Antara> {
     }
 }
 
-fn mukra(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+fn mukra(doc: &Yaml) -> Option<SwarBlocks> {
     swar_line(doc)
 }
 
-fn tihayi(doc: &Yaml) -> Option<Vec<SwarBlock>> {
+fn tihayi(doc: &Yaml) -> Option<SwarBlocks> {
     swar_line(doc)
 }
 

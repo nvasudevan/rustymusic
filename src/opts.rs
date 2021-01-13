@@ -2,11 +2,12 @@ use std::error::Error;
 
 use getopts::Options;
 
-use crate::raagas::swars::{Melody, Swar, SwarBlock};
+use crate::raagas::swars::{Swar, SwarBlock};
 use crate::raagas::constants::RAAGAS;
 use crate::raagas::random::randomiser;
 use crate::raagas::raag;
 use crate::raagas::physics::Pitch;
+use crate::raagas::raag::raag::Raag;
 
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
@@ -33,7 +34,7 @@ pub fn my_opts() -> Options {
 pub fn parse(
     opts: &Options,
     args: Vec<String>,
-) -> Result<Box<dyn Melody>, Box<dyn Error>> {
+) -> Result<Raag, Box<dyn Error>> {
     let matches = opts.parse(&args[1..])?;
     match matches.opt_str("r") {
         Some(r) => {
@@ -47,23 +48,25 @@ pub fn parse(
             }
             let raag = raag::load::load_yaml(_r).unwrap();
 
+           Ok(raag)
+
             // check if play random swars flag is set
-            if let Some(n) = matches.opt_str("z") {
-                // let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
-                let rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
-                match rnd_swars {
-                    Ok(mut _swars) => {
-                        _swars.insert(0,Swar::new(Pitch::new("S".to_string()), 3.0));
-                        let swarblk = SwarBlock(_swars);
-                        return Ok(Box::new(swarblk));
-                    }
-                    Err(e) => {
-                        return Err(e.into());
-                    }
-                }
-            } else {
-                return Ok(Box::new(raag));
-            }
+            // if let Some(n) = matches.opt_str("z") {
+            //     // let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
+            //     let rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
+            //     match rnd_swars {
+            //         Ok(mut _swars) => {
+            //             _swars.insert(0,Swar::new(Pitch::new("S".to_string()), 3.0));
+            //             let swarblk = SwarBlock(_swars);
+            //             return Ok(Box::new(swarblk));
+            //         }
+            //         Err(e) => {
+            //             return Err(e.into());
+            //         }
+            //     }
+            // } else {
+            //     return Ok(Box::new(raag));
+            // }
         }
         _ => Err("A valid option was not passed!".into()),
     }

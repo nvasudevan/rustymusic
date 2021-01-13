@@ -1,8 +1,24 @@
-use rodio::{source::SineWave, Device, OutputStream, OutputStreamHandle};
+use rodio::{source::SineWave, Device, OutputStream, OutputStreamHandle, Sink};
 use std::fmt::Formatter;
 use std::fmt;
 
 use crate::raagas::constants;
+use crate::raagas::swars::Swar;
+use std::str::FromStr;
+
+pub struct TimedSink {
+    pub sink: Sink,
+    pub duration: f32
+}
+
+impl TimedSink {
+    pub fn new(sink: Sink, duration: f32) -> Self {
+        TimedSink {
+            sink,
+            duration
+        }
+    }
+}
 
 pub struct AudioDevice {
     pub(crate) out_stream_handle: OutputStreamHandle,
@@ -71,6 +87,17 @@ impl Pitch {
         let _hz = hz.unwrap();
         Some(_hz.to_owned())
     }
+
+    pub fn from_swar(s: &str) -> SineWave {
+        return match constants::SWARS.get(s) {
+            Some(hz) => {
+                SineWave::new(hz.freq as u32)
+            },
+            _ => {
+                SineWave::new(Pitch::default().hertz().unwrap().freq as u32)
+            }
+        }
+    }
 }
 
 impl Default for Pitch {
@@ -84,6 +111,23 @@ impl From<Pitch> for SineWave {
         SineWave::new(p.hertz().unwrap().freq as u32)
     }
 }
+
+// impl FromStr for SineWave {
+//     type Err = std::error::Error;
+//
+//     fn from_str(swar: &str) -> Result<Self, Self::Err>  {
+//         return match constants::SWARS.get(swar) {
+//             Ok(hz) => {
+//                 Ok(SineWave::new(hz.freq))
+//             },
+//             _ => {
+//                 // SineWave::new(Pitch::default().hertz().unwrap().freq as u32)
+//                 Err(format!("Can't parse {} as a swar", swar))
+//             }
+//         }
+//
+//         }
+// }
 
 impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

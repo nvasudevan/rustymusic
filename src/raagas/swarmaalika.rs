@@ -1,63 +1,122 @@
-use crate::raagas::swars::{Melody, Swar, SwarBlock};
+use crate::raagas::swars::{Swar, SwarBlock, BeatSrc, SwarBlocks};
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
-use crate::raagas::physics::AudioDevice;
+use crate::raagas::physics::{AudioDevice, TimedSink};
+use std::{io, fs};
+use rodio::PlayError;
+use crate::raagas::utils;
 
 #[derive(Debug, Clone)]
 pub struct Sthayi {
-    pub lines: HashMap<String, Vec<SwarBlock>>,
+    pub lines: HashMap<String, SwarBlocks>,
 }
 
 impl Sthayi {
-    pub fn new(lines: HashMap<String, Vec<SwarBlock>>) -> Self {
+    pub fn new(lines: HashMap<String, SwarBlocks>) -> Self {
         Sthayi { lines }
+    }
+
+    pub fn build_sink(&self,
+                       beat_src: &BeatSrc,
+                       dev: &AudioDevice,
+                       vol: f32) -> Result<Vec<TimedSink>, PlayError> {
+
+        let mut sinks: Vec<TimedSink> = Vec::new();
+        for (key, line) in self.lines.iter() {
+            match key.as_str() {
+                "lineA" => {
+                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
+                    sinks.append(&mut sink);
+                },
+                "lineB" => {
+                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
+                    sinks.append(&mut sink);
+                },
+                "lineC" => {
+                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
+                    sinks.append(&mut sink);
+                },
+                _ => {}
+            }
+        }
+
+        match self.lines.get("lineA") {
+            Some(line_a) => {
+                let mut sink = line_a.build_sink(&beat_src, &dev, vol)?;
+                sinks.append(&mut sink);
+            },
+            _ => {}
+        }
+
+        Ok(sinks)
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Antara {
-    pub lines: HashMap<String, Vec<SwarBlock>>,
+    pub lines: HashMap<String, SwarBlocks>,
 }
 
 impl Antara {
-    pub fn new(lines: HashMap<String, Vec<SwarBlock>>) -> Self {
+    pub fn new(lines: HashMap<String, SwarBlocks>) -> Self {
         Antara { lines }
+    }
+
+    pub fn create_sink(&self,
+                       beat_src: &BeatSrc,
+                       dev: &AudioDevice,
+                       mut sinks: &mut Vec<TimedSink>,
+                       vol: f32) -> Result<Vec<TimedSink>, PlayError> {
+
+        let mut sinks: Vec<TimedSink> = Vec::new();
+        for (key, line) in self.lines.iter() {
+            match key.as_str() {
+                "lineC" => {
+                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
+                    sinks.append(&mut sink);
+                },
+                "lineD" => {
+                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
+                    sinks.append(&mut sink);
+                },
+                "lineE" => {
+                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
+                    sinks.append(&mut sink);
+                },
+                _ => {}
+            }
+        }
+
+        Ok(sinks)
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Swarmaalika {
-    pub mukra: Option<Vec<SwarBlock>>,
+    pub mukra: Option<SwarBlocks>,
     pub sthayi: Sthayi,
     pub antara: Antara,
-    pub tihayi: Option<Vec<SwarBlock>>,
+    pub tihayi: Option<SwarBlocks>,
     pub sam: usize,
 }
 
 impl Swarmaalika {
     pub fn new(
-        mukra: Option<Vec<SwarBlock>>,
+        mukra: Option<SwarBlocks>,
         sthayi: Sthayi,
         antara: Antara,
-        tihayi: Option<Vec<SwarBlock>>,
+        tihayi: Option<SwarBlocks>,
         sam: Option<usize>,
     ) -> Self {
         let mut _sam = match sam {
             Some(n) => n,
             _ => 1,
         };
-        // let mut _tihayi = match tihayi {
-        //     Some(n) => {
-        //         n
-        //     },
-        //     _ => {
-        //         1
-        //     }
-        // };
+
         Swarmaalika {
             mukra,
             sthayi,
@@ -66,153 +125,17 @@ impl Swarmaalika {
             sam: _sam,
         }
     }
-}
 
-impl Melody for Swarmaalika {
-    // TODO: should the beat_src be a reference (&beat_src)?
-    // [mukra] <sthayi> A <antara> A <tihayi> X 3
-    // [mukra] <A A B B [C]> A <C C D D E E] A <tihayi> X 3
-    fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
-        _mix: bool,
-        _n: i8,
-    ) {
-        println!("\n=> swarmaalika");
-        let play = |line: &Option<Vec<SwarBlock>>, cnt: usize| match &line {
-            Some(line) => {
-                for blk in line {
-                    for _ in 0..cnt {
-                        blk.play(&dev, vol, beat_src.clone(), false, 1);
-                        println!();
-                    }
-                }
-            }
-            _ => {}
-        };
-
-        // play taal until sam - count(mukra)
-        let _sam = match &self.mukra {
-            Some(mukra) => {
-                let mut _n = 0;
-                for blk in mukra {
-                    _n = _n + blk.0.len();
-                }
-                self.sam - _n
-            }
-            _ => self.sam,
-        };
-        let sam_blk = SwarBlock::from_iter((0.._sam).into_iter());
-        play(&Some(vec![sam_blk]), 1);
-
-        play(&self.mukra, 1);
-
-        let sthayi_tags: Vec<&str> = vec!["lineA", "lineB", "lineC"];
-        for t in sthayi_tags {
-            let line = self.sthayi.lines.get(t);
-            match line {
-                Some(l) => {
-                    let _line = l.to_owned();
-                    play(&Some(_line), 2);
-                }
-                _ => {}
-            }
-        }
-
-        // after sthayi play A
-        match self.sthayi.lines.get("lineA") {
-            Some(l) => {
-                let _line = l.to_owned();
-                play(&Some(_line), 1);
-            }
-            _ => {}
-        }
-
-        // antara
-        let antara_tags: Vec<&str> = vec!["lineC", "lineD", "lineE"];
-        for t in antara_tags {
-            let line = self.antara.lines.get(t);
-            match line {
-                Some(l) => {
-                    let _line = l.to_owned();
-                    play(&Some(_line), 2);
-                }
-                _ => {}
-            }
-        }
-
-        // match lineA {
-        //     Some(l) => {
-        //         let _line = l.to_owned();
-        //         play(&Some(_line.clone()), 1);
-        //         println!();
-        //
-        //         // play tihayi
-        //         // let mut i = 0;
-        //         // let mut tihayi_blk: Vec<Swar> = Vec::new();
-        //         // let _line_tihayi = _line.clone();
-        //         // for blk in _line_tihayi {
-        //         //     for sw in blk.0 {
-        //         //         let cnt = &sw.beat_cnt;
-        //         //         i += *cnt as usize;
-        //         //         tihayi_blk.push(sw);
-        //         //         if i >= self.tihayi {
-        //         //             break
-        //         //         }
-        //         //     }
-        //         //     if i >= self.tihayi {
-        //         //         break
-        //         //     }
-        //         // }
-        //         // println!("tihayi: {:?}", tihayi_blk);
-        //         // play(&Some(vec![SwarBlock(tihayi_blk)]), 3);
-        //         //
-        //         // // finally, now play the remaining swars of line A
-        //         // let mut j: usize = 0;
-        //         // for blk in _line {
-        //         //     for sw in blk.0 {
-        //         //         let cnt = &sw.beat_cnt;
-        //         //         j += *cnt as usize;
-        //         //         if j > self.tihayi {
-        //         //             let _sw = sw.to_owned();
-        //         //             let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
-        //         //             _sw_ext.play(&dev, None, false, 1);
-        //         //         }
-        //         //     }
-        //         // }
-        //     },
-        //     _ => {}
-        // }
-
-        // play tihayi
-        let mut t_cnt: usize = 0;
-        for blk in self.tihayi.as_ref().unwrap() {
-            t_cnt = t_cnt + blk.no_beats();
-        }
-        println!("tihayi no of beats: {}", t_cnt);
-        play(&self.tihayi, 3);
-
-        // we need to play swars from line A
-        // from the beat where tihayi finishes until beat cycle finishes
-        match self.sthayi.lines.get("lineA") {
-            Some(l) => {
-                let _line = l.to_owned();
-                let mut j: usize = 0;
-                for blk in _line {
-                    for sw in blk.0 {
-                        let cnt = &sw.beat_cnt;
-                        j += *cnt as usize;
-                        if j > t_cnt {
-                            let _sw = sw.to_owned();
-                            let _sw_ext = Swar::new(_sw.pitch.unwrap(), 2.0);
-                            _sw_ext.play(&dev, vol, None, false, 1);
-                        }
-                    }
-                }
-            }
-            _ => {}
-        }
+    pub fn build_sink(&self,
+                       beat_src: &BeatSrc,
+                       dev: &AudioDevice,
+                       vol: f32) -> Result<Vec<TimedSink>, PlayError>
+    {
+        let mut sinks: Vec<TimedSink> = Vec::new();
+        let mut sthayi = self.sthayi.build_sink(&beat_src, &dev, vol)?;
+        sinks.append(&mut sthayi);
+        let mut anthara = self.sthayi.build_sink(&beat_src, &dev, vol)?;
+        sinks.append(&mut anthara);
+        Ok(sinks)
     }
 }

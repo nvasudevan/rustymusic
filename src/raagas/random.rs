@@ -18,11 +18,11 @@ pub fn randomiser(raag: &raag::Raag, n: usize) -> Result<Vec<Swar>, String> {
     let aroha = raag.aroha().as_ref().unwrap();
     let avroha = raag.avroha().as_ref().unwrap();
     let mut _swars: Vec<Swar> = Vec::new();
-    for blk in aroha {
+    for blk in &aroha.0 {
         _swars.append(&mut blk.to_swars());
     }
 
-    for blk in avroha {
+    for blk in &avroha.0 {
         _swars.append(&mut blk.to_swars());
     }
 

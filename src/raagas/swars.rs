@@ -1,23 +1,14 @@
-use std::{fmt,io,fs};
+use std::{fmt, io, fs};
 use crate::raagas::utils;
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration, SineWave};
-use crate::raagas::physics::{Pitch, AudioDevice};
-use rodio::{Sink, Source};
+use crate::raagas::physics::{Pitch, AudioDevice, TimedSink};
+use rodio::{Sink, Source, PlayError};
 use crate::raagas::constants::BPS;
 use std::iter::FromIterator;
 use std::io::sink;
 
-pub trait Melody {
-    fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-        beat_src: Option<Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>>,
-        mix: bool,
-        n: i8,
-    );
-}
+pub type BeatSrc = Option<Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Swar {
@@ -27,6 +18,9 @@ pub struct Swar {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SwarBlock(pub Vec<Swar>);
+
+#[derive(Debug, Clone)]
+pub struct SwarBlocks(pub Vec<SwarBlock>);
 
 // impl for Swar
 impl Swar {
@@ -44,6 +38,38 @@ impl Swar {
     pub fn beat_count(&self) -> f32 {
         self.beat_cnt
     }
+
+    fn build_sink(&self, beat_src: &BeatSrc, dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
+        let sink = Sink::try_new(&dev.out_stream_handle)?;
+        match beat_src.clone() {
+            Some(src) => {
+                match self.pitch.as_ref() {
+                    // play swar with taal
+                    Some(p) => {
+                        let sinew = SineWave::from(p.to_owned());
+                        sink.append(src.mix(sinew));
+                    }
+                    _ => {
+                        // play taal
+                        sink.append(src);
+                    }
+                }
+            }
+            _ => {
+                // play swar
+                match self.pitch.as_ref() {
+                    Some(p) => {
+                        let sinew = SineWave::from(p.to_owned());
+                        sink.append(sinew);
+                        // sink.append(sinew.mix(Pitch::from_swar("M")));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        sink.set_volume(vol);
+        Ok(TimedSink::new(sink, self.beat_cnt))
+    }
 }
 
 impl fmt::Display for Swar {
@@ -60,56 +86,6 @@ impl fmt::Display for Swar {
             _ => String::new(),
         };
         write!(f, "{}", _s)
-    }
-}
-
-impl Melody for Swar {
-    fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-        beat_src: Option<Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>>,
-        _mix: bool,
-        _n: i8,
-    ) {
-        match Sink::try_new(&dev.out_stream_handle) {
-            Ok(sink) => {
-                match beat_src {
-                    Some(src) => {
-                        match &self.pitch {
-                            // play swar with taal
-                            Some(p) => {
-                                let sinew = SineWave::from(p.to_owned());
-                                sink.append(src.mix(sinew));
-                                // let sa = Pitch::default().hertz().unwrap().freq() as u32;
-                                // sink.append(src.mix(SineWave::new(sa)));
-                            }
-                            _ => {
-                                // play taal
-                                sink.append(src);
-                            }
-                        }
-                    }
-                    _ => {
-                        // play swar
-                        match &self.pitch {
-                            Some(p) => {
-                                let sinew = SineWave::from(p.to_owned());
-                                sink.append(sinew);
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-                sink.set_volume(vol);
-                sink.play();
-                utils::delay(self.beat_cnt * BPS);
-                sink.stop();
-            },
-            Err(e) => {
-                println!("error in creating sink: {}", e);
-            }
-        }
     }
 }
 
@@ -131,6 +107,19 @@ impl SwarBlock {
 
         cnt
     }
+
+    pub fn build_sink(&self,
+                       beat_src: &BeatSrc,
+                       dev: &AudioDevice,
+                       vol: f32) -> Result<Vec<TimedSink>, PlayError> {
+        let mut sinks: Vec<TimedSink> = Vec::new();
+        for bt in &self.0 {
+            let bt_sink = bt.build_sink(&beat_src, &dev, vol)?;
+            sinks.push(bt_sink);
+        }
+
+        Ok(sinks)
+    }
 }
 
 impl FromIterator<usize> for SwarBlock {
@@ -147,27 +136,15 @@ impl FromIterator<usize> for SwarBlock {
     }
 }
 
-impl Melody for SwarBlock {
-    fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-        beat_src: Option<Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>>,
-        _mix: bool,
-        n: i8,
-    ) {
-        for _ in 0..n {
-            let mut prev_sw_bt: f32 = 1.0;
-            for bt in &self.0 {
-                if (prev_sw_bt < 1.0) && (bt.beat_cnt > 1.0) {
-                    print!(" {}", bt);
-                } else {
-                    print!("{}", bt);
-                }
-                utils::io_flush();
-                bt.play(&dev, vol,beat_src.clone(), false, 1);
-                prev_sw_bt = bt.beat_cnt;
-            }
+impl SwarBlocks {
+    pub fn build_sink(&self, beat_src: &BeatSrc, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
+        let mut sinks: Vec<TimedSink> = Vec::new();
+        for blk in &self.0 {
+            println!("blk: {:?}", blk);
+            let mut blk_sinks = blk.build_sink(&beat_src, &dev, vol)?;
+            sinks.append(&mut blk_sinks);
         }
+
+        Ok(sinks)
     }
 }

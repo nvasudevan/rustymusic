@@ -1,11 +1,11 @@
+use rodio::source::{Repeat, TakeDuration, SineWave};
 use rodio::decoder::Decoder;
-use rodio::source::{Repeat, TakeDuration};
-use rodio::Sink;
+use rodio::{Sink, Source, PlayError};
 use std::fs::File;
 use std::io::BufReader;
 use crate::raagas::swarmaalika::Swarmaalika;
-use crate::raagas::swars::{SwarBlock, Melody};
-use crate::raagas::physics::AudioDevice;
+use crate::raagas::swars::{SwarBlock, Swar, BeatSrc, SwarBlocks};
+use crate::raagas::physics::{AudioDevice, TimedSink};
 use crate::raagas::constants::{PLAY_PAUSE_DURATION, BPS};
 use crate::raagas::utils;
 
@@ -13,22 +13,22 @@ use crate::raagas::utils;
 pub struct Raag {
     swarmaalika: Swarmaalika,
     name: String,
-    aroha: Option<Vec<SwarBlock>>,
-    avroha: Option<Vec<SwarBlock>>,
-    pakad: Option<Vec<SwarBlock>>,
-    alankars: Option<Vec<SwarBlock>>,
-    beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+    aroha: Option<SwarBlocks>,
+    avroha: Option<SwarBlocks>,
+    pakad: Option<SwarBlocks>,
+    alankars: Option<SwarBlocks>,
+    beat_src: BeatSrc,
 }
 
 impl Raag {
     pub fn new(
         name: String,
-        aroha: Option<Vec<SwarBlock>>,
-        avroha: Option<Vec<SwarBlock>>,
-        pakad: Option<Vec<SwarBlock>>,
-        alankars: Option<Vec<SwarBlock>>,
+        aroha: Option<SwarBlocks>,
+        avroha: Option<SwarBlocks>,
+        pakad: Option<SwarBlocks>,
+        alankars: Option<SwarBlocks>,
         swarmaalika: Swarmaalika,
-        beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        beat_src: BeatSrc,
     ) -> Raag {
         Raag {
             name,
@@ -45,19 +45,19 @@ impl Raag {
         self.name.to_string()
     }
 
-    pub fn aroha(&self) -> &Option<Vec<SwarBlock>> {
+    pub fn aroha(&self) -> &Option<SwarBlocks> {
         &self.aroha
     }
 
-    pub fn avroha(&self) -> &Option<Vec<SwarBlock>> {
+    pub fn avroha(&self) -> &Option<SwarBlocks> {
         &self.avroha
     }
 
-    pub fn pakad(&self) -> &Option<Vec<SwarBlock>> {
+    pub fn pakad(&self) -> &Option<SwarBlocks> {
         &self.pakad
     }
 
-    pub fn alankars(&self) -> &Option<Vec<SwarBlock>> {
+    pub fn alankars(&self) -> &Option<SwarBlocks> {
         &self.alankars
     }
 
@@ -65,104 +65,70 @@ impl Raag {
         &self.swarmaalika
     }
 
-    pub fn beat_src(&self) -> &Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>> {
+    pub fn beat_src(&self) -> &BeatSrc {
         &self.beat_src
     }
 
-    fn play_aroha(&self, dev: &AudioDevice, vol: f32) {
+    fn build_aroha(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> aroha for raag: {}", self.name());
-        match self.aroha() {
-            Some(_aroha) => {
-                for blk in _aroha {
-                    blk.play(&dev, vol, None, false, 1);
-                }
-            }
-            _ => {}
-        }
+        self.aroha.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
     }
 
-    fn play_avroha(&self, dev: &AudioDevice, vol: f32) {
+    fn build_avroha(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> avroha for raag: {}", self.name());
-        match self.avroha() {
-            Some(_avroha) => {
-                for blk in _avroha {
-                    blk.play(&dev, vol, None, false, 1);
-                }
-            }
-            _ => {}
-        }
+        self.avroha.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
     }
 
-    fn play_pakad(&self, dev: &AudioDevice, vol: f32) {
+    fn build_pakad(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> pakad for raag: {}", self.name());
-        match self.pakad() {
-            Some(_pakad) => {
-                let mut _comma: bool = false;
-                for blk in _pakad {
-                    if _comma {
-                        print!(", ");
-                        utils::io_flush();
-                    }
-                    _comma = true;
-                    blk.play(&dev, vol,None, false, 1);
-                }
-            }
-            _ => {}
-        }
+        self.pakad.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
     }
 
-    fn play_alankars(&self, dev: &AudioDevice, vol: f32) {
+    fn build_alankars(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> alankars for raag: {}", self.name());
-        match self.alankars() {
-            Some(_alankar) => {
-                let mut _comma: bool = false;
-                for blk in _alankar {
-                    if _comma {
-                        print!(", ");
-                        utils::io_flush();
-                    }
-                    blk.play(&dev, vol, self.beat_src.clone(), false, 1);
-                }
-            }
-            _ => {}
-        }
+        self.alankars.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
     }
 
-    fn play_swarmaalika(&self, dev: &AudioDevice, vol: f32, mix: bool, n: i8) {
-        self.swarmaalika.play(dev, vol, self.beat_src.clone(), mix, n);
+    fn build_swarmaalika(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
+        self.swarmaalika.build_sink(&self.beat_src, &dev, vol)
     }
-}
 
-impl Melody for Raag {
-    fn play(
+    pub fn play(
         &self,
         dev: &AudioDevice,
         vol: f32,
-        _beat_src: Option<Repeat<TakeDuration<Decoder<BufReader<File>>>>>,
+        _beat_src: BeatSrc,
         _mix: bool,
         n: i8,
     ) {
+        println!("=> build sink: {}", self.name());
         println!("=> playing raag: {}", self.name());
-        match Sink::try_new(&dev.out_stream_handle) {
-            Ok(sink) => {
-                self.play_aroha(&dev, vol);
-                utils::delay(PLAY_PAUSE_DURATION * BPS);
-                self.play_avroha(&dev, vol);
-                utils::delay(PLAY_PAUSE_DURATION  * BPS);
-                self.play_pakad(&dev, vol);
-                utils::delay(PLAY_PAUSE_DURATION * BPS);
-                // self.play_taal(&sink, beat_src);
-                // sink.set_volume(*&dev.vol as f32);
-                self.play_swarmaalika(dev, vol, false, n);
-                utils::delay(PLAY_PAUSE_DURATION * BPS);
-                // self.play_alankars(&dev, &beat_src);
-                sink.play();
-                utils::delay(2.0);
-                // sink.stop();
-            },
-            Err(e) => {
-                println!("error: {}", e);
+        let play_sinks = |sinks: Result<Vec<TimedSink>, PlayError>| match &sinks {
+            Ok(timed_sinks) => {
+                println!("=> playing ...");
+                for tsink in timed_sinks {
+                    tsink.sink.set_volume(1.0);
+                    tsink.sink.play();
+                    utils::delay(tsink.duration * BPS);
+                    tsink.sink.stop();
+                    println!("sink => len: {}, empty: {}", tsink.sink.len(), tsink.sink.empty());
+                }
             }
-        }
+            Err(e) => {
+                println!("Error: {}", e);
+            }
+        };
+        let mut aroha_sinks: Vec<TimedSink> = Vec::new();
+        play_sinks(self.build_aroha(&dev, vol));
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
+        play_sinks(self.build_avroha(&dev, vol));
+        // utils::delay(PLAY_PAUSE_DURATION  * BPS);
+        // play_sinks(self.build_pakad(&dev, vol));
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // play_sinks(self.build_swarmaalika(&dev, vol));
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // self.play_alankars(&dev, &beat_src);
+        // utils::delay(2.0);
     }
 }
+
