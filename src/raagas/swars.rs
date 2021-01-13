@@ -8,7 +8,7 @@ use crate::raagas::constants::BPS;
 use std::iter::FromIterator;
 use std::io::sink;
 
-pub type BeatSrc = Option<Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>>;
+pub type BeatSrc = Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Swar {
@@ -39,7 +39,7 @@ impl Swar {
         self.beat_cnt
     }
 
-    fn build_sink(&self, beat_src: &BeatSrc, dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
+    fn build_sink(&self, beat_src: &Option<BeatSrc>, dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
         let sink = Sink::try_new(&dev.out_stream_handle)?;
         match beat_src.clone() {
             Some(src) => {
@@ -109,7 +109,7 @@ impl SwarBlock {
     }
 
     pub fn build_sink(&self,
-                       beat_src: &BeatSrc,
+                       beat_src: &Option<BeatSrc>,
                        dev: &AudioDevice,
                        vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         let mut sinks: Vec<TimedSink> = Vec::new();
@@ -137,7 +137,10 @@ impl FromIterator<usize> for SwarBlock {
 }
 
 impl SwarBlocks {
-    pub fn build_sink(&self, beat_src: &BeatSrc, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
+    pub fn build_sink(&self,
+                      beat_src: &Option<BeatSrc>,
+                      dev: &AudioDevice,
+                      vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         let mut sinks: Vec<TimedSink> = Vec::new();
         for blk in &self.0 {
             println!("blk: {:?}", blk);

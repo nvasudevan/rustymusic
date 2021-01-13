@@ -17,7 +17,7 @@ pub struct Raag {
     avroha: Option<SwarBlocks>,
     pakad: Option<SwarBlocks>,
     alankars: Option<SwarBlocks>,
-    beat_src: BeatSrc,
+    beat_src: Option<BeatSrc>,
 }
 
 impl Raag {
@@ -28,7 +28,7 @@ impl Raag {
         pakad: Option<SwarBlocks>,
         alankars: Option<SwarBlocks>,
         swarmaalika: Swarmaalika,
-        beat_src: BeatSrc,
+        beat_src: Option<BeatSrc>,
     ) -> Raag {
         Raag {
             name,
@@ -65,23 +65,23 @@ impl Raag {
         &self.swarmaalika
     }
 
-    pub fn beat_src(&self) -> &BeatSrc {
+    pub fn beat_src(&self) -> &Option<BeatSrc> {
         &self.beat_src
     }
 
     fn build_aroha(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> aroha for raag: {}", self.name());
-        self.aroha.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
+        self.aroha.as_ref().unwrap().build_sink(&None, &dev, vol)
     }
 
     fn build_avroha(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> avroha for raag: {}", self.name());
-        self.avroha.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
+        self.avroha.as_ref().unwrap().build_sink(&None, &dev, vol)
     }
 
     fn build_pakad(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
         println!("\n=> pakad for raag: {}", self.name());
-        self.pakad.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
+        self.pakad.as_ref().unwrap().build_sink(&None, &dev, vol)
     }
 
     fn build_alankars(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
@@ -97,7 +97,7 @@ impl Raag {
         &self,
         dev: &AudioDevice,
         vol: f32,
-        _beat_src: BeatSrc,
+        _beat_src: Option<BeatSrc>,
         _mix: bool,
         n: i8,
     ) {
@@ -122,8 +122,8 @@ impl Raag {
         play_sinks(self.build_aroha(&dev, vol));
         utils::delay(PLAY_PAUSE_DURATION * BPS);
         play_sinks(self.build_avroha(&dev, vol));
-        // utils::delay(PLAY_PAUSE_DURATION  * BPS);
-        // play_sinks(self.build_pakad(&dev, vol));
+        utils::delay(PLAY_PAUSE_DURATION  * BPS);
+        play_sinks(self.build_pakad(&dev, vol));
         // utils::delay(PLAY_PAUSE_DURATION * BPS);
         // play_sinks(self.build_swarmaalika(&dev, vol));
         // utils::delay(PLAY_PAUSE_DURATION * BPS);

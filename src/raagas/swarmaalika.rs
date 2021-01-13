@@ -21,7 +21,7 @@ impl Sthayi {
     }
 
     pub fn build_sink(&self,
-                       beat_src: &BeatSrc,
+                       beat_src: &Option<BeatSrc>,
                        dev: &AudioDevice,
                        vol: f32) -> Result<Vec<TimedSink>, PlayError> {
 
@@ -67,7 +67,7 @@ impl Antara {
     }
 
     pub fn create_sink(&self,
-                       beat_src: &BeatSrc,
+                       beat_src: &Option<BeatSrc>,
                        dev: &AudioDevice,
                        mut sinks: &mut Vec<TimedSink>,
                        vol: f32) -> Result<Vec<TimedSink>, PlayError> {
@@ -127,7 +127,7 @@ impl Swarmaalika {
     }
 
     pub fn build_sink(&self,
-                       beat_src: &BeatSrc,
+                       beat_src: &Option<BeatSrc>,
                        dev: &AudioDevice,
                        vol: f32) -> Result<Vec<TimedSink>, PlayError>
     {

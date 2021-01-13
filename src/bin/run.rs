@@ -13,9 +13,9 @@ fn main() {
             let (_, stream_handle) = out;
             let opts = opts::my_opts();
             match opts::parse(&opts, env::args().collect()) {
-                Ok(melody) => {
+                Ok(raag) => {
                     let audio_dev = AudioDevice::new(stream_handle);
-                    melody.play(&audio_dev, constants::VOL, None, false, 1)
+                    raag.play(&audio_dev, constants::VOL, None, false, 1)
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),
             }

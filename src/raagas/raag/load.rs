@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
-use crate::raagas::swars::{Swar, SwarBlock, SwarBlocks};
+use crate::raagas::swars::{Swar, SwarBlock, SwarBlocks, BeatSrc};
 use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, CONF_DIR, BEAT_MP3};
 use crate::raagas::physics::Pitch;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
@@ -203,7 +203,7 @@ fn swarmaalika(doc: &Yaml) -> Option<Swarmaalika> {
     }
 }
 
-fn play_raw_beats_forever(beatp: (&str, f32)) -> Repeat<TakeDuration<Decoder<BufReader<File>>>> {
+fn play_raw_beats_forever(beatp: (&str, f32)) -> BeatSrc {
     let f = File::open(beatp.0).expect(&format!("Unable to open file {}", beatp.0));
     let source = decoder::Decoder::new(BufReader::new(f)).unwrap();
     // we are having to do this as the total_duration is returned none for
