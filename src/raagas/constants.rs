@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::raagas::physics::Hertz;
+use crate::raagas::sound::Hertz;
 
 pub(crate) const RAAGAS: [&str;9] = [
     "durga", "yaman", "bhupali", "hamsadhwani",

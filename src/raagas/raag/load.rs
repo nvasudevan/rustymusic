@@ -12,7 +12,7 @@ use std::io::BufReader;
 use std::time::Duration;
 use crate::raagas::swars::{Swar, SwarBlock, SwarBlocks, BeatSrc};
 use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, CONF_DIR, BEAT_MP3};
-use crate::raagas::physics::Pitch;
+use crate::raagas::sound::Pitch;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::utils;

@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use crate::raagas::swars::{Hertz, Pitch, Swar};
+    use crate::raagas::swars::{Swar, SwarBlock};
     use crate::raagas::raag;
-    use crate::raagas::random;
-    use crate::SWARS;
+    use crate::raagas::raag::random;
+    use crate::raagas::constants::initialise_swars;
 
-    use crate::raagas::swarblock::SwarBlock;
+    use crate::raagas::sound::{Hertz, Pitch};
 
     #[test]
     fn test_base_swar_is_sa() {
@@ -32,22 +32,15 @@ mod tests {
     }
 
     #[test]
-    fn test_raag() {
-        let s = "durga";
-        let raag = raag::raag(s.to_string()).unwrap();
-        assert_eq!(raag.name(), s);
-    }
-
-    #[test]
     fn test_raag_aroha_as_string() {
         let s = "durga";
-        let raag = raag::raag(s.to_string()).unwrap();
+        let raag = raag::load::load_yaml(s.to_string()).unwrap();
         let expected = "S[C#] - R[D#] - M[F#] - P[G#] - D[A#] - S.[C#] -  - ";
 
         let mut aroha_s = String::new();
         match raag.aroha() {
             Some(aroha) => {
-                for blk in aroha {
+                for blk in &aroha.0 {
                     for sw in &blk.0 {
                         aroha_s = format!("{}{}", aroha_s, sw);
                     }
@@ -61,7 +54,7 @@ mod tests {
     #[test]
     fn test_raag_avroha() {
         let s = "durga";
-        let raag = raag::raag(s.to_string()).unwrap();
+        let raag = raag::load::load_yaml(s.to_string()).unwrap();
         let swars: Vec<Swar> = vec![
             Swar::new(Pitch::new("S.".to_string()), 2.0),
             Swar::new(Pitch::new("D".to_string()), 2.0),
@@ -74,22 +67,22 @@ mod tests {
 
         match raag.avroha() {
             Some(avroha) => {
-                assert_eq!(avroha.clone(), expected);
+                assert_eq!(avroha.0.clone(), expected);
             }
             _ => {}
         }
     }
 
-    #[test]
-    fn test_randomiser() {
-        let z: usize = 3;
-        // test 3 notes are returned
-        let _swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
-        let s = "durga";
-        let raag = raag::raag(s.to_string()).unwrap();
-        let swars = random::randomiser(&raag, z);
-        let _swars = swars.unwrap();
-        println!("_swars: {:?}", _swars);
-        assert_eq!(_swars.len(), z);
-    }
+    // #[test]
+    // fn test_randomiser() {
+    //     let z: usize = 3;
+    //     // test 3 notes are returned
+    //     let _swars: Vec<String> = initialise_swars().keys().map(|x| x.to_string()).collect();
+    //     let s = "durga";
+    //     let raag = raag::load::load_yaml(s.to_string()).unwrap();
+    //     let swars = random::randomiser(&raag, z);
+    //     let _swars = swars.unwrap();
+    //     println!("_swars: {:?}", _swars);
+    //     assert_eq!(_swars.len(), z);
+    // }
 }

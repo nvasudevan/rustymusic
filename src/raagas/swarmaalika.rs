@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
-use crate::raagas::physics::{AudioDevice, TimedSink};
+use crate::raagas::sound::{AudioDevice, TimedSink};
 use std::{io, fs};
 use rodio::PlayError;
 use crate::raagas::utils;
@@ -66,10 +66,9 @@ impl Antara {
         Antara { lines }
     }
 
-    pub fn create_sink(&self,
+    pub fn build_sink(&self,
                        beat_src: &Option<BeatSrc>,
                        dev: &AudioDevice,
-                       mut sinks: &mut Vec<TimedSink>,
                        vol: f32) -> Result<Vec<TimedSink>, PlayError> {
 
         let mut sinks: Vec<TimedSink> = Vec::new();
@@ -134,7 +133,7 @@ impl Swarmaalika {
         let mut sinks: Vec<TimedSink> = Vec::new();
         let mut sthayi = self.sthayi.build_sink(&beat_src, &dev, vol)?;
         sinks.append(&mut sthayi);
-        let mut anthara = self.sthayi.build_sink(&beat_src, &dev, vol)?;
+        let mut anthara = self.antara.build_sink(&beat_src, &dev, vol)?;
         sinks.append(&mut anthara);
         Ok(sinks)
     }

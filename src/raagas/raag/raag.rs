@@ -1,3 +1,5 @@
+use rand;
+use rand::seq::SliceRandom;
 use rodio::source::{Repeat, TakeDuration, SineWave};
 use rodio::decoder::Decoder;
 use rodio::{Sink, Source, PlayError};
@@ -5,9 +7,14 @@ use std::fs::File;
 use std::io::BufReader;
 use crate::raagas::swarmaalika::Swarmaalika;
 use crate::raagas::swars::{SwarBlock, Swar, BeatSrc, SwarBlocks};
-use crate::raagas::physics::{AudioDevice, TimedSink};
+use crate::raagas::sound::{AudioDevice, TimedSink};
 use crate::raagas::constants::{PLAY_PAUSE_DURATION, BPS};
 use crate::raagas::utils;
+use crate::raagas::raag::SimpleRandomiser;
+
+use rand::prelude::ThreadRng;
+use rand::{thread_rng, Rng};
+use crate::raagas::raag::random::index_swar;
 
 #[derive(Clone)]
 pub struct Raag {
@@ -93,6 +100,47 @@ impl Raag {
         self.swarmaalika.build_sink(&self.beat_src, &dev, vol)
     }
 
+    pub fn is_ascending(&self, swars: &Vec<Swar>) -> bool {
+        let aroha = self.aroha().as_ref().unwrap().to_swars();
+
+        let mut i = index_swar(&aroha, swars.first().unwrap());
+        if let Some(swars_tail) = swars.get(1..) {
+            for swar in swars_tail {
+                let _i = index_swar(&aroha, swar);
+                if _i < i {
+                    return false
+                }
+                i = _i;
+            }
+        }
+
+        return true;
+    }
+
+    pub fn is_descending(&self, swars: &Vec<Swar>) -> bool {
+        let avroha = self.avroha().as_ref().unwrap().to_swars();
+
+         if let Some(mut i) = index_swar(&avroha, swars.first().unwrap()) {
+             if let Some(swars_tail) = swars.get(1..) {
+                 for swar in swars_tail {
+                     if let Some(_i) = index_swar(&avroha, swar) {
+                         if _i < i {
+                             return false
+                         }
+                         i = _i;
+                     } else {
+                         // if swar not in avroha, return false
+                         return false;
+                     }
+                 }
+             }
+             return true; //not sure about this
+         }
+
+        // the initial swar not in avroha
+        return false;
+    }
+
     pub fn play(
         &self,
         dev: &AudioDevice,
@@ -118,14 +166,13 @@ impl Raag {
                 println!("Error: {}", e);
             }
         };
-        let mut aroha_sinks: Vec<TimedSink> = Vec::new();
-        play_sinks(self.build_aroha(&dev, vol));
-        utils::delay(PLAY_PAUSE_DURATION * BPS);
-        play_sinks(self.build_avroha(&dev, vol));
-        utils::delay(PLAY_PAUSE_DURATION  * BPS);
-        play_sinks(self.build_pakad(&dev, vol));
+        // play_sinks(self.build_aroha(&dev, vol));
         // utils::delay(PLAY_PAUSE_DURATION * BPS);
-        // play_sinks(self.build_swarmaalika(&dev, vol));
+        // play_sinks(self.build_avroha(&dev, vol));
+        // utils::delay(PLAY_PAUSE_DURATION  * BPS);
+        // play_sinks(self.build_pakad(&dev, vol));
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        play_sinks(self.build_swarmaalika(&dev, vol));
         // utils::delay(PLAY_PAUSE_DURATION * BPS);
         // self.play_alankars(&dev, &beat_src);
         // utils::delay(2.0);

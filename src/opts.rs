@@ -4,10 +4,12 @@ use getopts::Options;
 
 use crate::raagas::swars::{Swar, SwarBlock};
 use crate::raagas::constants::RAAGAS;
-use crate::raagas::random::randomiser;
 use crate::raagas::raag;
-use crate::raagas::physics::Pitch;
+use crate::raagas::sound::Pitch;
 use crate::raagas::raag::raag::Raag;
+use crate::raagas::raag::Melody;
+use crate::raagas::utils;
+use crate::raagas::raag::SimpleRandomiser;
 
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
@@ -31,61 +33,59 @@ pub fn my_opts() -> Options {
     opts
 }
 
+fn parse_raag(raag: &str) -> Result<Melody, Box<dyn Error>> {
+    // is raag supported?
+    if !RAAGAS.contains(&raag) {
+        let raagas_list = RAAGAS.join(",");
+        return Err(
+            format!("Raag {} is unsupported, raagas allowed: {}", raag, raagas_list).into(),
+        );
+    }
+
+    let _raag = raag::load::load_yaml(raag.to_string()).unwrap();
+    return Ok(Melody::Raag(_raag));
+}
+
 pub fn parse(
     opts: &Options,
     args: Vec<String>,
-) -> Result<Raag, Box<dyn Error>> {
+) -> Result<Melody, Box<dyn Error>> {
     let matches = opts.parse(&args[1..])?;
-    match matches.opt_str("r") {
-        Some(r) => {
-            let _r = r.to_lowercase();
-            // is raag supported?
-            if !RAAGAS.contains(&_r.as_str()) {
-                let _raagas = RAAGAS.join(",");
-                return Err(
-                    format!("Raag {} is unsupported, raagas allowed: {}", r, _raagas).into(),
-                );
+    // check if play random swars flag is set
+    if let Some(n) = matches.opt_str("z") {
+        if let Some(r) = matches.opt_str("r") {
+            let melody = parse_raag(r.to_lowercase().as_str())?;
+            if let Melody::Raag(raag) = &melody {
+                // let swars = raag.randomise_swarblocks(raag.pakad().as_ref().unwrap().0.get(0).unwrap());
+                // let choose_from: Vec<Swar> = raag.aroha().as_ref().unwrap().to_swars();
+                let swarblk = raag.randomise();
+                println!("=> swar block: {}", swarblk);
+                // let swarblk = SwarBlock(swars.to_swars());
+                return Ok(Melody::SwarBlock(swarblk));
             }
-            let raag = raag::load::load_yaml(_r).unwrap();
-
-           Ok(raag)
-
-            // check if play random swars flag is set
-            // if let Some(n) = matches.opt_str("z") {
-            //     // let swars: Vec<String> = SWARS.keys().map(|x| x.to_string()).collect();
-            //     let rnd_swars = randomiser(&raag, n.parse::<usize>().unwrap());
-            //     match rnd_swars {
-            //         Ok(mut _swars) => {
-            //             _swars.insert(0,Swar::new(Pitch::new("S".to_string()), 3.0));
-            //             let swarblk = SwarBlock(_swars);
-            //             return Ok(Box::new(swarblk));
-            //         }
-            //         Err(e) => {
-            //             return Err(e.into());
-            //         }
-            //     }
-            // } else {
-            //     return Ok(Box::new(raag));
-            // }
+        } else {
+            // we can play random swars from sargam
         }
-        _ => Err("A valid option was not passed!".into()),
     }
 
-    // playing swars from the file, although multiple lines, we see it as one block
-    // match matches.opt_str("f") {
-    //     Some(fp) => {
-    //         println!("Playing swars from the file {}", fp);
-    //         let lines = utils::lines_from_file(fp);
-    //         let mut swars: Vec<Swar> = vec![];
-    //
-    //         for l in lines {
-    //             let mut _swars = raag::to_swars(&l);
-    //             swars.append(&mut _swars);
-    //         }
-    //
-    //         let swarblk = SwarBlock(swars);
-    //         return Ok(Box::new(swarblk));
-    //     }
-    //     _ => {}
-    // }
+    if let Some(r) = matches.opt_str("r") {
+        return parse_raag(r.to_lowercase().as_str());
+    }
+
+    // playing swars from the file
+    if let Some(fp) = matches.opt_str("f") {
+        println!("Playing swars from the file {}", fp);
+        let lines = utils::lines_from_file(fp);
+        let mut swars: Vec<Swar> = vec![];
+
+        for l in lines {
+            let mut _swars = raag::load::to_swars( & l);
+            swars.append( & mut _swars);
+        }
+
+        let swarblk = SwarBlock(swars);
+        return Ok(Melody::SwarBlock(swarblk));
+    }
+
+    return Err("Invalid options passed".into());
 }

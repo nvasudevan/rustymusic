@@ -3,9 +3,10 @@ extern crate getopts;
 use std::env;
 
 use rustymusic::opts;
-use rustymusic::raagas::physics::AudioDevice;
+use rustymusic::raagas::sound::AudioDevice;
 use rustymusic::raagas::constants;
 use rodio::Sink;
+use rustymusic::raagas::raag::Melody;
 
 fn main() {
     match rodio::OutputStream::try_default() {
@@ -13,9 +14,15 @@ fn main() {
             let (_, stream_handle) = out;
             let opts = opts::my_opts();
             match opts::parse(&opts, env::args().collect()) {
-                Ok(raag) => {
+                Ok(melody) => {
                     let audio_dev = AudioDevice::new(stream_handle);
-                    raag.play(&audio_dev, constants::VOL, None, false, 1)
+                    if let Melody::Raag(raag) = &melody {
+                        raag.play(&audio_dev, constants::VOL, None, false, 1)
+                    }
+
+                    if let Melody::SwarBlock(blk) = &melody {
+                        blk.play_rt(&audio_dev, constants::VOL)
+                    }
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),
             }
