@@ -5,7 +5,7 @@ use std::env;
 use rustymusic::opts;
 use rustymusic::raagas::sound::AudioDevice;
 use rustymusic::raagas::constants;
-use rodio::Sink;
+
 use rustymusic::raagas::raag::Melody;
 
 fn main() {

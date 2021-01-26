@@ -3,7 +3,7 @@ use rand;
 use rand::seq::SliceRandom;
 
 use rand::prelude::ThreadRng;
-use crate::raagas::raag::{raag, SimpleRandomiser, PureRandomiser};
+use crate::raagas::raag::{SimpleRandomiser, PureRandomiser};
 use crate::raagas::sound::Pitch;
 use crate::raagas::raag::raag::Raag;
 use rand::Rng;
@@ -29,8 +29,8 @@ impl SimpleRandomiser for Raag {
         // exclude the left most and two right-most (as index start from 0)
         let i: i32 = rnd.gen_range(1, blk_len-2);
         println!("i = {}", i);
-        let mut before_i = i - 1;
-        let mut after_i = i + 2;
+        let before_i = i - 1;
+        let after_i = i + 2;
 
         println!("before_i = {}, after_i = {}", before_i, after_i);
         println!("=> pakad: {:?}\n", pakad_blk);

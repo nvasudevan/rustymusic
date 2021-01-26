@@ -6,7 +6,7 @@ use crate::raagas::sound::{Pitch, AudioDevice, TimedSink};
 use rodio::{Sink, Source, PlayError};
 use crate::raagas::constants::BPS;
 use std::iter::FromIterator;
-use std::io::{sink, Write};
+use std::io::{Write};
 use std::fmt::Formatter;
 
 pub type BeatSrc = Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>;

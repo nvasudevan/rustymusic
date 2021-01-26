@@ -5,8 +5,8 @@ use getopts::Options;
 use crate::raagas::swars::{Swar, SwarBlock};
 use crate::raagas::constants::RAAGAS;
 use crate::raagas::raag;
-use crate::raagas::sound::Pitch;
-use crate::raagas::raag::raag::Raag;
+
+
 use crate::raagas::raag::Melody;
 use crate::raagas::utils;
 use crate::raagas::raag::SimpleRandomiser;
@@ -52,7 +52,7 @@ pub fn parse(
 ) -> Result<Melody, Box<dyn Error>> {
     let matches = opts.parse(&args[1..])?;
     // check if play random swars flag is set
-    if let Some(n) = matches.opt_str("z") {
+    if let Some(_n) = matches.opt_str("z") {
         if let Some(r) = matches.opt_str("r") {
             let melody = parse_raag(r.to_lowercase().as_str())?;
             if let Melody::Raag(raag) = &melody {
