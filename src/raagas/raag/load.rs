@@ -10,12 +10,13 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
-use crate::raagas::swars::{Swar, SwarBlock, SwarBlocks, BeatSrc};
+use crate::raagas::swars::{Swar, BeatSrc};
 use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, CONF_DIR, BEAT_MP3};
 use crate::raagas::sound::Pitch;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::utils;
+use crate::raagas::swarblock::{SwarBlocks, SwarBlock};
 
 pub fn to_swars(s: &str) -> Vec<Swar> {
     let mut _blk: Vec<Swar> = vec![];

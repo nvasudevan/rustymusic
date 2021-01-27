@@ -6,7 +6,7 @@ use rustymusic::opts;
 use rustymusic::raagas::sound::AudioDevice;
 use rustymusic::raagas::constants;
 
-use rustymusic::raagas::raag::Melody;
+use rustymusic::raagas::Melody;
 
 fn main() {
     match rodio::OutputStream::try_default() {
@@ -21,7 +21,7 @@ fn main() {
                     }
 
                     if let Melody::SwarBlock(blk) = &melody {
-                        blk.play_rt(&audio_dev, constants::VOL)
+                        // blk.play_rt(&audio_dev, constants::VOL)
                     }
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),

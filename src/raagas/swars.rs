@@ -6,8 +6,9 @@ use crate::raagas::sound::{Pitch, AudioDevice, TimedSink};
 use rodio::{Sink, Source, PlayError};
 use crate::raagas::constants::BPS;
 use std::iter::FromIterator;
-use std::io::{Write};
+use std::io::Write;
 use std::fmt::Formatter;
+use crate::raagas::swarblock::SwarBlock;
 
 pub type BeatSrc = Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>;
 
@@ -16,12 +17,6 @@ pub struct Swar {
     pub pitch: Option<Pitch>,
     pub beat_cnt: f32,
 }
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct SwarBlock(pub Vec<Swar>);
-
-#[derive(Debug, Clone)]
-pub struct SwarBlocks(pub Vec<SwarBlock>);
 
 // impl for Swar
 impl Swar {
@@ -159,60 +154,5 @@ impl SwarBlock {
             tsink.sink.stop();
         }
 
-    }
-}
-
-impl fmt::Display for SwarBlock {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let mut s = String::new();
-        for swar in &self.0 {
-            s = format!("{} {}", s, swar);
-        }
-
-        write!(f, "{}", s)
-    }
-}
-
-impl FromIterator<usize> for SwarBlock {
-    fn from_iter<T: IntoIterator<Item=usize>>(iter: T) -> Self {
-        let mut _blk: Vec<Swar> = Vec::new();
-        for _ in iter {
-            _blk.push(Swar {
-                pitch: None,
-                beat_cnt: 1.0,
-            });
-        }
-
-        SwarBlock(_blk)
-    }
-}
-
-impl SwarBlocks {
-    pub fn build_sink(&self,
-                      beat_src: &Option<BeatSrc>,
-                      dev: &AudioDevice,
-                      vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        let mut sinks: Vec<TimedSink> = Vec::new();
-        for blk in &self.0 {
-            println!("blk: {:?}", blk);
-            let mut blk_sinks = blk.build_sink(&beat_src, &dev, vol)?;
-            sinks.append(&mut blk_sinks);
-        }
-
-        Ok(sinks)
-    }
-
-    pub fn to_swars(&self) -> Vec<Swar> {
-        let mut swars: Vec<Swar> = Vec::new();
-        for blk in &self.0 {
-            let mut blk_swars = blk.to_swars();
-            swars.append(&mut blk_swars);
-        }
-
-        swars
-    }
-
-    pub fn to_swarblock(&self) -> SwarBlock {
-        SwarBlock(self.to_swars())
     }
 }

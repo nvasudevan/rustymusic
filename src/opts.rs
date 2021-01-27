@@ -2,14 +2,11 @@ use std::error::Error;
 
 use getopts::Options;
 
-use crate::raagas::swars::{Swar, SwarBlock};
+use crate::raagas::swars::Swar;
 use crate::raagas::constants::RAAGAS;
-use crate::raagas::raag;
-
-
-use crate::raagas::raag::Melody;
+use crate::raagas::{raag, Melody, SimpleRandomiser};
 use crate::raagas::utils;
-use crate::raagas::raag::SimpleRandomiser;
+use crate::raagas::swarblock;
 
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
@@ -58,10 +55,12 @@ pub fn parse(
             if let Melody::Raag(raag) = &melody {
                 // let swars = raag.randomise_swarblocks(raag.pakad().as_ref().unwrap().0.get(0).unwrap());
                 // let choose_from: Vec<Swar> = raag.aroha().as_ref().unwrap().to_swars();
-                let swarblk = raag.randomise();
-                println!("=> swar block: {}", swarblk);
+                if let Some(swarblk) = raag.randomise() {
+                    println!("=> swar block: {}", swarblk);
+                    return Ok(Melody::SwarBlock(swarblk));
+                }
                 // let swarblk = SwarBlock(swars.to_swars());
-                return Ok(Melody::SwarBlock(swarblk));
+                return Ok(Melody::SwarBlock(raag.pakad().as_ref().unwrap().to_swarblock()));
             }
         } else {
             // we can play random swars from sargam
@@ -83,7 +82,7 @@ pub fn parse(
             swars.append( & mut _swars);
         }
 
-        let swarblk = SwarBlock(swars);
+        let swarblk = swarblock::SwarBlock(swars);
         return Ok(Melody::SwarBlock(swarblk));
     }
 

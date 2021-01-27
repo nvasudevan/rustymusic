@@ -1,11 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use crate::raagas::swars::{Swar, SwarBlock};
+    use crate::raagas::swars::Swar;
     use crate::raagas::raag;
-    
-    
-
     use crate::raagas::sound::{Hertz, Pitch};
+    use crate::raagas::swarblock::SwarBlock;
 
     #[test]
     fn test_base_swar_is_sa() {

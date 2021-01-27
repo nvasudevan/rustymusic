@@ -1,20 +1,12 @@
-
-
-
-
 use rodio::{PlayError};
 
-
 use crate::raagas::swarmaalika::Swarmaalika;
-use crate::raagas::swars::{Swar, BeatSrc, SwarBlocks};
+use crate::raagas::swars::{Swar, BeatSrc};
 use crate::raagas::sound::{AudioDevice, TimedSink};
 use crate::raagas::constants::{BPS};
 use crate::raagas::utils;
-
-
-
-
 use crate::raagas::raag::random::index_swar;
+use crate::raagas::swarblock::SwarBlocks;
 
 #[derive(Clone)]
 pub struct Raag {
@@ -100,45 +92,76 @@ impl Raag {
         self.swarmaalika.build_sink(&self.beat_src, &dev, vol)
     }
 
-    pub fn is_ascending(&self, swars: &Vec<Swar>) -> bool {
-        let aroha = self.aroha().as_ref().unwrap().to_swars();
-
-        let mut i = index_swar(&aroha, swars.first().unwrap());
-        if let Some(swars_tail) = swars.get(1..) {
-            for swar in swars_tail {
-                let _i = index_swar(&aroha, swar);
-                if _i < i {
-                    return false
+    pub fn asc_desc(&self, base_swars: Vec<Swar>, swars: &Vec<Swar>) -> bool {
+        if let Some(mut i) = index_swar(&base_swars, swars.first().unwrap()) {
+            if let Some(swars_tail) = swars.get(1..) {
+                for swar in swars_tail {
+                    if let Some(_i) = index_swar(&base_swars, swar) {
+                        if _i < i {
+                            return false
+                        }
+                        i = _i;
+                    } else {
+                        // if swar not in avroha, return false
+                        return false;
+                    }
                 }
-                i = _i;
             }
+            return true; //not sure about this
         }
-
-        return true;
-    }
-
-    pub fn is_descending(&self, swars: &Vec<Swar>) -> bool {
-        let avroha = self.avroha().as_ref().unwrap().to_swars();
-
-         if let Some(mut i) = index_swar(&avroha, swars.first().unwrap()) {
-             if let Some(swars_tail) = swars.get(1..) {
-                 for swar in swars_tail {
-                     if let Some(_i) = index_swar(&avroha, swar) {
-                         if _i < i {
-                             return false
-                         }
-                         i = _i;
-                     } else {
-                         // if swar not in avroha, return false
-                         return false;
-                     }
-                 }
-             }
-             return true; //not sure about this
-         }
 
         // the initial swar not in avroha
         return false;
+    }
+
+    pub fn is_ascending(&self, swars: &Vec<Swar>) -> bool {
+        self.asc_desc(self.aroha().as_ref().unwrap().to_swars(), swars)
+
+    }
+    pub fn is_descending(&self, swars: &Vec<Swar>) -> bool {
+        self.asc_desc(self.avroha().as_ref().unwrap().to_swars(), swars)
+    }
+
+    pub fn swars_by_context(&self, swars: &Vec<Swar>, index: usize) -> Option<Vec<Swar>> {
+        let no_swars = swars.len();
+
+        if index > no_swars-1 {
+            return None;
+        }
+
+        let build_swars = |p: usize, q: usize| {
+            (p..q+1).map(|i| swars.get(i).unwrap().clone()).collect()
+        };
+
+        if index == 0 {
+            let _swars = swars.get(0..3).unwrap();
+            return Some(_swars.to_vec());
+        }
+
+        // return the last swar and the penultimate
+        if index == no_swars-1 {
+            return Some(build_swars(index-2, index));
+        }
+
+        Some(build_swars(index-1, index+1))
+    }
+
+    pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
+        let swars = self.aroha.as_ref().unwrap().to_swars();
+        if let Some(i) = index_swar(&swars, &swar) {
+            return self.swars_by_context(&swars, i);
+        }
+
+        None
+    }
+
+    pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
+        let swars = self.avroha.as_ref().unwrap().to_swars();
+        if let Some(i) = index_swar(&swars, &swar) {
+            return self.swars_by_context(&swars, i);
+        }
+
+        None
     }
 
     pub fn play(
