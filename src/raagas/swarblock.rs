@@ -163,17 +163,17 @@ impl Mutate for SwarBlocks {
         self.to_swarblock().mutate(i, mut_type, from)
     }
 
-    fn mutate_swar(&self, i: usize, from: Vec<Swar>) -> SwarBlock {
+    fn mutate_swar(&self, _i: usize, _from: Vec<Swar>) -> SwarBlock {
         unimplemented!()
     }
 
-    fn muate_swar_duration(&self, i: usize) -> SwarBlock {
+    fn muate_swar_duration(&self, _i: usize) -> SwarBlock {
         unimplemented!()
     }
 }
 
 impl Mutate for SwarBlock {
-    fn mutate(&self, i: usize, mut_type: MutationType, from: Option<Vec<Swar>>) -> SwarBlock {
+    fn mutate(&self, i: usize, _mut_type: MutationType, from: Option<Vec<Swar>>) -> SwarBlock {
         let mut swars = self.to_swars().clone();
         println!("i={}, swars: {}", i, SwarBlock(swars.clone()));
         let mut rnd = rand::thread_rng();
@@ -188,11 +188,11 @@ impl Mutate for SwarBlock {
         SwarBlock(swars)
     }
 
-    fn mutate_swar(&self, i: usize, from: Vec<Swar>) -> SwarBlock {
+    fn mutate_swar(&self, _i: usize, _from: Vec<Swar>) -> SwarBlock {
         unimplemented!()
     }
 
-    fn muate_swar_duration(&self, i: usize) -> SwarBlock {
+    fn muate_swar_duration(&self, _i: usize) -> SwarBlock {
         unimplemented!()
     }
 }
