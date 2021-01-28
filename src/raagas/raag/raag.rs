@@ -122,43 +122,19 @@ impl Raag {
         self.asc_desc(self.avroha().as_ref().unwrap().to_swars(), swars)
     }
 
-    pub fn swars_by_context(&self, swars: &Vec<Swar>, index: usize) -> Option<Vec<Swar>> {
-        let no_swars = swars.len();
-
-        if index > no_swars-1 {
-            return None;
-        }
-
-        let build_swars = |p: usize, q: usize| {
-            (p..q+1).map(|i| swars.get(i).unwrap().clone()).collect()
-        };
-
-        if index == 0 {
-            let _swars = swars.get(0..3).unwrap();
-            return Some(_swars.to_vec());
-        }
-
-        // return the last swar and the penultimate
-        if index == no_swars-1 {
-            return Some(build_swars(index-2, index));
-        }
-
-        Some(build_swars(index-1, index+1))
-    }
-
     pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
-        let swars = self.aroha.as_ref().unwrap().to_swars();
-        if let Some(i) = index_swar(&swars, &swar) {
-            return self.swars_by_context(&swars, i);
+        let swars = self.aroha.as_ref().unwrap().to_swarblock();
+        if let Some(i) = index_swar(&swars.to_swars(), &swar) {
+            return swars.adjacent_swars(i);
         }
 
         None
     }
 
     pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
-        let swars = self.avroha.as_ref().unwrap().to_swars();
-        if let Some(i) = index_swar(&swars, &swar) {
-            return self.swars_by_context(&swars, i);
+        let swars = self.avroha.as_ref().unwrap().to_swarblock();
+        if let Some(i) = index_swar(&swars.to_swars(), &swar) {
+            return swars.adjacent_swars(i);
         }
 
         None

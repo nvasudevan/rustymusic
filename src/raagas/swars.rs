@@ -35,7 +35,7 @@ impl Swar {
         self.beat_cnt
     }
 
-    fn build_sink(&self, beat_src: &Option<BeatSrc>, dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
+    pub(crate) fn build_sink(&self, beat_src: &Option<BeatSrc>, dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
         let sink = Sink::try_new(&dev.out_stream_handle)?;
         match beat_src.clone() {
             Some(src) => {
@@ -96,63 +96,3 @@ impl fmt::Display for Swar {
     }
 }
 
-// impl for SwarBlock
-impl SwarBlock {
-    pub fn to_swars(&self) -> Vec<Swar> {
-        let mut swars: Vec<Swar> = Vec::new();
-        for sw in &self.0 {
-            swars.push(sw.clone());
-        }
-        swars
-    }
-
-    pub fn no_beats(&self) -> usize {
-        let mut cnt: usize = 0;
-        for sw in &self.0 {
-            cnt = cnt + sw.beat_cnt as usize;
-        }
-
-        cnt
-    }
-
-    pub fn build_sink(&self,
-                       beat_src: &Option<BeatSrc>,
-                       dev: &AudioDevice,
-                       vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        let mut sinks: Vec<TimedSink> = Vec::new();
-        for bt in &self.0 {
-            let bt_sink = bt.build_sink(&beat_src, &dev, vol)?;
-            sinks.push(bt_sink);
-        }
-
-        Ok(sinks)
-    }
-
-    pub fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-    ) {
-        //
-        match self.build_sink(&None, &dev, vol) {
-            Ok(tsinks) => {
-                for tsink in tsinks {
-                    tsink.sink.play();
-                    utils::delay(tsink.duration * BPS);
-                    tsink.sink.stop();
-                }
-            },
-            _ => {}
-        }
-    }
-
-    pub fn play_rt(&self, dev: &AudioDevice, vol: f32) {
-        for bt in &self.0 {
-            let tsink = bt.build_sink(&None, &dev, vol).unwrap();
-            tsink.sink.play();
-            utils::delay(tsink.duration * BPS);
-            tsink.sink.stop();
-        }
-
-    }
-}

@@ -38,5 +38,12 @@ pub(crate) trait SimpleRandomiser {
 }
 
 pub(crate) trait Mutate {
-    fn mutate(&self, i: usize, from: Vec<Swar>) -> SwarBlock;
+    fn mutate(&self, i: usize, mut_type: MutationType, from: Option<Vec<Swar>>) -> SwarBlock;
+    fn mutate_swar(&self, i: usize, from: Vec<Swar>) -> SwarBlock;
+    fn muate_swar_duration(&self, i: usize) -> SwarBlock;
+}
+
+pub enum MutationType {
+    by_swar,
+    by_duration,
 }
