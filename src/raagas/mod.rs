@@ -53,14 +53,6 @@ pub enum SwarBlockMutationType {
     by_duration,
 }
 
-// pub enum SwarMutationType {
-//     simple,
-//     increment_beat,
-//     decrement_beat,
-//     share_beat,
-//     kan_swar
-// }
-
 pub(crate) trait MutationOperators {
    fn operators(&self) -> Vec<&str>;
 }

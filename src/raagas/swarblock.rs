@@ -111,8 +111,33 @@ impl SwarBlock {
 impl fmt::Display for SwarBlock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        for swar in &self.0 {
-            s = format!("{} {}", s, swar);
+        let first_swar = self.0.get(0).unwrap();
+        s = format!("{} {}", s, first_swar);
+        let mut prev_bt_cnt: f32 = first_swar.beat_cnt;
+        let rest_swars = self.0.get(1..).unwrap();
+        for swar in rest_swars {
+            match swar.beat_cnt {
+                0.5 => {
+                    if prev_bt_cnt == 0.5 {
+                        s = format!("{}{}", s, swar);
+                    } else {
+                        s = format!("{} {}:", s, swar);
+                    }
+                },
+                KAN_SWAR_BEAT_COUNT => {
+                    s = format!("{} {}/", s, swar);
+                },
+                _ => {
+                    if prev_bt_cnt == KAN_SWAR_BEAT_COUNT {
+                        s = format!("{}{}", s, swar);
+                    } else if prev_bt_cnt == 0.5 {
+                        s = format!("{}{}", s, swar);
+                    } else {
+                        s = format!("{} {}", s, swar);
+                    }
+                }
+            }
+            prev_bt_cnt = swar.beat_cnt;
         }
 
         write!(f, "{}", s)
@@ -264,7 +289,7 @@ impl Mutate for SwarBlock {
                     let rnd_swar_latter = from_swr_blk.random_swar();
 
                     // now randomly insert/replace rnd_swar and rnd_swar_latter
-                    let b = rand::thread_rng().gen_bool(0.8);
+                    let b = rand::thread_rng().gen_bool((1.0 - KAN_SWAR_BEAT_COUNT) as f64);
                     if b {
                         std::mem::replace(&mut swars[i], rnd_swar);
                         swars.insert(i+1, rnd_swar_latter);
