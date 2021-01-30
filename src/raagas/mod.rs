@@ -38,12 +38,29 @@ pub(crate) trait SimpleRandomiser {
 }
 
 pub(crate) trait Mutate {
-    fn mutate(&self, i: usize, mut_type: MutationType, from: Option<Vec<Swar>>) -> SwarBlock;
-    fn mutate_swar(&self, i: usize, from: Vec<Swar>) -> SwarBlock;
-    fn muate_swar_duration(&self, i: usize) -> SwarBlock;
+    fn mutate(&self,
+              i: usize,
+              mut_type: SwarBlockMutationType,
+              from: Option<Vec<Swar>>) -> Option<SwarBlock>;
+
+    fn mutate_swar(&self, i: usize, from: Option<Vec<Swar>>) -> Option<SwarBlock>;
+
+    fn mutate_swar_duration(&self, i: usize) -> Option<Swar>;
 }
 
-pub enum MutationType {
+pub enum SwarBlockMutationType {
     by_swar,
     by_duration,
+}
+
+// pub enum SwarMutationType {
+//     simple,
+//     increment_beat,
+//     decrement_beat,
+//     share_beat,
+//     kan_swar
+// }
+
+pub(crate) trait MutationOperators {
+   fn operators(&self) -> Vec<&str>;
 }

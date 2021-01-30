@@ -3,9 +3,10 @@ use std::fmt;
 use std::iter::FromIterator;
 use crate::raagas::sound::{AudioDevice, TimedSink};
 use rodio::PlayError;
-use crate::raagas::{Mutate, utils, MutationType};
+use crate::raagas::{Mutate, utils, SwarBlockMutationType, MutationOperators};
 use rand::seq::SliceRandom;
-use crate::raagas::constants::BPS;
+use crate::raagas::constants::{BPS, KAN_SWAR_BEAT_COUNT};
+use rand::Rng;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SwarBlock(pub Vec<Swar>);
@@ -56,6 +57,15 @@ impl SwarBlock {
         Some(build_swars(index-1, index+1))
     }
 
+    pub fn random_swar(&self) -> Swar {
+        let mut rnd = rand::thread_rng();
+        let from = self.to_swars();
+        let rnd_swar = from.choose(&mut rnd);
+
+        let swar = rnd_swar.unwrap();
+
+        swar.clone()
+    }
 
     pub fn build_sink(&self,
                       beat_src: &Option<BeatSrc>,
@@ -156,43 +166,124 @@ impl SwarBlocks {
     pub fn to_swarblock(&self) -> SwarBlock {
         SwarBlock(self.to_swars())
     }
+
+    pub fn random_swar(&self) -> Swar {
+        self.to_swarblock().random_swar()
+    }
 }
 
 impl Mutate for SwarBlocks {
-    fn mutate(&self, i: usize, mut_type: MutationType, from: Option<Vec<Swar>>) -> SwarBlock {
+    fn mutate(&self, i: usize, mut_type: SwarBlockMutationType, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
         self.to_swarblock().mutate(i, mut_type, from)
     }
 
-    fn mutate_swar(&self, _i: usize, _from: Vec<Swar>) -> SwarBlock {
-        unimplemented!()
+    fn mutate_swar(&self, _i: usize, _from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+        None
     }
 
-    fn muate_swar_duration(&self, _i: usize) -> SwarBlock {
-        unimplemented!()
+    fn mutate_swar_duration(&self, _i: usize) -> Option<Swar> {
+        None
     }
 }
 
 impl Mutate for SwarBlock {
-    fn mutate(&self, i: usize, _mut_type: MutationType, from: Option<Vec<Swar>>) -> SwarBlock {
-        let mut swars = self.to_swars().clone();
-        println!("i={}, swars: {}", i, SwarBlock(swars.clone()));
-        let mut rnd = rand::thread_rng();
-        if let Some(rnd_swar) = from.unwrap().choose(&mut rnd) {
-            println!("rnd_swar: {}", rnd_swar);
-            std::mem::replace(&mut swars[i], rnd_swar.clone());
+    fn mutate(&self, i: usize, mut_type: SwarBlockMutationType, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+        match mut_type {
+            SwarBlockMutationType::by_swar => {
+                self.mutate_swar(i, from)
+            },
+            _ => {
+                None
+            }
         }
-        println!("mut swars: {}", SwarBlock(swars.clone()));
-
-        // other mutations for Y in X Y Z -- X:Y, Y:Z, X, Y, X:X, Z:Z
-
-        SwarBlock(swars)
     }
 
-    fn mutate_swar(&self, _i: usize, _from: Vec<Swar>) -> SwarBlock {
-        unimplemented!()
+    fn mutate_swar(&self, i: usize, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+        let mut swars = self.to_swars().clone();
+        let from_swr_blk = SwarBlock(from.unwrap());
+        let mut rnd_swar = from_swr_blk.random_swar();
+
+        let swar_mut_operators = rnd_swar.operators();
+        let swar_mut_type = swar_mut_operators.choose(&mut rand::thread_rng());
+        if let Some(swar_mut) = swar_mut_type {
+            // mutations for Y in X Y Z -- X, Y, Z, X:Y, Y:X, Y:Z, Z:Y, X:X, Y:Y, Z:Z
+
+            match swar_mut.to_string().as_str() {
+                "simple" => {
+                    std::mem::replace(&mut swars[i], rnd_swar);
+                    println!("[simple] mutated: {}", SwarBlock(swars.clone()));
+
+                    return Some(SwarBlock(swars));
+                },
+                "inc_beat" => {
+                    let mut mut_rnd_swar = rnd_swar;
+                    let inc_bt = mut_rnd_swar.beat_cnt + 1.0;
+                    mut_rnd_swar.inc_beat_count(inc_bt);
+                    std::mem::replace(&mut swars[i], mut_rnd_swar);
+                    println!("[inc_beat] mutated: {}", SwarBlock(swars.clone()));
+
+                    return Some(SwarBlock(swars));
+                },
+                "dec_beat" => {
+                    let mut mut_rnd_swar = rnd_swar;
+                    let mut dec_bt = mut_rnd_swar.beat_cnt;
+                    if dec_bt >= 1.0 {
+                        dec_bt = dec_bt/2.0;
+                    }
+                    mut_rnd_swar.dec_beat_count(dec_bt);
+                    std::mem::replace(&mut swars[i], mut_rnd_swar);
+                    println!("[dec_beat] mutated: {}", SwarBlock(swars.clone()));
+
+                    return Some(SwarBlock(swars));
+                },
+                "share_beat" => {
+                    // X Y Z -> X Y:_ Z
+                    rnd_swar.set_beat_count(0.5);
+
+                    // get another random swar from 'from'
+                    let mut rnd_swar_latter = from_swr_blk.random_swar();
+
+                    // now randomly insert/replace rnd_swar and rnd_swar_latter
+                    let b = rand::thread_rng().gen_bool(0.5);
+                    if b {
+                        std::mem::replace(&mut swars[i], rnd_swar);
+                        swars.insert(i+1, rnd_swar_latter);
+                    } else {
+                        swars.insert(i, rnd_swar_latter);
+                        std::mem::replace(&mut swars[i+1], rnd_swar);
+                    }
+
+                    println!("[share_beat] mutated: {}", SwarBlock(swars.clone()));
+                    return Some(SwarBlock(swars));
+                },
+                "kan_swar" => {
+                    // X Y Z -> X _/_ Z
+                    rnd_swar.set_beat_count(KAN_SWAR_BEAT_COUNT);
+
+                    // get another random swar from 'from'
+                    let mut rnd_swar_latter = from_swr_blk.random_swar();
+
+                    // now randomly insert/replace rnd_swar and rnd_swar_latter
+                    let b = rand::thread_rng().gen_bool(0.8);
+                    if b {
+                        std::mem::replace(&mut swars[i], rnd_swar);
+                        swars.insert(i+1, rnd_swar_latter);
+                    } else {
+                        swars.insert(i, rnd_swar_latter);
+                        std::mem::replace(&mut swars[i+1], rnd_swar);
+                    }
+
+                    println!("[kan_swar] mutated: {}", SwarBlock(swars.clone()));
+                    return Some(SwarBlock(swars));
+                },
+                _ => { return None; }
+            }
+        }
+
+        None
     }
 
-    fn muate_swar_duration(&self, _i: usize) -> SwarBlock {
-        unimplemented!()
+    fn mutate_swar_duration(&self, _i: usize) -> Option<Swar> {
+        None
     }
 }

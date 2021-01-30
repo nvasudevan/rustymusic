@@ -20,8 +20,8 @@ fn main() {
                         raag.play(&audio_dev, constants::VOL, None, false, 1)
                     }
 
-                    if let Melody::SwarBlock(_blk) = &melody {
-                        // blk.play_rt(&audio_dev, constants::VOL)
+                    if let Melody::SwarBlock(blk) = &melody {
+                        blk.play_rt(&audio_dev, constants::VOL)
                     }
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),

@@ -6,7 +6,7 @@ use rand::prelude::ThreadRng;
 use crate::raagas::sound::Pitch;
 use crate::raagas::raag::raag::Raag;
 use rand::Rng;
-use crate::raagas::{SimpleRandomiser, PureRandomiser, Mutate, MutationType};
+use crate::raagas::{SimpleRandomiser, PureRandomiser, Mutate, SwarBlockMutationType};
 use crate::raagas::swarblock::SwarBlock;
 
 pub fn index_swar(swars: &Vec<Swar>, swar: &Swar) -> Option<usize> {
@@ -32,22 +32,20 @@ impl SimpleRandomiser for Raag {
         let h = i - 1;
         let j = i + 2;
 
-        println!("=> pakad: {}\n", base_swar_blk);
-        println!("i = {}, swar: {}", i, swar_picked);
         if let Some(swars) = pakad_blk.get((h as usize)..(j as usize)) {
             let swars_vec = swars.to_vec();
-            println!("blk: {}", SwarBlock(swars_vec.clone()));
+            println!("[{}], swar: {}, blk: {}", i, swar_picked, SwarBlock(swars_vec.clone()));
             if self.is_ascending(&swars_vec) {
                 println!("\n=> swars in ascending ...");
                 // use swars around 'i'th swar from aroha.
                 if let Some(aroha_swars) = self.aroha_swars_by_context(swar_picked) {
                     println!("aroha: {:?}", SwarBlock(aroha_swars.clone()));
-                    let mut_pakad: SwarBlock = base_swar_blk.mutate(
+                    let mut_pakad = base_swar_blk.mutate(
                         i as usize,
-                        MutationType::by_swar,
+                        SwarBlockMutationType::by_swar,
                         Some(aroha_swars)
                     );
-                    return Some(mut_pakad);
+                    return mut_pakad;
                 }
             }
 
@@ -56,21 +54,23 @@ impl SimpleRandomiser for Raag {
                 // use swars around 'i'th swar from aroha.
                 if let Some(avroha_swars) = self.avroha_swars_by_context(swar_picked) {
                     println!("avroha: {}", SwarBlock(avroha_swars.clone()));
-                    let mut_pakad: SwarBlock = base_swar_blk.mutate(
-                        i as usize, MutationType::by_swar, Some(avroha_swars));
-                    return Some(mut_pakad);
+                    let mut_pakad = base_swar_blk.mutate(
+                        i as usize,
+                        SwarBlockMutationType::by_swar,
+                        Some(avroha_swars));
+                    return mut_pakad;
                 }
             }
 
             // swars (R S G) -- neither asc or descending
             // so try: ith swar S -> S:S, or  R:S or S:G or R or G
             println!("\n=> swars neither asecending or descending ...");
-            let mut_pakad: SwarBlock = base_swar_blk.mutate(
+            let mut_pakad = base_swar_blk.mutate(
                 i as usize,
-                MutationType::by_swar,
+                SwarBlockMutationType::by_swar,
                 Some(swars_vec)
             );
-            return Some(mut_pakad);
+            return mut_pakad;
         }
 
         return None

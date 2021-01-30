@@ -7,7 +7,9 @@ use rodio::{Sink, Source, PlayError};
 
 
 use std::io::Write;
-
+use crate::raagas::{Mutate, SwarBlockMutationType, MutationOperators};
+use crate::raagas::swarblock::SwarBlock;
+use rand::seq::SliceRandom;
 
 
 pub type BeatSrc = Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>;
@@ -35,7 +37,23 @@ impl Swar {
         self.beat_cnt
     }
 
-    pub(crate) fn build_sink(&self, beat_src: &Option<BeatSrc>, dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
+    pub fn set_beat_count(&mut self, bt_cnt: f32) {
+        self.beat_cnt = bt_cnt;
+    }
+
+    /// increment the swar beat count by inc
+    pub(crate) fn inc_beat_count(&mut self, inc: f32) {
+        self.beat_cnt += inc;
+    }
+
+    /// decrement the swar beat count by dec
+    pub(crate) fn dec_beat_count(&mut self, dec: f32) {
+        self.beat_cnt -= dec;
+    }
+
+    pub(crate) fn build_sink(&self,
+                             beat_src: &Option<BeatSrc>,
+                             dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
         let sink = Sink::try_new(&dev.out_stream_handle)?;
         match beat_src.clone() {
             Some(src) => {
@@ -96,3 +114,29 @@ impl fmt::Display for Swar {
     }
 }
 
+impl MutationOperators for Swar {
+    fn operators(&self) -> Vec<&str> {
+        vec![
+            "simple", "inc_beat", "dec_beat", "share_beat", "kan_swar"
+        ]
+    }
+}
+
+impl Mutate for Swar {
+    fn mutate(&self, i: usize, mut_type: SwarBlockMutationType, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+        None
+    }
+
+    fn mutate_swar(&self, i: usize, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+        None
+    }
+
+    fn mutate_swar_duration(&self, i: usize) -> Option<Swar> {
+        let mut mut_swar = self.clone();
+        let beat_durations: Vec<f32> = vec![0.5, 1.0, 2.0, 3.0];
+        let mut rnd = rand::thread_rng();
+        mut_swar.beat_cnt = *beat_durations.choose(&mut rnd).unwrap_or_else(|| &(1.0 as f32));
+
+        Some(mut_swar)
+    }
+}

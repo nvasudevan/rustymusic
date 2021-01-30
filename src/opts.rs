@@ -56,7 +56,7 @@ pub fn parse(
                 // let swars = raag.randomise_swarblocks(raag.pakad().as_ref().unwrap().0.get(0).unwrap());
                 // let choose_from: Vec<Swar> = raag.aroha().as_ref().unwrap().to_swars();
                 if let Some(swarblk) = raag.randomise() {
-                    println!("=> swar block: {}", swarblk);
+                    // println!("=> swar block: {}", swarblk);
                     return Ok(Melody::SwarBlock(swarblk));
                 }
                 // let swarblk = SwarBlock(swars.to_swars());
