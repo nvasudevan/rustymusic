@@ -123,15 +123,15 @@ impl MutationOperators for Swar {
 }
 
 impl Mutate for Swar {
-    fn mutate(&self, i: usize, mut_type: SwarBlockMutationType, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+    fn mutate(&self, _i: usize, _mut_type: SwarBlockMutationType, _from: Option<Vec<Swar>>) -> Option<SwarBlock> {
         None
     }
 
-    fn mutate_swar(&self, i: usize, from: Option<Vec<Swar>>) -> Option<SwarBlock> {
+    fn mutate_swar(&self, _i: usize, _from: Option<Vec<Swar>>) -> Option<SwarBlock> {
         None
     }
 
-    fn mutate_swar_duration(&self, i: usize) -> Option<Swar> {
+    fn mutate_swar_duration(&self, _i: usize) -> Option<Swar> {
         let mut mut_swar = self.clone();
         let beat_durations: Vec<f32> = vec![0.5, 1.0, 2.0, 3.0];
         let mut rnd = rand::thread_rng();

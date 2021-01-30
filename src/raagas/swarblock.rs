@@ -241,7 +241,7 @@ impl Mutate for SwarBlock {
                     rnd_swar.set_beat_count(0.5);
 
                     // get another random swar from 'from'
-                    let mut rnd_swar_latter = from_swr_blk.random_swar();
+                    let rnd_swar_latter = from_swr_blk.random_swar();
 
                     // now randomly insert/replace rnd_swar and rnd_swar_latter
                     let b = rand::thread_rng().gen_bool(0.5);
@@ -261,7 +261,7 @@ impl Mutate for SwarBlock {
                     rnd_swar.set_beat_count(KAN_SWAR_BEAT_COUNT);
 
                     // get another random swar from 'from'
-                    let mut rnd_swar_latter = from_swr_blk.random_swar();
+                    let rnd_swar_latter = from_swr_blk.random_swar();
 
                     // now randomly insert/replace rnd_swar and rnd_swar_latter
                     let b = rand::thread_rng().gen_bool(0.8);
