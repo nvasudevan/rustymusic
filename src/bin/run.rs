@@ -17,11 +17,11 @@ fn main() {
                 Ok(melody) => {
                     let audio_dev = AudioDevice::new(stream_handle);
                     if let Melody::Raag(raag) = &melody {
-                        raag.play(&audio_dev, constants::VOL, None, false, 1)
+                        raag.play(&audio_dev, constants::VOL) // None, false, 1)
                     }
 
                     if let Melody::SwarBlock(blk) = &melody {
-                        blk.play_rt(&audio_dev, constants::VOL)
+                        blk.play(&audio_dev, constants::VOL)
                     }
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),

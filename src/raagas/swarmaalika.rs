@@ -16,39 +16,26 @@ impl Sthayi {
         Sthayi { lines }
     }
 
-    pub fn build_sink(&self,
-                       beat_src: &Option<BeatSrc>,
-                       dev: &AudioDevice,
-                       vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-
-        let mut sinks: Vec<TimedSink> = Vec::new();
-        for (key, line) in self.lines.iter() {
-            match key.as_str() {
-                "lineA" => {
-                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
-                    sinks.append(&mut sink);
-                },
-                "lineB" => {
-                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
-                    sinks.append(&mut sink);
-                },
-                "lineC" => {
-                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
-                    sinks.append(&mut sink);
-                },
-                _ => {}
+    pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice, vol: f32) {
+        let line_blks = self.lines.get(line);
+        if let Some(blks) = line_blks {
+            for _ in 0..no_times {
+                blks.to_swarblock().play(&dev, vol);
             }
         }
+    }
 
-        match self.lines.get("lineA") {
-            Some(line_a) => {
-                let mut sink = line_a.build_sink(&beat_src, &dev, vol)?;
-                sinks.append(&mut sink);
-            },
-            _ => {}
+    pub fn play(&self, dev: &AudioDevice, vol: f32) {
+        for line in self.lines.keys() {
+            match line.as_str() {
+                "lineA"|"lineB" => {
+                    self.play_line(line, 2, dev, vol);
+                },
+                _ => {
+                    self.play_line(line, 1, dev, vol);
+                }
+            }
         }
-
-        Ok(sinks)
     }
 }
 
@@ -62,31 +49,26 @@ impl Antara {
         Antara { lines }
     }
 
-    pub fn build_sink(&self,
-                       beat_src: &Option<BeatSrc>,
-                       dev: &AudioDevice,
-                       vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-
-        let mut sinks: Vec<TimedSink> = Vec::new();
-        for (key, line) in self.lines.iter() {
-            match key.as_str() {
-                "lineC" => {
-                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
-                    sinks.append(&mut sink);
-                },
-                "lineD" => {
-                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
-                    sinks.append(&mut sink);
-                },
-                "lineE" => {
-                    let mut sink = line.build_sink(&beat_src, &dev, vol)?;
-                    sinks.append(&mut sink);
-                },
-                _ => {}
+    pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice, vol: f32) {
+        let line_blks = self.lines.get(line);
+        if let Some(blks) = line_blks {
+            for _ in 0..no_times {
+                blks.to_swarblock().play(&dev, vol);
             }
         }
+    }
 
-        Ok(sinks)
+    pub fn play(&self, dev: &AudioDevice, vol: f32) {
+        for line in self.lines.keys() {
+            match line.as_str() {
+                "lineC"|"lineD" => {
+                    self.play_line(line, 2, dev, vol);
+                },
+                _ => {
+                    self.play_line(line, 1, dev, vol);
+                }
+            }
+        }
     }
 }
 
@@ -121,16 +103,10 @@ impl Swarmaalika {
         }
     }
 
-    pub fn build_sink(&self,
-                       beat_src: &Option<BeatSrc>,
-                       dev: &AudioDevice,
-                       vol: f32) -> Result<Vec<TimedSink>, PlayError>
-    {
-        let mut sinks: Vec<TimedSink> = Vec::new();
-        let mut sthayi = self.sthayi.build_sink(&beat_src, &dev, vol)?;
-        sinks.append(&mut sthayi);
-        let mut anthara = self.antara.build_sink(&beat_src, &dev, vol)?;
-        sinks.append(&mut anthara);
-        Ok(sinks)
+    pub fn play(&self, dev: &AudioDevice, vol: f32) {
+        self.sthayi.play(&dev, vol);
+        self.sthayi.play_line("lineA", 1, &dev, vol);
+        self.antara.play(&dev, vol);
+        self.sthayi.play_line("lineA", 1, &dev, vol);
     }
 }

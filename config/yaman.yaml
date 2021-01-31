@@ -2,11 +2,11 @@ alankars:
   - .N R G M' P D N S. S. N D P M' G R S
   - .N G R M' G P M' D P N D S. S. D N P D M' P G M' R G S
 aroha:
-  - .N R G M' P D N S. -
+  - .N - R - G - M' - P - D - N - S. -
 avroha:
-  - S. N D P M' G R S -
+  - S. - N - D - P - M' - G - R - S -
 pakad:
-  - .N R - G R S -, P M' - G R S -
+  - .N - R - - G - R - S - -, M'/P - M' - - G R S - -
 swarmaalika:
   - sam: 9
   - mukra:

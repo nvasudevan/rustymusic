@@ -53,7 +53,8 @@ impl Swar {
 
     pub(crate) fn build_sink(&self,
                              beat_src: &Option<BeatSrc>,
-                             dev: &AudioDevice, vol: f32) -> Result<TimedSink, PlayError> {
+                             dev: &AudioDevice,
+                             vol: f32) -> Result<TimedSink, PlayError> {
         let sink = Sink::try_new(&dev.out_stream_handle)?;
         match beat_src.clone() {
             Some(src) => {
@@ -74,7 +75,6 @@ impl Swar {
             _ => {
                 // play swar
                 if let Some(p)  = self.pitch.as_ref() {
-                    print!("{} ", p);
                     io::stdout().flush();
                     let sinew = SineWave::from(p.to_owned());
                     // sink.append(sinew);

@@ -3,7 +3,7 @@ use rodio::{PlayError};
 use crate::raagas::swarmaalika::Swarmaalika;
 use crate::raagas::swars::{Swar, BeatSrc};
 use crate::raagas::sound::{AudioDevice, TimedSink};
-use crate::raagas::constants::{BPS};
+use crate::raagas::constants::{BPS, PLAY_PAUSE_DURATION};
 use crate::raagas::utils;
 use crate::raagas::raag::random::index_swar;
 use crate::raagas::swarblock::SwarBlocks;
@@ -68,28 +68,33 @@ impl Raag {
         &self.beat_src
     }
 
-    fn build_aroha(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        println!("\n=> aroha for raag: {}", self.name());
-        self.aroha.as_ref().unwrap().build_sink(&None, &dev, vol)
+    fn play_aroha(&self, dev: &AudioDevice, vol: f32) {
+        let blk = self.aroha.as_ref().unwrap().to_swarblock();
+        println!("\n=> aroha  {}", blk);
+        blk.play(&dev, vol);
     }
 
-    fn build_avroha(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        println!("\n=> avroha for raag: {}", self.name());
-        self.avroha.as_ref().unwrap().build_sink(&None, &dev, vol)
+    fn play_avroha(&self, dev: &AudioDevice, vol: f32) {
+        let blk = self.avroha.as_ref().unwrap().to_swarblock();
+        println!("\n=> avroha  {}", blk);
+        blk.play(&dev, vol);
     }
 
-    fn build_pakad(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        println!("\n=> pakad for raag: {}", self.name());
-        self.pakad.as_ref().unwrap().build_sink(&None, &dev, vol)
+    fn play_pakad(&self, dev: &AudioDevice, vol: f32) {
+        let blk = self.pakad.as_ref().unwrap().to_swarblock();
+        println!("\n=> pakad  {}", blk);
+        blk.play(&dev, vol);
     }
 
-    fn build_alankars(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        println!("\n=> alankars for raag: {}", self.name());
-        self.alankars.as_ref().unwrap().build_sink(&self.beat_src, &dev, vol)
+    fn play_alankars(&self, dev: &AudioDevice, vol: f32) {
+        let blk = self.alankars.as_ref().unwrap().to_swarblock();
+        println!("\n=> alankars  {}", blk);
+        blk.play(&dev, vol);
     }
 
-    fn build_swarmaalika(&self, dev: &AudioDevice, vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        self.swarmaalika.build_sink(&self.beat_src, &dev, vol)
+    fn play_swarmaalika(&self, dev: &AudioDevice, vol: f32)  {
+        println!("\n=> playing swarmaalika");
+        self.swarmaalika.play(&dev, vol);
     }
 
     pub fn asc_desc(&self, base_swars: Vec<Swar>, swars: &Vec<Swar>) -> bool {
@@ -140,41 +145,16 @@ impl Raag {
         None
     }
 
-    pub fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-        _beat_src: Option<BeatSrc>,
-        _mix: bool,
-        _n: i8,
-    ) {
-        println!("=> build sink: {}", self.name());
+    pub fn play(&self, dev: &AudioDevice, vol: f32) {
         println!("=> playing raag: {}", self.name());
-        let play_sinks = |sinks: Result<Vec<TimedSink>, PlayError>| match &sinks {
-            Ok(timed_sinks) => {
-                println!("=> playing ...");
-                for tsink in timed_sinks {
-                    tsink.sink.set_volume(1.0);
-                    tsink.sink.play();
-                    utils::delay(tsink.duration * BPS);
-                    tsink.sink.stop();
-                    println!("sink => len: {}, empty: {}", tsink.sink.len(), tsink.sink.empty());
-                }
-            }
-            Err(e) => {
-                println!("Error: {}", e);
-            }
-        };
-        // play_sinks(self.build_aroha(&dev, vol));
-        // utils::delay(PLAY_PAUSE_DURATION * BPS);
-        // play_sinks(self.build_avroha(&dev, vol));
-        // utils::delay(PLAY_PAUSE_DURATION  * BPS);
-        // play_sinks(self.build_pakad(&dev, vol));
-        // utils::delay(PLAY_PAUSE_DURATION * BPS);
-        play_sinks(self.build_swarmaalika(&dev, vol));
-        // utils::delay(PLAY_PAUSE_DURATION * BPS);
-        // self.play_alankars(&dev, &beat_src);
-        // utils::delay(2.0);
+
+        self.play_aroha(&dev, vol);
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
+        self.play_avroha(&dev, vol);
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
+        self.play_pakad(&dev, vol);
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
+        self.play_swarmaalika(&dev, vol);
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
     }
 }
-

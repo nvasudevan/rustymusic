@@ -80,27 +80,9 @@ impl SwarBlock {
         Ok(sinks)
     }
 
-    pub fn play(
-        &self,
-        dev: &AudioDevice,
-        vol: f32,
-    ) {
-        //
-        match self.build_sink(&None, &dev, vol) {
-            Ok(tsinks) => {
-                for tsink in tsinks {
-                    tsink.sink.play();
-                    utils::delay(tsink.duration * BPS);
-                    tsink.sink.stop();
-                }
-            },
-            _ => {}
-        }
-    }
-
-    pub fn play_rt(&self, dev: &AudioDevice, vol: f32) {
-        for bt in &self.0 {
-            let tsink = bt.build_sink(&None, &dev, vol).unwrap();
+    pub fn play(&self, dev: &AudioDevice, vol: f32) {
+        for sw in &self.0 {
+            let tsink = sw.build_sink(&None, &dev, vol).unwrap();
             tsink.sink.play();
             utils::delay(tsink.duration * BPS);
             tsink.sink.stop();
@@ -159,20 +141,6 @@ impl FromIterator<usize> for SwarBlock {
 }
 
 impl SwarBlocks {
-    pub fn build_sink(&self,
-                      beat_src: &Option<BeatSrc>,
-                      dev: &AudioDevice,
-                      vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        let mut sinks: Vec<TimedSink> = Vec::new();
-        for blk in &self.0 {
-            println!("blk: {:?}", blk);
-            let mut blk_sinks = blk.build_sink(&beat_src, &dev, vol)?;
-            sinks.append(&mut blk_sinks);
-        }
-
-        Ok(sinks)
-    }
-
     pub fn to_swars(&self) -> Vec<Swar> {
         let mut swars: Vec<Swar> = Vec::new();
         for blk in &self.0 {
@@ -194,6 +162,10 @@ impl SwarBlocks {
 
     pub fn random_swar(&self) -> Swar {
         self.to_swarblock().random_swar()
+    }
+
+    pub fn play_rt(&self, dev: &AudioDevice, vol: f32) {
+        self.to_swarblock().play(&dev, vol)
     }
 }
 
