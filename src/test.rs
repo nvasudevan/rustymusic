@@ -31,8 +31,9 @@ mod tests {
 
     #[test]
     fn test_raag_aroha_as_string() {
-        let s = "durga";
-        let raag = raag::load::load_yaml(s.to_string()).unwrap();
+        let raag = "durga";
+        let composition = "durga";
+        let raag = raag::load::load_yaml(raag, composition).unwrap();
         let expected = "S[C#] - R[D#] - M[F#] - P[G#] - D[A#] - S.[C#] -  - ";
 
         let mut aroha_s = String::new();
@@ -51,8 +52,9 @@ mod tests {
 
     #[test]
     fn test_raag_avroha() {
-        let s = "durga";
-        let raag = raag::load::load_yaml(s.to_string()).unwrap();
+        let raag = "durga";
+        let composition = "durga";
+        let raag = raag::load::load_yaml(raag, composition).unwrap();
         let swars: Vec<Swar> = vec![
             Swar::new(Pitch::new("S.".to_string()), 2.0),
             Swar::new(Pitch::new("D".to_string()), 2.0),

@@ -1,6 +1,7 @@
 use std::io::{BufRead, Write};
 use std::thread::sleep;
 use std::time::Duration;
+use std::path::PathBuf;
 
 pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
     // println!("reading from file: {}", fp);
@@ -12,7 +13,7 @@ pub(crate) fn lines_from_file(fp: String) -> Vec<String> {
     lines
 }
 
-pub(crate) fn file_as_str(fp: String) -> String {
+pub(crate) fn file_as_str(fp: PathBuf) -> String {
     let f = std::fs::read_to_string(fp);
     match &f {
         Ok(_s) => String::from(_s),

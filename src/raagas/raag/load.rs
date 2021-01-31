@@ -8,6 +8,7 @@ use yaml_rust::YamlLoader;
 use self::yaml_rust::{yaml, Yaml};
 use std::collections::HashMap;
 use std::fs::File;
+use std::path::Path;
 use std::io::BufReader;
 use std::time::Duration;
 use crate::raagas::swars::{Swar, BeatSrc};
@@ -219,9 +220,11 @@ fn play_raw_beats_forever(beatp: (&str, f32)) -> BeatSrc {
     beat_src
 }
 
-pub fn load_yaml(raag: String) -> Option<Raag> {
+pub fn load_yaml(raag: &str, composition: &str) -> Option<Raag> {
     // Given a raag name returns a Raag
-    let raagp = format!("{}/{}.yaml", CONF_DIR, raag);
+    let comp_path = format!("{}.yaml", composition);
+    let raagp = Path::new(CONF_DIR).join(raag).join(comp_path);
+    // let raagp = format!("{}/{}/{}.yaml", CONF_DIR, raag, composition);
     let s = utils::file_as_str(raagp);
     let yamlldr = YamlLoader::load_from_str(&s);
     match &yamlldr {
@@ -238,7 +241,7 @@ pub fn load_yaml(raag: String) -> Option<Raag> {
             let beat_src = play_raw_beats_forever(BEAT_MP3);
 
             Some(Raag::new(
-                raag,
+                raag.to_string(),
                 Some(aroha),
                 Some(avroha),
                 Some(pakad),
