@@ -2,7 +2,7 @@ use rodio::{PlayError};
 
 use crate::raagas::swarmaalika::Swarmaalika;
 use crate::raagas::swars::{Swar, BeatSrc};
-use crate::raagas::sound::{AudioDevice, TimedSink};
+use crate::raagas::sound::{AudioDevice};
 use crate::raagas::constants::{BPS, PLAY_PAUSE_DURATION};
 use crate::raagas::utils;
 use crate::raagas::raag::random::index_swar;
@@ -148,11 +148,11 @@ impl Raag {
     pub fn play(&self, dev: &AudioDevice, vol: f32) {
         println!("=> playing raag: {}", self.name());
 
-        self.play_aroha(&dev, vol);
-        utils::delay(PLAY_PAUSE_DURATION * BPS);
-        self.play_avroha(&dev, vol);
-        utils::delay(PLAY_PAUSE_DURATION * BPS);
-        self.play_pakad(&dev, vol);
+        // self.play_aroha(&dev, vol);
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // self.play_avroha(&dev, vol);
+        // utils::delay(PLAY_PAUSE_DURATION * BPS);
+        // self.play_pakad(&dev, vol);
         utils::delay(PLAY_PAUSE_DURATION * BPS);
         self.play_swarmaalika(&dev, vol);
         utils::delay(PLAY_PAUSE_DURATION * BPS);

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::raagas::sound::{AudioDevice, TimedSink};
+use crate::raagas::sound::{AudioDevice};
 use crate::raagas::swars::BeatSrc;
 
 use rodio::PlayError;
@@ -26,16 +26,8 @@ impl Sthayi {
     }
 
     pub fn play(&self, dev: &AudioDevice, vol: f32) {
-        for line in self.lines.keys() {
-            match line.as_str() {
-                "lineA"|"lineB" => {
-                    self.play_line(line, 2, dev, vol);
-                },
-                _ => {
-                    self.play_line(line, 1, dev, vol);
-                }
-            }
-        }
+        self.play_line("lineA", 2, &dev, vol);
+        self.play_line("lineB", 2, &dev, vol);
     }
 }
 
@@ -59,16 +51,8 @@ impl Antara {
     }
 
     pub fn play(&self, dev: &AudioDevice, vol: f32) {
-        for line in self.lines.keys() {
-            match line.as_str() {
-                "lineC"|"lineD" => {
-                    self.play_line(line, 2, dev, vol);
-                },
-                _ => {
-                    self.play_line(line, 1, dev, vol);
-                }
-            }
-        }
+        self.play_line("lineC", 2, &dev, vol);
+        self.play_line("lineD", 2, &dev, vol);
     }
 }
 

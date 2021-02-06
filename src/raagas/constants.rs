@@ -5,7 +5,7 @@ pub(crate) const RAAGAS: [&str;9] = [
     "durga", "yaman", "bhupali", "hamsadhwani",
     "yeri_aali", "bairav", "bhairavi", "daesh", "malkauns"
 ];
-pub const BPS: f32 = 0.5; // equivalent to 120 BPM
+pub const BPS: f32 = 0.7; // equivalent to 120 BPM
 pub const CONF_DIR: &str = "./config";
 pub const BEAT_MP3: (&str, f32) = ("./samples/1beat.mp3", BPS);
 pub const TIHAYI_TIMES: i8 = 3;

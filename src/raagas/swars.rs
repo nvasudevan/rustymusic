@@ -2,7 +2,7 @@ use std::{fmt, io, fs};
 
 use rodio::decoder::Decoder;
 use rodio::source::{Repeat, TakeDuration, SineWave};
-use crate::raagas::sound::{Pitch, AudioDevice, TimedSink};
+use crate::raagas::sound::{Pitch, AudioDevice};
 use rodio::{Sink, Source, PlayError};
 
 
@@ -16,6 +16,7 @@ pub type BeatSrc = Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>;
 
 #[derive(Debug, Clone)]
 pub struct Swar {
+    // A blank swar is when there is nothing to play, so a pause
     pub pitch: Option<Pitch>,
     pub beat_cnt: f32,
 }
@@ -54,21 +55,19 @@ impl Swar {
     pub(crate) fn build_sink(&self,
                              beat_src: &Option<BeatSrc>,
                              dev: &AudioDevice,
-                             vol: f32) -> Result<TimedSink, PlayError> {
+                             vol: f32) -> Result<Option<Sink>, PlayError> {
         let sink = Sink::try_new(&dev.out_stream_handle)?;
-        match beat_src.clone() {
+        sink.set_volume(vol);
+        match beat_src {
             Some(src) => {
-                match self.pitch.as_ref() {
+                if let Some(p) = self.pitch.as_ref() {
                     // play swar with taal
-                    Some(p) => {
-                        let sinew = SineWave::from(p.to_owned());
+                    // let sinew = SineWave::from(p.to_owned());
+                    if let Some(sinew) = p.to_sinewave() {
                         sink.append(sinew);
                         // sink.append(sinew.mix(Pitch::from_swar("M")));
                         // sink.append(src.mix(sinew));
-                    }
-                    _ => {
-                        // play taal
-                        sink.append(src);
+                        return Ok(Some(sink));
                     }
                 }
             }
@@ -76,20 +75,25 @@ impl Swar {
                 // play swar
                 if let Some(p)  = self.pitch.as_ref() {
                     io::stdout().flush();
-                    let sinew = SineWave::from(p.to_owned());
-                    // sink.append(sinew);
-                    sink.append(sinew.mix(Pitch::from_swar("M")));
+                    if let Some(sinew) = p.to_sinewave() {
+                        // sink.append(sinew);
+                        sink.append(sinew.mix(Pitch::from_swar("M")));
+                        return Ok(Some(sink));
+                    }
                 }
             }
         }
-        sink.set_volume(vol);
-        Ok(TimedSink::new(sink, self.beat_cnt))
+
+        Ok(None)
+
     }
 }
 
 impl PartialEq for Swar {
     fn eq(&self, other: &Self) -> bool {
-        if self.pitch.as_ref().unwrap().hertz().unwrap().freq() == other.pitch.as_ref().unwrap().hertz().unwrap().freq() {
+        let my_freq= self.pitch.as_ref().unwrap().hertz().unwrap().freq();
+        let other_freq= other.pitch.as_ref().unwrap().hertz().unwrap().freq();
+        if my_freq == other_freq {
             return true;
         }
 
@@ -107,7 +111,7 @@ impl fmt::Display for Swar {
         };
 
         let _s = match &self.pitch {
-            Some(sw) => format!("{}{}", sw, dash),
+            Some(p) => format!("{}{}", p, dash),
             _ => String::new(),
         };
         write!(f, "{}", _s)

@@ -1,8 +1,8 @@
 use crate::raagas::swars::{Swar, BeatSrc};
 use std::fmt;
 use std::iter::FromIterator;
-use crate::raagas::sound::{AudioDevice, TimedSink};
-use rodio::PlayError;
+use crate::raagas::sound::{AudioDevice};
+use rodio::{PlayError, Sink};
 use crate::raagas::{Mutate, utils, SwarBlockMutationType, MutationOperators};
 use rand::seq::SliceRandom;
 use crate::raagas::constants::{BPS, KAN_SWAR_BEAT_COUNT};
@@ -70,8 +70,8 @@ impl SwarBlock {
     pub fn build_sink(&self,
                       beat_src: &Option<BeatSrc>,
                       dev: &AudioDevice,
-                      vol: f32) -> Result<Vec<TimedSink>, PlayError> {
-        let mut sinks: Vec<TimedSink> = Vec::new();
+                      vol: f32) -> Result<Vec<Option<Sink>>, PlayError> {
+        let mut sinks: Vec<Option<Sink>> = Vec::new();
         for bt in &self.0 {
             let bt_sink = bt.build_sink(&beat_src, &dev, vol)?;
             sinks.push(bt_sink);
@@ -81,11 +81,19 @@ impl SwarBlock {
     }
 
     pub fn play(&self, dev: &AudioDevice, vol: f32) {
+        println!("=> playing swarblock: {}", self);
         for sw in &self.0 {
-            let tsink = sw.build_sink(&None, &dev, vol).unwrap();
-            tsink.sink.play();
-            utils::delay(tsink.duration * BPS);
-            tsink.sink.stop();
+            let sw_sink = sw.build_sink(&None, &dev, vol).unwrap();
+            match sw_sink {
+                Some(sink) => {
+                    sink.play();
+                    utils::delay(sw.beat_cnt * BPS);
+                    sink.stop();
+                },
+                None => {
+                    utils::delay(sw.beat_cnt * BPS);
+                }
+            }
         }
 
     }
@@ -112,12 +120,11 @@ impl fmt::Display for SwarBlock {
                 _ => {
                     if prev_bt_cnt == KAN_SWAR_BEAT_COUNT {
                         s = format!("{}{}", s, swar);
-                    } else if prev_bt_cnt == 0.5 {
-                        s = format!("{}{}", s, swar);
                     } else {
                         s = format!("{} {}", s, swar);
                     }
-                }
+                },
+                _ => {}
             }
             prev_bt_cnt = swar.beat_cnt;
         }
