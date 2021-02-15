@@ -2,12 +2,12 @@ use std::error::Error;
 
 use getopts::{Options, Matches};
 
-use crate::raagas::swars::Swar;
 use crate::raagas::constants::RAAGAS;
 use crate::raagas::{raag, Melody, SimpleRandomiser};
 use crate::raagas::utils;
 use crate::raagas::swarblock;
 use crate::raagas::raag::raag::Raag;
+use crate::raagas::swar_beat::SwarBeat;
 
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
@@ -71,9 +71,9 @@ pub fn parse(
             let raag = build_raag(r.as_str(), c.as_str())?;
             // check if play random swars flag is set
             if let Some(_) = matches.opt_str("z") {
-                if let Some(swarblk) = raag.randomise() {
-                    return Ok(Melody::SwarBlock(swarblk));
-                }
+                let random_blk = raag.pakad().as_ref().unwrap();
+                let swarblk = raag.randomise(random_blk);
+                return Ok(Melody::SwarBlocks(swarblk));
             }
             return Ok(Melody::Raag(raag));
         }
@@ -86,14 +86,14 @@ pub fn parse(
     if let Some(fp) = matches.opt_str("f") {
         println!("Playing swars from the file {}", fp);
         let lines = utils::lines_from_file(fp);
-        let mut swars: Vec<Swar> = vec![];
+        let mut swarbeats: Vec<SwarBeat> = vec![];
 
         for l in lines {
-            let mut _swars = raag::load::to_swars(&l);
-            swars.append(&mut _swars);
+            let mut _swars = raag::load::to_swarbeats(&l);
+            swarbeats.append(&mut _swars);
         }
 
-        let swarblk = swarblock::SwarBlock(swars);
+        let swarblk = swarblock::SwarBlock(swarbeats);
         return Ok(Melody::SwarBlock(swarblk));
     }
 

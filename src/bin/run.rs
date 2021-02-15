@@ -15,13 +15,13 @@ fn main() {
             let opts = opts::my_opts();
             match opts::parse(&opts, env::args().collect()) {
                 Ok(melody) => {
-                    let audio_dev = AudioDevice::new(stream_handle);
+                    let audio_dev = AudioDevice::new(stream_handle, constants::VOL);
                     if let Melody::Raag(raag) = &melody {
-                        raag.play(&audio_dev, constants::VOL) // None, false, 1)
+                        raag.play(&audio_dev)
                     }
 
                     if let Melody::SwarBlock(blk) = &melody {
-                        blk.play(&audio_dev, constants::VOL)
+                        blk.play(&audio_dev)
                     }
                 },
                 Err(e) => opts::print_usage(&e.to_string(), &opts),

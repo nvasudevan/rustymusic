@@ -1,6 +1,6 @@
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::swars::Swar;
-use crate::raagas::swarblock::SwarBlock;
+use crate::raagas::swarblock::{SwarBlock, SwarInSwarBlock, SwarBlocks};
 
 pub mod utils;
 pub mod constants;
@@ -10,22 +10,12 @@ pub mod sound;
 pub mod taal;
 pub mod raag;
 pub(crate) mod swarblock;
+pub(crate) mod swar_beat;
 
 pub enum Melody {
+    SwarBlocks(SwarBlocks),
     SwarBlock(SwarBlock),
     Raag(Raag),
-}
-
-pub struct SwarContext {
-    swars: Vec<Swar>
-}
-
-impl SwarContext {
-    pub fn new(swars: Vec<Swar>) -> Self {
-        SwarContext {
-            swars
-        }
-    }
 }
 
 pub(crate) trait PureRandomiser {
@@ -34,25 +24,25 @@ pub(crate) trait PureRandomiser {
 
 pub(crate) trait SimpleRandomiser {
     // mutate Self n times
-    fn randomise(&self) -> Option<SwarBlock>;
+    fn randomise(&self, src_blks: &SwarBlocks) -> SwarBlocks;
 }
 
 pub(crate) trait Mutate {
     fn mutate(&self,
-              i: usize,
-              mut_type: SwarBlockMutationType,
-              from: Option<Vec<Swar>>) -> Option<SwarBlock>;
+              index: &SwarInSwarBlock,
+              from: Vec<Swar>) -> Self;
 
-    fn mutate_swar(&self, i: usize, from: Option<Vec<Swar>>) -> Option<SwarBlock>;
+    fn mutate_swar(&self, index: &SwarInSwarBlock, from: Vec<Swar>) -> Self;
 
     fn mutate_swar_duration(&self, i: usize) -> Option<Swar>;
 }
 
 pub enum SwarBlockMutationType {
-    by_swar,
-    by_duration,
+    BySwar,
+    ByDuration,
 }
 
 pub(crate) trait MutationOperators {
-   fn operators(&self) -> Vec<&str>;
+    fn operators(&self) -> Vec<&str>;
+    fn random_mutation_operator(&self) -> String;
 }

@@ -1,16 +1,13 @@
 use std::{fmt, io, fs};
 
 use rodio::decoder::Decoder;
-use rodio::source::{Repeat, TakeDuration, SineWave};
+use rodio::source::{Repeat, TakeDuration};
 use crate::raagas::sound::{Pitch, AudioDevice};
 use rodio::{Sink, Source, PlayError};
 
-
-use std::io::Write;
-use crate::raagas::{Mutate, SwarBlockMutationType, MutationOperators};
-use crate::raagas::swarblock::SwarBlock;
+use crate::raagas::{Mutate, MutationOperators};
+use crate::raagas::swarblock::SwarInSwarBlock;
 use rand::seq::SliceRandom;
-
 
 pub type BeatSrc = Repeat<TakeDuration<Decoder<io::BufReader<fs::File>>>>;
 
@@ -42,6 +39,10 @@ impl Swar {
         self.beat_cnt = bt_cnt;
     }
 
+    pub fn freq(&self) -> f64 {
+        self.pitch.as_ref().unwrap().hertz().unwrap().freq()
+    }
+
     /// increment the swar beat count by inc
     pub(crate) fn inc_beat_count(&mut self, inc: f32) {
         self.beat_cnt += inc;
@@ -54,12 +55,11 @@ impl Swar {
 
     pub(crate) fn build_sink(&self,
                              beat_src: &Option<BeatSrc>,
-                             dev: &AudioDevice,
-                             vol: f32) -> Result<Option<Sink>, PlayError> {
+                             dev: &AudioDevice) -> Result<Option<Sink>, PlayError> {
         let sink = Sink::try_new(&dev.out_stream_handle)?;
-        sink.set_volume(vol);
+        sink.set_volume(dev.vol());
         match beat_src {
-            Some(src) => {
+            Some(_) => {
                 if let Some(p) = self.pitch.as_ref() {
                     // play swar with taal
                     // let sinew = SineWave::from(p.to_owned());
@@ -74,7 +74,6 @@ impl Swar {
             _ => {
                 // play swar
                 if let Some(p)  = self.pitch.as_ref() {
-                    io::stdout().flush();
                     if let Some(sinew) = p.to_sinewave() {
                         // sink.append(sinew);
                         sink.append(sinew.mix(Pitch::from_swar("M")));
@@ -85,7 +84,6 @@ impl Swar {
         }
 
         Ok(None)
-
     }
 }
 
@@ -124,15 +122,23 @@ impl MutationOperators for Swar {
             "simple", "inc_beat", "dec_beat", "share_beat", "kan_swar"
         ]
     }
+
+    fn random_mutation_operator(&self) -> String {
+         let swar_mut_operators = &self.operators();
+         let swar_mut_type = swar_mut_operators.choose(&mut rand::thread_rng()).unwrap();
+
+        swar_mut_type.to_string()
+
+    }
 }
 
 impl Mutate for Swar {
-    fn mutate(&self, _i: usize, _mut_type: SwarBlockMutationType, _from: Option<Vec<Swar>>) -> Option<SwarBlock> {
-        None
+    fn mutate(&self, _index: &SwarInSwarBlock, _from: Vec<Swar>) -> Self {
+        unimplemented!()
     }
 
-    fn mutate_swar(&self, _i: usize, _from: Option<Vec<Swar>>) -> Option<SwarBlock> {
-        None
+    fn mutate_swar(&self, _index: &SwarInSwarBlock, _from: Vec<Swar>) -> Self {
+        unimplemented!()
     }
 
     fn mutate_swar_duration(&self, _i: usize) -> Option<Swar> {

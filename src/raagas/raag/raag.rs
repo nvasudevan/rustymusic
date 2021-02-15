@@ -1,11 +1,8 @@
-use rodio::{PlayError};
-
 use crate::raagas::swarmaalika::Swarmaalika;
 use crate::raagas::swars::{Swar, BeatSrc};
 use crate::raagas::sound::{AudioDevice};
 use crate::raagas::constants::{BPS, PLAY_PAUSE_DURATION};
 use crate::raagas::utils;
-use crate::raagas::raag::random::index_swar;
 use crate::raagas::swarblock::SwarBlocks;
 
 #[derive(Clone)]
@@ -68,93 +65,67 @@ impl Raag {
         &self.beat_src
     }
 
-    fn play_aroha(&self, dev: &AudioDevice, vol: f32) {
-        let blk = self.aroha.as_ref().unwrap().to_swarblock();
-        println!("\n=> aroha  {}", blk);
-        blk.play(&dev, vol);
+    fn play_aroha(&self, dev: &AudioDevice) {
+        // println!("\n=> playing aroha  {:?}", self.aroha.unwrap());
+        self.aroha.as_ref().unwrap().play(&dev);
     }
 
-    fn play_avroha(&self, dev: &AudioDevice, vol: f32) {
-        let blk = self.avroha.as_ref().unwrap().to_swarblock();
-        println!("\n=> avroha  {}", blk);
-        blk.play(&dev, vol);
+    fn play_avroha(&self, dev: &AudioDevice) {
+        println!("\n=> playing avroha  {:?}", self.avroha.as_ref().unwrap());
+        self.avroha.as_ref().unwrap().play(&dev);
     }
 
-    fn play_pakad(&self, dev: &AudioDevice, vol: f32) {
-        let blk = self.pakad.as_ref().unwrap().to_swarblock();
-        println!("\n=> pakad  {}", blk);
-        blk.play(&dev, vol);
+    fn play_pakad(&self, dev: &AudioDevice) {
+        // println!("\n=> playing pakad  {:?}", self.pakad.unwrap());
+        self.pakad.as_ref().unwrap().play(&dev);
     }
 
-    fn play_alankars(&self, dev: &AudioDevice, vol: f32) {
-        let blk = self.alankars.as_ref().unwrap().to_swarblock();
-        println!("\n=> alankars  {}", blk);
-        blk.play(&dev, vol);
-    }
+    // fn play_alankars(&self, dev: &AudioDevice, vol: f32) {
+    //     // println!("\n=> playing alankars  {:?}", self.alankars.unwrap());
+    //     self.alankars.as_ref().unwrap().play(&dev, vol);
+    // }
 
-    fn play_swarmaalika(&self, dev: &AudioDevice, vol: f32)  {
+    fn play_swarmaalika(&self, dev: &AudioDevice)  {
         println!("\n=> playing swarmaalika");
-        self.swarmaalika.play(&dev, vol);
-    }
-
-    pub fn asc_desc(&self, base_swars: Vec<Swar>, swars: &Vec<Swar>) -> bool {
-        if let Some(mut i) = index_swar(&base_swars, swars.first().unwrap()) {
-            if let Some(swars_tail) = swars.get(1..) {
-                for swar in swars_tail {
-                    if let Some(_i) = index_swar(&base_swars, swar) {
-                        if _i < i {
-                            return false
-                        }
-                        i = _i;
-                    } else {
-                        // if swar not in avroha, return false
-                        return false;
-                    }
-                }
-            }
-            return true; //not sure about this
-        }
-
-        // the initial swar not in avroha
-        return false;
+        self.swarmaalika.play(&dev);
     }
 
     pub fn is_ascending(&self, swars: &Vec<Swar>) -> bool {
-        self.asc_desc(self.aroha().as_ref().unwrap().to_swars(), swars)
-
+        self.aroha().as_ref().unwrap().is_monotonic_increasing(swars)
     }
+
     pub fn is_descending(&self, swars: &Vec<Swar>) -> bool {
-        self.asc_desc(self.avroha().as_ref().unwrap().to_swars(), swars)
+        self.avroha().as_ref().unwrap().is_monotonic_increasing(swars)
     }
 
     pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
-        let swars = self.aroha.as_ref().unwrap().to_swarblock();
-        if let Some(i) = index_swar(&swars.to_swars(), &swar) {
-            return swars.adjacent_swars(i);
+        let blks = self.aroha.as_ref().unwrap();
+        if let Some(index) = blks.index_swar(&swar) {
+            return blks.adjacent_swars(&index);
         }
 
         None
     }
 
     pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
-        let swars = self.avroha.as_ref().unwrap().to_swarblock();
-        if let Some(i) = index_swar(&swars.to_swars(), &swar) {
-            return swars.adjacent_swars(i);
+        let blks = self.avroha.as_ref().unwrap();
+        if let Some(index) = blks.index_swar(&swar) {
+            return blks.adjacent_swars(&index);
         }
 
         None
     }
 
-    pub fn play(&self, dev: &AudioDevice, vol: f32) {
+    pub fn play(&self, dev: &AudioDevice) {
         println!("=> playing raag: {}", self.name());
 
-        // self.play_aroha(&dev, vol);
-        // utils::delay(PLAY_PAUSE_DURATION * BPS);
-        // self.play_avroha(&dev, vol);
-        // utils::delay(PLAY_PAUSE_DURATION * BPS);
-        // self.play_pakad(&dev, vol);
+        self.play_aroha(&dev);
         utils::delay(PLAY_PAUSE_DURATION * BPS);
-        self.play_swarmaalika(&dev, vol);
+        self.play_avroha(&dev);
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
+        self.play_pakad(&dev);
+        utils::delay(PLAY_PAUSE_DURATION * BPS);
+        self.play_swarmaalika(&dev);
         utils::delay(PLAY_PAUSE_DURATION * BPS);
     }
 }

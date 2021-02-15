@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 
 use crate::raagas::sound::{AudioDevice};
-use crate::raagas::swars::BeatSrc;
 
-use rodio::PlayError;
 use crate::raagas::swarblock::SwarBlocks;
 
 #[derive(Debug, Clone)]
@@ -16,18 +14,18 @@ impl Sthayi {
         Sthayi { lines }
     }
 
-    pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice, vol: f32) {
+    pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice) {
         let line_blks = self.lines.get(line);
         if let Some(blks) = line_blks {
             for _ in 0..no_times {
-                blks.to_swarblock().play(&dev, vol);
+                blks.play(&dev);
             }
         }
     }
 
-    pub fn play(&self, dev: &AudioDevice, vol: f32) {
-        self.play_line("lineA", 2, &dev, vol);
-        self.play_line("lineB", 2, &dev, vol);
+    pub fn play(&self, dev: &AudioDevice) {
+        self.play_line("lineA", 2, &dev);
+        self.play_line("lineB", 2, &dev);
     }
 }
 
@@ -41,18 +39,18 @@ impl Antara {
         Antara { lines }
     }
 
-    pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice, vol: f32) {
+    pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice) {
         let line_blks = self.lines.get(line);
         if let Some(blks) = line_blks {
             for _ in 0..no_times {
-                blks.to_swarblock().play(&dev, vol);
+                blks.play(&dev);
             }
         }
     }
 
-    pub fn play(&self, dev: &AudioDevice, vol: f32) {
-        self.play_line("lineC", 2, &dev, vol);
-        self.play_line("lineD", 2, &dev, vol);
+    pub fn play(&self, dev: &AudioDevice) {
+        self.play_line("lineC", 2, &dev);
+        self.play_line("lineD", 2, &dev);
     }
 }
 
@@ -87,10 +85,10 @@ impl Swarmaalika {
         }
     }
 
-    pub fn play(&self, dev: &AudioDevice, vol: f32) {
-        self.sthayi.play(&dev, vol);
-        self.sthayi.play_line("lineA", 1, &dev, vol);
-        self.antara.play(&dev, vol);
-        self.sthayi.play_line("lineA", 1, &dev, vol);
+    pub fn play(&self, dev: &AudioDevice) {
+        self.sthayi.play(&dev);
+        self.sthayi.play_line("lineA", 1, &dev);
+        self.antara.play(&dev);
+        self.sthayi.play_line("lineA", 1, &dev);
     }
 }

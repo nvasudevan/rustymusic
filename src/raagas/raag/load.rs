@@ -18,45 +18,67 @@ use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::utils;
 use crate::raagas::swarblock::{SwarBlocks, SwarBlock};
+use crate::raagas::swar_beat::SwarBeat;
 
-pub fn to_swars(s: &str) -> Vec<Swar> {
-    let mut _blk: Vec<Swar> = vec![];
-    let swars: Vec<String> = s.trim().split(" ").map(|x| x.to_string()).collect();
-    for sw in swars {
-        if sw.eq("-") {
-            //add an extra beat to previous swar
-            let prev = _blk.pop();
-            match &prev {
-                Some(_sw) => {
-                    let p = _sw.pitch.as_ref().unwrap();
-                    _blk.push(Swar::new(p.clone(), _sw.beat_cnt + 1.0))
-                }
-                None => {
-                    // TODO: no previous swar, so we should be playing just thaalam.
-                }
-            }
+// increment the last swar of previous swarbeat
+fn extend_swar(swarbeats: &mut Vec<SwarBeat>, beat_count_inc: f32) {
+    if let Some(prev_sw_bt) = swarbeats.last_mut() {
+        let last_swar = prev_sw_bt.swars.last_mut().unwrap();
+        last_swar.set_beat_count(last_swar.beat_cnt + beat_count_inc);
+    }
+}
+
+pub fn to_swarbeats(s: &str) -> Vec<SwarBeat> {
+    let mut swarbeats_vec: Vec<SwarBeat> = vec![];
+    let swarbeats: Vec<String> = s.trim().split(" ").map(|x| x.to_string()).collect();
+    for sw_bt in swarbeats {
+        let mut swars = Vec::<Swar>::new();
+        if sw_bt.eq("-") {
+            // S:G -  (G will be a beat and a half)
+            //add an extra beat to the previous swarbeat
+            // and nothing to add for current swarbeat
+            extend_swar(&mut swarbeats_vec, 1.0);
         } else {
-            if sw.contains(":") {
-                let _swrs: Vec<String> = sw.split(":").map(|x| x.to_string()).collect();
-                let beat_cnt: f32 = 1.0 / _swrs.len() as f32;
-                for _sw in _swrs {
-                    _blk.push(Swar::new(Pitch::new(_sw), beat_cnt));
+            if sw_bt.contains(":") {
+                // four cases: S:S, S:S:S:S and S:- or -:S
+                let sw_bts_vec: Vec<String> = sw_bt.split(":").map(|x| x.to_string()).collect();
+                let first_swar_s = sw_bts_vec.first().unwrap();
+                let last_swar_s = sw_bts_vec.last().unwrap();
+                if first_swar_s.eq("-") {
+                    // modify last swar of previous SwarBeat
+                    extend_swar(&mut swarbeats_vec, 0.5);
+                    // and last_swar to swars
+                    let last_swar = Swar::new(Pitch::new(last_swar_s.to_string()), 0.5);
+                    swars.push(last_swar);
+                } else if last_swar_s.eq("-") {
+                    // add the first swar
+                    let first_swar = Swar::new(Pitch::new(last_swar_s.to_string()), 1.0);
+                    swars.push(first_swar);
+                } else {
+                    let first_swar = Swar::new(Pitch::new(first_swar_s.to_string()), 0.5);
+                    let last_swar = Swar::new(Pitch::new(last_swar_s.to_string()), 0.5);
+                    swars.push(first_swar);
+                    swars.push(last_swar);
                 }
-            } else if sw.contains("/") {
+            } else if sw_bt.contains("/") {
                 // kan swar
-                let _swrs: Vec<String> = sw.split("/").map(|x| x.to_string()).collect();
-                let _kan = _swrs.get(0).unwrap();
-                let _kan_bt_cnt: f32 = 1.0 * KAN_SWAR_BEAT_COUNT;
-                _blk.push(Swar::new(Pitch::new(_kan.to_string()), _kan_bt_cnt));
-                let _sw = _swrs.get(1).unwrap();
-                _blk.push(Swar::new(Pitch::new(_sw.to_string()), 1.0 - _kan_bt_cnt));
+                // e.g.: P/M
+                let swrs: Vec<String> = sw_bt.split("/").map(|x| x.to_string()).collect();
+                let kan = swrs.get(0).unwrap();
+                let kan_bt_cnt: f32 = 1.0 * KAN_SWAR_BEAT_COUNT;
+                swars.push(Swar::new(Pitch::new(kan.to_string()), kan_bt_cnt));
+                let main_swar = swrs.get(1).unwrap();
+                swars.push(Swar::new(Pitch::new(main_swar.to_string()), 1.0 - kan_bt_cnt));
+
             } else {
-                _blk.push(Swar::new(Pitch::new(sw), 1.0));
+                // all else, just a plain swar (e.g.: S)
+                swars.push(Swar::new(Pitch::new(sw_bt.to_string()), 1.0));
             }
         }
+        swarbeats_vec.push(SwarBeat::new(swars));
     }
 
-    _blk
+    swarbeats_vec
 }
 
 fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
@@ -69,7 +91,7 @@ fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
                 } else {
                     let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
                     for _s in blks_s {
-                        blk.push(SwarBlock(to_swars(_s)));
+                        blk.push(SwarBlock(to_swarbeats(_s)));
                     }
                     Some(SwarBlocks(blk))
                 }

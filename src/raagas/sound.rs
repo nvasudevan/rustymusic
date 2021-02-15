@@ -1,4 +1,4 @@
-use rodio::{source::SineWave, OutputStreamHandle, Sink};
+use rodio::{source::SineWave, OutputStreamHandle};
 use std::fmt::Formatter;
 use std::fmt;
 
@@ -10,8 +10,12 @@ pub struct AudioDevice {
 }
 
 impl AudioDevice {
-    pub fn new(out_stream_handle: OutputStreamHandle) -> AudioDevice {
-        AudioDevice { out_stream_handle, vol: constants::VOL }
+    pub fn new(out_stream_handle: OutputStreamHandle, vol: f32) -> AudioDevice {
+        AudioDevice { out_stream_handle, vol }
+    }
+
+    pub fn vol(&self) -> f32 {
+        self.vol
     }
 }
 
@@ -90,10 +94,10 @@ impl From<Pitch> for SineWave {
 
 impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let mut tone = "";
-        if let Some(hz) = constants::SWARS.get(&*self.0) {
-            tone = hz.tone();
-        }
+        // let mut tone = "";
+        // if let Some(hz) = constants::SWARS.get(&*self.0) {
+        //     tone = hz.tone();
+        // }
         // write!(f, "{}[{}]", self.0, tone)
         write!(f, "{}", self.0)
     }

@@ -1,4 +1,4 @@
-use std::io::{BufRead, Write};
+use std::io::BufRead;
 use std::thread::sleep;
 use std::time::Duration;
 use std::path::PathBuf;
@@ -25,9 +25,9 @@ pub fn delay(t: f32) {
     sleep(Duration::from_secs_f32(t));
 }
 
-pub(crate) fn io_flush() {
-    match std::io::stdout().flush() {
-        Ok(()) => {}
-        _ => panic!("I/O couldn't be flushed to terminal!"),
-    }
-}
+// pub(crate) fn io_flush() {
+//     match std::io::stdout().flush() {
+//         Ok(()) => {}
+//         _ => panic!("I/O couldn't be flushed to terminal!"),
+//     }
+// }

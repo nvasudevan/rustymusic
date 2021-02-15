@@ -6,12 +6,11 @@ use rodio::Sink;
 
 pub struct Taal {
     taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>,
-    bps: f32,
 }
 
 impl Taal {
-    pub fn new(taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>, bps: f32) -> Self {
-        Taal { taal, bps }
+    pub fn new(taal: Repeat<TakeDuration<Decoder<BufReader<File>>>>) -> Self {
+        Taal { taal }
     }
 
     pub fn play(&self, sink: Sink) {
