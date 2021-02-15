@@ -3,7 +3,7 @@ mod tests {
     use crate::raagas::swars::Swar;
     use crate::raagas::raag;
     use crate::raagas::sound::{Hertz, Pitch};
-    use crate::raagas::swarblock::SwarBlock;
+    
 
     #[test]
     fn test_base_swar_is_sa() {
@@ -50,28 +50,28 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_raag_avroha() {
-        let raag = "durga";
-        let composition = "durga";
-        let raag = raag::load::load_yaml(raag, composition).unwrap();
-        let swars: Vec<Swar> = vec![
-            Swar::new(Pitch::new("S.".to_string()), 2.0),
-            Swar::new(Pitch::new("D".to_string()), 2.0),
-            Swar::new(Pitch::new("P".to_string()), 2.0),
-            Swar::new(Pitch::new("M".to_string()), 2.0),
-            Swar::new(Pitch::new("R".to_string()), 2.0),
-            Swar::new(Pitch::new("S".to_string()), 3.0),
-        ];
-        let expected: Vec<SwarBlock> = vec![SwarBlock(swars)];
-
-        match raag.avroha() {
-            Some(avroha) => {
-                assert_eq!(avroha.0.clone(), expected);
-            }
-            _ => {}
-        }
-    }
+    // #[test]
+    // fn test_raag_avroha() {
+    //     let raag = "durga";
+    //     let composition = "durga";
+    //     let raag = raag::load::load_yaml(raag, composition).unwrap();
+    //     let swars: Vec<Swar> = vec![
+    //         Swar::new(Pitch::new("S.".to_string()), 2.0),
+    //         Swar::new(Pitch::new("D".to_string()), 2.0),
+    //         Swar::new(Pitch::new("P".to_string()), 2.0),
+    //         Swar::new(Pitch::new("M".to_string()), 2.0),
+    //         Swar::new(Pitch::new("R".to_string()), 2.0),
+    //         Swar::new(Pitch::new("S".to_string()), 3.0),
+    //     ];
+    //     let expected: Vec<SwarBlock> = vec![SwarBlock(swars)];
+    //
+    //     match raag.avroha() {
+    //         Some(avroha) => {
+    //             assert_eq!(avroha.0.clone(), expected);
+    //         }
+    //         _ => {}
+    //     }
+    // }
 
     // #[test]
     // fn test_randomiser() {
