@@ -101,15 +101,8 @@ impl PartialEq for Swar {
 
 impl fmt::Display for Swar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let _cnt = self.beat_cnt as usize;
-        let dash = match _cnt {
-            1 => String::from(" "),
-            2..=8 => (0..(_cnt - 1)).map(|_| " - ").collect::<String>(),
-            _ => String::new(),
-        };
-
         let _s = match &self.pitch {
-            Some(p) => format!("{}{}", p, dash),
+            Some(p) => format!("{}", p),
             _ => String::new(),
         };
         write!(f, "{}", _s)
@@ -133,11 +126,11 @@ impl MutationOperators for Swar {
 }
 
 impl Mutate for Swar {
-    fn mutate(&self, _index: &SwarInSwarBlock, _from: Vec<Swar>) -> Self {
+    fn mutate(&self, _index: &SwarInSwarBlock, _from: Vec<&Swar>) -> Self {
         unimplemented!()
     }
 
-    fn mutate_swar(&self, _index: &SwarInSwarBlock, _from: Vec<Swar>) -> Self {
+    fn mutate_swar(&self, _index: &SwarInSwarBlock, _from: Vec<&Swar>) -> Self {
         unimplemented!()
     }
 

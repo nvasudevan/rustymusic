@@ -30,9 +30,9 @@ pub(crate) trait SimpleRandomiser {
 pub(crate) trait Mutate {
     fn mutate(&self,
               index: &SwarInSwarBlock,
-              from: Vec<Swar>) -> Self;
+              from: Vec<&Swar>) -> Self;
 
-    fn mutate_swar(&self, index: &SwarInSwarBlock, from: Vec<Swar>) -> Self;
+    fn mutate_swar(&self, index: &SwarInSwarBlock, from: Vec<&Swar>) -> Self;
 
     fn mutate_swar_duration(&self, i: usize) -> Option<Swar>;
 }

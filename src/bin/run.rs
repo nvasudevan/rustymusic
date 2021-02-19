@@ -21,6 +21,7 @@ fn main() {
                     }
 
                     if let Melody::SwarBlock(blk) = &melody {
+                        println!("blk : {:?}", blk);
                         blk.play(&audio_dev)
                     }
                 },

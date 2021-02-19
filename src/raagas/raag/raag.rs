@@ -90,15 +90,15 @@ impl Raag {
         self.swarmaalika.play(&dev);
     }
 
-    pub fn is_ascending(&self, swars: &Vec<Swar>) -> bool {
+    pub fn is_ascending(&self, swars: &Vec<&Swar>) -> bool {
         self.aroha().as_ref().unwrap().is_monotonic_increasing(swars)
     }
 
-    pub fn is_descending(&self, swars: &Vec<Swar>) -> bool {
+    pub fn is_descending(&self, swars: &Vec<&Swar>) -> bool {
         self.avroha().as_ref().unwrap().is_monotonic_increasing(swars)
     }
 
-    pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
+    pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<&Swar>> {
         let blks = self.aroha.as_ref().unwrap();
         if let Some(index) = blks.index_swar(&swar) {
             return blks.adjacent_swars(&index);
@@ -107,7 +107,7 @@ impl Raag {
         None
     }
 
-    pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<Swar>> {
+    pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<&Swar>> {
         let blks = self.avroha.as_ref().unwrap();
         if let Some(index) = blks.index_swar(&swar) {
             return blks.adjacent_swars(&index);

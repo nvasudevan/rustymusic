@@ -11,9 +11,9 @@ use rand::{Rng};
 #[derive(Debug, Clone)]
 pub struct SwarBlock(pub Vec<SwarBeat>);
 
-#[derive(Debug, Clone)]
-pub struct SwarBlockRef<'a>(pub Vec<&'a SwarBeat>);
-
+// #[derive(Debug, Clone)]
+// pub struct SwarBlockRef<'a>(pub Vec<&'a SwarBeat>);
+//
 #[derive(Debug, Clone)]
 pub struct SwarBlocks(pub Vec<SwarBlock>);
 
@@ -60,50 +60,6 @@ impl SwarBlock {
         swars
     }
 
-    // pub fn adjacent_swars(&self, index: &SwarInSwarBlock) -> Option<Vec<Swar>> {
-    //     let mut swars = Vec::<Swar>::new();
-    //     if let Some(sw_bt) = self.0.get(index.swarbeat_index) {
-    //         if let Some(swar) = sw_bt.swars.get(index.swar_index) {
-    //             // preceeding
-    //             // if (sw_bt.swars.len() == -1) or first of this sw_bt, then
-    //             // go to preceding sw_bt and get last swar
-    //             // if (sw_bt.swars.len() == -1) or first of this sw_bt and
-    //             // there are no preceding swars then None
-    //
-    //             if index.swar_index == 0 && (index.swarbeat_index -1) >= 0 {
-    //                 if let Some(prev_sw_bt) = self.0.get(index.swarbeat_index -1) {
-    //                     // should we handle None case?
-    //                     let pre_swar = prev_sw_bt.swars.last().unwrap();
-    //                     swars.push(pre_swar.clone());
-    //                 }
-    //             } else {
-    //                 if index.swar_index > 0 {
-    //                     let pre_swar = sw_bt.swars.get(index.swar_index-1).unwrap();
-    //                     swars.push(pre_swar.clone());
-    //                 }
-    //             }
-    //
-    //             swars.push(swar.clone());
-    //
-    //             // succeeding
-    //             if index.swar_index < sw_bt.swars.len() {
-    //                 let post_swar = sw_bt.swars.get(index.swar_index+1).unwrap();
-    //                 swars.push(post_swar.clone());
-    //             } else {
-    //                 if index.swar_index+1 >= sw_bt.len() &&
-    //                     index.swarbeat_index +1 < self.len() {
-    //                     let next_sw_bt = self.0.get(index.swarbeat_index +1).unwrap();
-    //                     let post_swar = next_sw_bt.swars.first().unwrap();
-    //                     swars.push(post_swar.clone());
-    //                 }
-    //             }
-    //         }
-    //         return Some(swars);
-    //     }
-    //
-    //     None
-    // }
-
     pub fn random_swar_index(&self) -> Option<SwarInSwarBlock> {
         if let Some((i, sw_bt)) = self.random_swarbeat() {
             let swars = &sw_bt.swars;
@@ -144,42 +100,6 @@ impl SwarBlock {
         None
     }
 
-    // are the swars (match_swars) monotonic increasing?
-    // e.g.: for swarblock with aroha swars (S R G M P D N S.), monotonically increasing are:
-    // - R G P, R R G, R R R, P D N etc.
-    // G R S is NOT monotonically increasing
-    // for swarblock with avroha swars (S. N D P M G R S), monotonically increasing are:
-    // - N D M, N N N, M R R etc.
-    // pub fn is_monotonic_increasing(&self, match_swars: &Vec<Swar>) -> bool {
-    //     let swars = self.to_swars();
-    //     let get_swar_index = |swars: &Vec<Swar>, swar: &Swar| -> Option<usize> {
-    //         for (i, sw) in swars.iter().enumerate() {
-    //             if sw.eq(swar) {
-    //                 return Some(i);
-    //             }
-    //         }
-    //         None
-    //     };
-    //
-    //     let first_swar = match_swars.first().unwrap();
-    //     if let Some(first_sw_i) = get_swar_index(&swars, first_swar) {
-    //         // there should be tail
-    //         let match_tail = match_swars.get(1..).unwrap();
-    //         for sw in match_tail {
-    //             if let Some(next_sw_i) = get_swar_index(&swars, sw) {
-    //                 if next_sw_i < first_sw_i {
-    //                     return false;
-    //                 }
-    //             }
-    //         }
-    //
-    //         return true;
-    //     }
-    //
-    //     false
-    // }
-
-
     pub fn build_sink(&self,
                       beat_src: &Option<BeatSrc>,
                       dev: &AudioDevice) -> Result<Vec<Option<Sink>>, PlayError> {
@@ -195,7 +115,7 @@ impl SwarBlock {
     }
 
     pub fn play(&self, dev: &AudioDevice) {
-        println!("=> playing swarblock: {:?}", self);
+        println!("=> playing swarblock: {}", self);
         for sw_bt in &self.0 {
             for sw in &sw_bt.swars {
                 let sw_sink = sw.build_sink(&None, &dev).unwrap();
@@ -214,7 +134,7 @@ impl SwarBlock {
 
     }
 }
-impl<'a> fmt::Display for SwarBlockRef<'a> {
+impl fmt::Display for SwarBlock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
         for sw_bt in &self.0 {
@@ -224,27 +144,6 @@ impl<'a> fmt::Display for SwarBlockRef<'a> {
         write!(f, "{}", s)
     }
 }
-
-// impl FromIterator<usize> for SwarBlock {
-//     fn from_iter<T: IntoIterator<Item=usize>>(iter: T) -> Self {
-//         let mut _blk: Vec<Swar> = Vec::new();
-//         for _ in iter {
-//             _blk.push(Swar {
-//                 pitch: None,
-//                 beat_cnt: 1.0,
-//             });
-//         }
-//
-//         SwarBlock(_blk)
-//     }
-// }
-
-// impl<'a> Mutate for SwarBlockRef<'a> {
-//
-//     fn mutate_swar_duration(&self, i: usize) -> Option<Swar> {
-//         unimplemented!()
-//     }
-// }
 
 impl SwarBlocks {
 
@@ -321,14 +220,14 @@ impl SwarBlocks {
         swars
     }
 
-    pub fn adjacent_swars(&self, index: &SwarInSwarBlock) -> Option<Vec<Swar>> {
+    pub fn adjacent_swars(&self, index: &SwarInSwarBlock) -> Option<Vec<&Swar>> {
         let mut swar_beats = Vec::<&SwarBeat>::new();
         for blk in &self.0 {
             for sw_bt in &blk.0 {
                 swar_beats.push(sw_bt);
             }
         }
-        let mut swars = Vec::<Swar>::new();
+        let mut swars = Vec::<&Swar>::new();
         if let Some(sw_bt) = swar_beats.get(index.swarbeat_index) {
             if let Some(swar) = sw_bt.swars.get(index.swar_index) {
                 // preceeding
@@ -341,27 +240,27 @@ impl SwarBlocks {
                     if let Some(prev_sw_bt) = swar_beats.get(index.swarbeat_index-1) {
                         // should we handle None case?
                         let pre_swar = prev_sw_bt.swars.last().unwrap();
-                        swars.push(pre_swar.clone());
+                        swars.push(pre_swar);
                     }
                 } else {
                     if index.swar_index > 0 {
                         let pre_swar = sw_bt.swars.get(index.swar_index-1).unwrap();
-                        swars.push(pre_swar.clone());
+                        swars.push(pre_swar);
                     }
                 }
 
-                swars.push(swar.clone());
+                swars.push(swar);
 
                 // succeeding
                 if index.swar_index < sw_bt.swars.len() {
                     let post_swar = sw_bt.swars.get(index.swar_index+1).unwrap();
-                    swars.push(post_swar.clone());
+                    swars.push(post_swar);
                 } else {
                     if index.swar_index+1 >= sw_bt.len() &&
                         index.swarbeat_index+1 < swar_beats.len() {
                         let next_sw_bt = swar_beats.get(index.swarbeat_index +1).unwrap();
                         let post_swar = next_sw_bt.swars.first().unwrap();
-                        swars.push(post_swar.clone());
+                        swars.push(post_swar);
                     }
                 }
             }
@@ -371,7 +270,7 @@ impl SwarBlocks {
         None
     }
 
-    pub fn is_monotonic_increasing(&self, match_swars: &Vec<Swar>) -> bool {
+    pub fn is_monotonic_increasing(&self, match_swars: &Vec<&Swar>) -> bool {
         let mut swars = Vec::<&Swar>::new();
         for blk in &self.0 {
             for sw_bt in &blk.0 {
@@ -409,10 +308,10 @@ impl SwarBlocks {
 
     }
 
-    pub fn to_swarblock(&self) -> SwarBlockRef {
-        let swar_beats = self.swarbeats();
-        SwarBlockRef(swar_beats)
-    }
+    // pub fn to_swarblock(&self) -> SwarBlockRef {
+    //     let swar_beats = self.swarbeats();
+    //     SwarBlockRef(swar_beats)
+    // }
 
     pub fn play(&self, dev: &AudioDevice) {
         for blk in &self.0 {
@@ -449,31 +348,20 @@ impl SwarBlocks {
             }
         }
     }
-
-    // pub fn replace_swar_with_beat_change(&mut self, index: &SwarInSwarBlock, swar: Swar, beat_change: f32) {
-    //     if let Some(sw_bt) = self.get_swarbeat_mut_at(index.swarbeat_index) {
-    //         if beat_change >= 0.0 {
-    //             rnd_swar.inc_beat_count(beat_change);
-    //         } else {
-    //             rnd_swar.dec_beat_count(beat_change);
-    //         }
-    //         sw_bt.replace_swar(index.swar_index, rnd_swar);
-    //     }
-    // }
 }
 
 impl Mutate for SwarBlocks {
     fn mutate(&self,
               index: &SwarInSwarBlock,
-              from: Vec<Swar>) -> SwarBlocks {
+              from: Vec<&Swar>) -> SwarBlocks {
 
         self.mutate_swar(index, from)
     }
 
-    fn mutate_swar(&self, index: &SwarInSwarBlock, from: Vec<Swar>) -> SwarBlocks {
+    fn mutate_swar(&self, index: &SwarInSwarBlock, from: Vec<&Swar>) -> SwarBlocks {
         let mut rnd = rand::thread_rng();
         let rnd_swar_from = from.choose(&mut rnd);
-        let rnd_swar = rnd_swar_from.unwrap();
+        let rnd_swar = rnd_swar_from.unwrap().to_owned();
         let swar_mut_type = rnd_swar.random_mutation_operator();
 
         let mut mut_sw_blk = self.clone();
@@ -510,7 +398,7 @@ impl Mutate for SwarBlocks {
 
                 let mut rnd_swar_a = rnd_swar.clone();
                 rnd_swar_a.set_beat_count(0.5);
-                let mut rnd_swar_b = from.choose(&mut rnd).unwrap().to_owned();
+                let mut rnd_swar_b = from.choose(&mut rnd).unwrap().to_owned().clone();
                 rnd_swar_b.set_beat_count(0.5);
 
                 // now randomly insert/replace rnd_swar and rnd_swar_latter
@@ -530,7 +418,7 @@ impl Mutate for SwarBlocks {
 
                 let mut rnd_swar_a = rnd_swar.clone();
                 rnd_swar_a.set_beat_count(KAN_SWAR_BEAT_COUNT);
-                let mut rnd_swar_b = from.choose(&mut rnd).unwrap().to_owned();
+                let mut rnd_swar_b = from.choose(&mut rnd).unwrap().to_owned().clone();
                 rnd_swar_b.set_beat_count(1.0 - KAN_SWAR_BEAT_COUNT);
 
                 // now randomly insert/replace rnd_swar and rnd_swar_latter

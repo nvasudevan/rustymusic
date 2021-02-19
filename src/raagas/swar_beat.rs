@@ -43,29 +43,50 @@ impl SwarBeat {
         let swars: &mut Vec<Swar> = self.swars.as_mut();
         swars.insert(index, swar);
     }
+
+    pub fn increment_swar_at(&mut self, index: usize, beat_count_inc: f32) {
+         if let Some(swar) =  self.swars.get_mut(index) {
+              swar.inc_beat_count(beat_count_inc);
+         }
+    }
 }
 
 impl fmt::Display for SwarBeat {
     // there are four options: S, S:S, S:S:S:S, S/G
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let first_swar = self.swars.first().unwrap();
-        let mut s = format!("{}", first_swar);
-
-        let rest_swars = self.swars.get(1..);
-        if let Some(more_swars) = rest_swars {
-            let mut prev_bt_cnt = first_swar.beat_cnt;
-            for swar in more_swars {
-                if (swar.beat_cnt == 0.25) || (swar.beat_cnt == 0.50) {
-                    s = format!("{}:{}", s, swar);
-                } else {
-                    if prev_bt_cnt == KAN_SWAR_BEAT_COUNT {
-                        s = format!("{}/{}", s, swar);
-                    } else {
-                        s = format!("{} {}", s, swar);
-                    }
-                }
-                prev_bt_cnt = swar.beat_cnt;
-            }
+        // if there no swars in that swarbeat, it has a "-"? meaning it is an extension
+        // of previous swar?
+        let mut s = String::from("-");
+        match self.swars.first() {
+             Some(first_swar) => {
+                 let rest_swars = self.swars.get(1..).unwrap();
+                 match rest_swars.len() {
+                     0 => {
+                         // M:M -:P
+                         // the second swarbeat has only one swar (0.5 beat) but rendered as 'P'
+                         // so we count the number of beats, and if < 1.0 then we add a ':'
+                         if first_swar.beat_cnt < 1.0 {
+                             s = format!("-:{}", first_swar);
+                         } else {
+                             s = format!("{}", first_swar);
+                         }
+                     },
+                     _ => {
+                         let mut prev_bt_cnt = first_swar.beat_cnt;
+                         s = format!("{}", first_swar);
+                         for swar in rest_swars {
+                             // when we have the rest of the swars with fraction beat
+                             if prev_bt_cnt == KAN_SWAR_BEAT_COUNT {
+                                 s = format!("{}/{}", s, swar);
+                             } else {
+                                 s = format!("{}:{}", s, swar);
+                             }
+                             prev_bt_cnt = swar.beat_cnt;
+                         }
+                     }
+                 }
+             },
+            _ => {}
         }
 
         write!(f, "{}", s)

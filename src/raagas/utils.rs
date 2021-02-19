@@ -24,10 +24,3 @@ pub(crate) fn file_as_str(fp: PathBuf) -> String {
 pub fn delay(t: f32) {
     sleep(Duration::from_secs_f32(t));
 }
-
-// pub(crate) fn io_flush() {
-//     match std::io::stdout().flush() {
-//         Ok(()) => {}
-//         _ => panic!("I/O couldn't be flushed to terminal!"),
-//     }
-// }
