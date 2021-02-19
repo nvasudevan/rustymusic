@@ -1,1 +1,1 @@
-S:G:M:G S - - G M:M -:P :P G/M
+S:R:M:P S - - M P:P -:D :D P/M
