@@ -7,7 +7,7 @@ use crate::raagas::{raag, Melody, SimpleRandomiser};
 use crate::raagas::utils;
 use crate::raagas::swarblock;
 use crate::raagas::raag::raag::Raag;
-use crate::raagas::swar_beat::SwarBeat;
+use crate::raagas::swarbeat::SwarBeat;
 
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));

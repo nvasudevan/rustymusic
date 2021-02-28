@@ -10,7 +10,8 @@ pub mod sound;
 pub mod taal;
 pub mod raag;
 pub(crate) mod swarblock;
-pub(crate) mod swar_beat;
+pub(crate) mod swarbeat;
+mod swarblocks;
 
 pub enum Melody {
     SwarBlocks(SwarBlocks),

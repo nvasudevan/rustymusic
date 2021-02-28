@@ -5,6 +5,15 @@ use crate::raagas::sound::{AudioDevice};
 use crate::raagas::swarblock::SwarBlocks;
 
 #[derive(Debug, Clone)]
+pub struct Swarmaalika {
+    pub mukra: Option<SwarBlocks>,
+    pub sthayi: Sthayi,
+    pub antara: Antara,
+    pub tihayi: Option<SwarBlocks>,
+    sam: usize,
+}
+
+#[derive(Debug, Clone)]
 pub struct Sthayi {
     pub lines: HashMap<String, SwarBlocks>,
 }
@@ -54,15 +63,6 @@ impl Antara {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Swarmaalika {
-    pub mukra: Option<SwarBlocks>,
-    pub sthayi: Sthayi,
-    pub antara: Antara,
-    pub tihayi: Option<SwarBlocks>,
-    pub sam: usize,
-}
-
 impl Swarmaalika {
     pub fn new(
         mukra: Option<SwarBlocks>,
@@ -71,7 +71,7 @@ impl Swarmaalika {
         tihayi: Option<SwarBlocks>,
         sam: Option<usize>,
     ) -> Self {
-        let mut _sam = match sam {
+        let my_sam = match sam {
             Some(n) => n,
             _ => 1,
         };
@@ -81,8 +81,12 @@ impl Swarmaalika {
             sthayi,
             antara,
             tihayi,
-            sam: _sam,
+            sam: my_sam,
         }
+    }
+
+    pub fn sam(&self) -> usize {
+        self.sam
     }
 
     pub fn play(&self, dev: &AudioDevice) {
@@ -91,4 +95,26 @@ impl Swarmaalika {
         self.antara.play(&dev);
         self.sthayi.play_line("lineA", 1, &dev);
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::raagas::raag::load;
+
+    /// test if we can retrieve a line from Sthayi and match a swarbeat
+    #[test]
+    fn test_line_in_swarmaalika() {
+        let raag = "malkauns";
+        let composition = "comp1";
+        let line_a = "lineA";
+        let sw_bt_index: usize = 6;
+        let sw_bt_expected = "M:d:M:g";
+
+        let raag = load::load_yaml(raag, composition).unwrap();
+        let blks = raag.swarmaalika().sthayi.lines.get(line_a);
+        println!("blks: {}", blks.unwrap());
+        assert!(blks.is_some());
+        assert_eq!(blks.unwrap().swarbeats().get(sw_bt_index).unwrap().to_string(), sw_bt_expected);
+    }
+
 }

@@ -27,6 +27,13 @@ impl Swar {
         }
     }
 
+    pub fn empty(beat_cnt: f32) -> Self {
+        Swar {
+            pitch: None,
+            beat_cnt
+        }
+    }
+
     pub fn pitch(&self) -> Option<Pitch> {
         self.pitch.clone()
     }
@@ -141,5 +148,30 @@ impl Mutate for Swar {
         mut_swar.beat_cnt = *beat_durations.choose(&mut rnd).unwrap_or_else(|| &(1.0 as f32));
 
         Some(mut_swar)
+    }
+}
+
+/// tests on swarbeats and swars
+#[cfg(test)]
+mod tests {
+    use crate::raagas::sound::{Hertz, Pitch};
+    use crate::raagas::swars::Swar;
+
+    /// test S is set to C#, base pitch
+    #[test]
+    fn test_base_swar_is_sa() {
+        let base_hz = Hertz::new(277.18, "C#".to_string());
+        let sa_pitch = Pitch::new("S".to_string());
+        let sa = Swar::new(sa_pitch, 1.0);
+        assert_eq!(sa.pitch.unwrap().hertz().unwrap(), base_hz);
+    }
+
+    /// test swar with single beat
+    #[test]
+    fn test_swar_repr_single_beat() {
+        // test string version of swar
+        let sa_pitch = Pitch::new("S".to_string());
+        let sa = Swar::new(sa_pitch, 1.0);
+        assert_eq!(sa.to_string(), "S");
     }
 }

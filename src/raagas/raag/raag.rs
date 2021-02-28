@@ -66,12 +66,12 @@ impl Raag {
     }
 
     fn play_aroha(&self, dev: &AudioDevice) {
-        // println!("\n=> playing aroha  {:?}", self.aroha.unwrap());
+        println!("\n=> playing aroha  {}", self.aroha.as_ref().unwrap());
         self.aroha.as_ref().unwrap().play(&dev);
     }
 
     fn play_avroha(&self, dev: &AudioDevice) {
-        println!("\n=> playing avroha  {:?}", self.avroha.as_ref().unwrap());
+        println!("\n=> playing avroha  {}", self.avroha.as_ref().unwrap());
         self.avroha.as_ref().unwrap().play(&dev);
     }
 
@@ -127,5 +127,39 @@ impl Raag {
         utils::delay(PLAY_PAUSE_DURATION * BPS);
         self.play_swarmaalika(&dev);
         utils::delay(PLAY_PAUSE_DURATION * BPS);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::raagas::raag::load;
+
+    /// test if raag durga composition can be loaded and if it contains aroha
+    #[test]
+    fn test_load_raag_durga_aroha_as_string() {
+        let raag = "durga";
+        let composition = "durga";
+        let raag = load::load_yaml(raag, composition).unwrap();
+        let expected = "S - R - M - P - D - S. - -";
+
+        let aroha =  raag.aroha().as_ref().unwrap();
+        assert_eq!(aroha.to_string(), expected);
+    }
+
+    /// test if raag composition can be loaded and contains parts:
+    /// aroha, avroha, pakad, alankars, sthayi, antara
+    #[test]
+    fn test_load_raag_parts() {
+        let raag = "durga";
+        let composition = "durga";
+        let raag = load::load_yaml(raag, composition).unwrap();
+
+        assert!(raag.aroha().is_some());
+        assert!(raag.avroha().is_some());
+        assert!(raag.pakad().is_some());
+        assert!(raag.alankars().is_some());
+        assert_eq!(raag.swarmaalika().sam(), 1);
+        assert!(!raag.swarmaalika().sthayi.lines.is_empty());
+        assert!(!raag.swarmaalika().antara.lines.is_empty());
     }
 }

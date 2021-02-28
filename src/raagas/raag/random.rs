@@ -9,6 +9,8 @@ use crate::raagas::{SimpleRandomiser, PureRandomiser, Mutate};
 use crate::raagas::swarblock::SwarBlocks;
 
 impl SimpleRandomiser for Raag {
+    /// Based on the source swarblock, generate a mutated swarblock. For mutation,
+    /// one of the mutation operators is randomly picked.
     fn randomise(&self, src_blks: &SwarBlocks) -> SwarBlocks {
         if let Some(rnd_swar_ind) = src_blks.random_swar_index() {
             if let Some(context_swars) = src_blks.adjacent_swars(&rnd_swar_ind) {
@@ -55,6 +57,9 @@ impl SimpleRandomiser for Raag {
 }
 
 impl PureRandomiser for Raag {
+    /// A pure randomiser to generate a sequence of swars based on aroha and avroha
+    /// of the raag. Random swars are picked from aroha and avroha (in that order).
+    /// `n_swars` dictates the number of swars generated.
     fn randomise(&self, n_swars: usize) -> Result<Vec<Swar>, String> {
         let mut rnd = rand::thread_rng();
         let aroha = self.aroha().as_ref().unwrap();
@@ -98,6 +103,7 @@ impl PureRandomiser for Raag {
     }
 }
 
+/// Generate a sequence of indices in ascending order
 fn get_rnd_monotonic(mut rnd: &mut ThreadRng, max: usize, n: usize) -> Vec<usize> {
     let _v: Vec<usize> = (0..max).collect();
     let mut _rnd: Vec<usize> = _v.choose_multiple(&mut rnd, n).map(|i| *i).collect();

@@ -94,11 +94,6 @@ impl From<Pitch> for SineWave {
 
 impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        // let mut tone = "";
-        // if let Some(hz) = constants::SWARS.get(&*self.0) {
-        //     tone = hz.tone();
-        // }
-        // write!(f, "{}[{}]", self.0, tone)
         write!(f, "{}", self.0)
     }
 }
