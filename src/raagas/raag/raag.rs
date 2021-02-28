@@ -76,7 +76,7 @@ impl Raag {
     }
 
     fn play_pakad(&self, dev: &AudioDevice) {
-        // println!("\n=> playing pakad  {:?}", self.pakad.unwrap());
+        println!("\n=> playing pakad  {}", self.pakad.as_ref().unwrap());
         self.pakad.as_ref().unwrap().play(&dev);
     }
 

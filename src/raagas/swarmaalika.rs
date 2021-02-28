@@ -24,8 +24,10 @@ impl Sthayi {
     }
 
     pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice) {
+        println!("line: {}", line);
         let line_blks = self.lines.get(line);
         if let Some(blks) = line_blks {
+            println!("  {}", blks);
             for _ in 0..no_times {
                 blks.play(&dev);
             }
@@ -49,8 +51,10 @@ impl Antara {
     }
 
     pub fn play_line(&self, line: &str, no_times: usize, dev: &AudioDevice) {
+        println!("line: {}", line);
         let line_blks = self.lines.get(line);
         if let Some(blks) = line_blks {
+            println!("  {}", blks);
             for _ in 0..no_times {
                 blks.play(&dev);
             }
@@ -107,13 +111,23 @@ mod tests {
         let raag = "malkauns";
         let composition = "comp1";
         let line_a = "lineA";
+
+        let raag = load::load_yaml(raag, composition).unwrap();
+        let blks = raag.swarmaalika().sthayi.lines.get(line_a);
+        assert!(blks.is_some());
+    }
+
+    /// test if we can retrieve a line from Sthayi and match a swarbeat
+    #[test]
+    fn test_swarbeat_from_line_in_swarmaalika() {
+        let raag = "malkauns";
+        let composition = "comp1";
+        let line_a = "lineA";
         let sw_bt_index: usize = 6;
         let sw_bt_expected = "M:d:M:g";
 
         let raag = load::load_yaml(raag, composition).unwrap();
         let blks = raag.swarmaalika().sthayi.lines.get(line_a);
-        println!("blks: {}", blks.unwrap());
-        assert!(blks.is_some());
         assert_eq!(blks.unwrap().swarbeats().get(sw_bt_index).unwrap().to_string(), sw_bt_expected);
     }
 

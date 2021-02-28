@@ -111,7 +111,6 @@ impl SwarBlock {
     }
 
     pub fn play(&self, dev: &AudioDevice) {
-        println!("=> playing swarblock: {}", self);
         for sw_bt in &self.0 {
             for sw in &sw_bt.swars {
                 let sw_sink = sw.build_sink(&None, &dev).unwrap();

@@ -6,11 +6,10 @@ use yaml_rust::YamlLoader;
 use self::yaml_rust::{yaml, Yaml};
 use std::collections::HashMap;
 use std::fs::File;
-use std::path::Path;
 use std::io::BufReader;
 use std::time::Duration;
 use crate::raagas::swars::{Swar, BeatSrc};
-use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, CONF_DIR, BEAT_MP3};
+use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, BEAT_MP3};
 use crate::raagas::sound::Pitch;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::raag::raag::Raag;
@@ -290,10 +289,7 @@ fn play_raw_beats_forever(beatp: (&str, f32)) -> BeatSrc {
 
 pub fn load_yaml(raag: &str, composition: &str) -> Option<Raag> {
     // Given a raag name returns a Raag
-    let comp_path = format!("{}.yaml", composition);
-    let raagp = Path::new(CONF_DIR).join(raag).join(comp_path);
-    // let raagp = format!("{}/{}/{}.yaml", CONF_DIR, raag, composition);
-    let s = utils::file_as_str(raagp);
+    let s = utils::read_composition_as_str(raag, composition);
     let yamlldr = YamlLoader::load_from_str(&s);
     match &yamlldr {
         Ok(docs) => {
@@ -325,11 +321,40 @@ pub fn load_yaml(raag: &str, composition: &str) -> Option<Raag> {
 #[cfg(test)]
 mod tests {
     use crate::raagas::raag::load;
-    use crate::raagas::swarblock::SwarBlock;
+    use crate::raagas::utils;
+    use super::yaml_rust::YamlLoader;
+
+    /// load a raag from yaml
+    #[test]
+    fn test_load_yaml() {
+        let raag = "bhupali";
+        let composition = "1";
+        let raag = load::load_yaml(raag, composition);
+        assert!(raag.is_some());
+    }
+
+    /// test reading a line from yaml
+    #[test]
+    fn test_swar_line_aroha() {
+        let raag = "bhupali";
+        let composition = "1";
+        let composition_s = utils::read_composition_as_str(raag, composition);
+        let yamlldr = YamlLoader::load_from_str(&composition_s);
+        match &yamlldr {
+            Ok(docs) => {
+                let doc = &docs[0];
+                let aroha = &doc["aroha"];
+                let aroha_blks = load::swar_line(aroha);
+                assert!(aroha_blks.is_some());
+            },
+            _ => {}
+        }
+
+    }
 
     /// test no of swarbeats match for a sequence
     #[test]
-    fn test_load_swarbeats_count() {
+    fn test_string_to_swarbeats_count() {
         let s = "S:R:M:P S - - M P:P -:D :D P/M";
         let swarbeats = load::to_swarbeats(s);
         assert_eq!(swarbeats.len(), 9);
@@ -352,12 +377,11 @@ mod tests {
     fn test_extend_swar_with_half_beat() {
         let s = "S - :G";
         let mut swarbeats = load::to_swarbeats(s);
-        println!("swarbeats: {:?}", swarbeats);
         load::extend_last_swar(&mut swarbeats, 1.0);
-        println!("swarbeats: {:?}", swarbeats);
         let i = load::get_last_swarbeat_with_swar(&mut swarbeats).unwrap();
         let sw_bt = swarbeats.get(i).unwrap();
         let last_swar = sw_bt.swars.last().unwrap();
         assert_eq!(last_swar.beat_cnt, 1.5);
     }
+
 }
