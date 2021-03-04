@@ -8,123 +8,12 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
-use crate::raagas::swars::{Swar, BeatSrc};
-use crate::raagas::constants::{KAN_SWAR_BEAT_COUNT, BEAT_MP3};
-use crate::raagas::sound::Pitch;
+use crate::raagas::swars::BeatSrc;
+use crate::raagas::constants::BEAT_MP3;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::utils;
 use crate::raagas::swarblock::{SwarBlocks, SwarBlock};
-use crate::raagas::swarbeat::SwarBeat;
-
-// traversing from the last item, returns the index of the swarbeat with a swar in it
-// S - - M - -, will return 3 (as the last swarbeat is a '-' and M is the one with swar
-// from the back
-pub fn get_last_swarbeat_with_swar(swarbeats: &mut Vec<SwarBeat>) -> Option<usize> {
-    // (0..n) is excluded and we only need 0 to n-1
-    for i in (0..swarbeats.len()).rev() {
-        let sw_bt = swarbeats.get(i).unwrap();
-        if sw_bt.len() > 0 {
-            return Some(i);
-        }
-    }
-
-    None
-}
-
-// increment the last swar of previous swarbeat
-pub fn extend_last_swar(swarbeats: &mut Vec<SwarBeat>, beat_count_inc: f32) {
-    if let Some(i) = get_last_swarbeat_with_swar(swarbeats) {
-        if let Some(prev_sw_bt) = swarbeats.get_mut(i) {
-            prev_sw_bt.increment_swar_at(prev_sw_bt.len()-1, beat_count_inc);
-        }
-    }
-}
-
-pub fn to_swarbeats(s: &str) -> Vec<SwarBeat> {
-    let mut swarbeats_vec: Vec<SwarBeat> = vec![];
-    let swarbeats: Vec<String> = s.trim().split(" ").map(|x| x.to_string()).collect();
-    for sw_bt in swarbeats {
-        let mut swars = Vec::<Swar>::new();
-        if sw_bt.eq("-") {
-            // S:G -  (G will be a beat and a half)
-            // S - -  Go all the way back to S and extend it by 1 beat
-            // add an extra beat to the previous swarbeat
-            // and nothing to add for current swarbeat
-            extend_last_swar(&mut swarbeats_vec, 1.0);
-        } else {
-            if sw_bt.contains(":") {
-                // four cases: either two swars or four swars
-                // two swars: S:S, -:S :S S: we don't need 'S:- M' as we can always write it as
-                // 'S:M -'
-                // four swars: S:S:S:S
-                let sw_bts_vec: Vec<String> = sw_bt.split(":").map(|x| x.to_string()).collect();
-                if sw_bts_vec.len() == 2 {
-                    // first and second swar are each 0.5 beat
-                    let first_swar_s = sw_bts_vec.first().unwrap();
-                    let last_swar_s = sw_bts_vec.last().unwrap();
-                    if first_swar_s.eq("-") {
-                        // modify last swar of previous SwarBeat
-                        extend_last_swar(&mut swarbeats_vec, 0.5);
-                        // and last_swar to swars
-                        let last_swar = Swar::new(Pitch::new(last_swar_s.to_string()), 0.5);
-                        swars.push(last_swar);
-                    } else if last_swar_s.eq("-") {
-                        // add the first swar
-                        let first_swar = Swar::new(Pitch::new(last_swar_s.to_string()), 1.0);
-                        swars.push(first_swar);
-                    } else {
-                        if first_swar_s.eq("") {
-                            swars.push(Swar::empty(0.5));
-                        } else {
-                            swars.push(Swar::new(
-                                Pitch::new(first_swar_s.to_string()),
-                                0.5)
-                            );
-                        }
-                        if last_swar_s.eq("") {
-                            swars.push(Swar::empty(0.5));
-                        } else {
-                            swars.push(Swar::new(
-                                Pitch::new(last_swar_s.to_string()),
-                                0.5)
-                            );
-                        }
-                    }
-                } else if sw_bts_vec.len() == 4 {
-                    // each of the four swars are 0.25 beat
-                    let beat_count = 0.25;
-                    for sw in sw_bts_vec {
-                        if sw.eq("-")  {
-                            extend_last_swar(&mut swarbeats_vec, beat_count);
-                        } else {
-                            let swar = Swar::new(
-                                Pitch::new(sw.to_string()), beat_count
-                            );
-                            swars.push(swar);
-                        }
-                    }
-                }
-            } else if sw_bt.contains("/") {
-                // kan swar
-                // e.g.: P/M
-                let swrs: Vec<String> = sw_bt.split("/").map(|x| x.to_string()).collect();
-                let kan = swrs.get(0).unwrap();
-                let kan_bt_cnt: f32 = 1.0 * KAN_SWAR_BEAT_COUNT;
-                swars.push(Swar::new(Pitch::new(kan.to_string()), kan_bt_cnt));
-                let main_swar = swrs.get(1).unwrap();
-                swars.push(Swar::new(Pitch::new(main_swar.to_string()), 1.0 - kan_bt_cnt));
-
-            } else {
-                // all else, just a plain swar (e.g.: S)
-                swars.push(Swar::new(Pitch::new(sw_bt.to_string()), 1.0));
-            }
-        }
-        swarbeats_vec.push(SwarBeat::new(swars));
-    }
-
-    swarbeats_vec
-}
 
 fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
     let mut blk: Vec<SwarBlock> = Vec::new();
@@ -136,7 +25,7 @@ fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
                 } else {
                     let blks_s: Vec<&str> = line.as_str().unwrap().split(",").collect();
                     for blk_s in blks_s {
-                        blk.push(SwarBlock(to_swarbeats(blk_s)));
+                        blk.push(SwarBlock::from(blk_s));
                     }
                     Some(SwarBlocks(blk))
                 }
@@ -350,38 +239,6 @@ mod tests {
             _ => {}
         }
 
-    }
-
-    /// test no of swarbeats match for a sequence
-    #[test]
-    fn test_string_to_swarbeats_count() {
-        let s = "S:R:M:P S - - M P:P -:D :D P/M";
-        let swarbeats = load::to_swarbeats(s);
-        assert_eq!(swarbeats.len(), 9);
-    }
-
-    /// test if the beat count matches when a swar is extended
-    #[test]
-    fn test_extend_swar_with_beat() {
-        let s = "S - G -";
-        let mut swarbeats = load::to_swarbeats(s);
-        load::extend_last_swar(&mut swarbeats, 1.0);
-        let i = load::get_last_swarbeat_with_swar(&mut swarbeats).unwrap();
-        let sw_bt = swarbeats.get(i).unwrap();
-        let last_swar = sw_bt.swars.last().unwrap();
-        assert_eq!(last_swar.beat_cnt, 3.0);
-    }
-
-    /// test if the beat count matches when half a beat swar is extended
-    #[test]
-    fn test_extend_swar_with_half_beat() {
-        let s = "S - :G";
-        let mut swarbeats = load::to_swarbeats(s);
-        load::extend_last_swar(&mut swarbeats, 1.0);
-        let i = load::get_last_swarbeat_with_swar(&mut swarbeats).unwrap();
-        let sw_bt = swarbeats.get(i).unwrap();
-        let last_swar = sw_bt.swars.last().unwrap();
-        assert_eq!(last_swar.beat_cnt, 1.5);
     }
 
 }

@@ -7,7 +7,6 @@ use crate::raagas::{raag, Melody, SimpleRandomiser};
 use crate::raagas::utils;
 use crate::raagas::swarblock;
 use crate::raagas::raag::raag::Raag;
-use crate::raagas::swarbeat::SwarBeat;
 
 pub fn print_usage(msg: &str, opts: &Options) {
     println!("Usage: {}", opts.usage(msg));
@@ -81,19 +80,12 @@ pub fn parse(
         // we can play random swars from sargam
     }
 
-
     // playing swars from the file
     if let Some(fp) = matches.opt_str("f") {
         println!("Playing swars from the file {}", fp);
         let lines = utils::lines_from_file(fp);
-        let mut swarbeats: Vec<SwarBeat> = vec![];
-
-        for l in lines {
-            let mut _swars = raag::load::to_swarbeats(&l);
-            swarbeats.append(&mut _swars);
-        }
-
-        let swarblk = swarblock::SwarBlock(swarbeats);
+        let s: &str = &lines.join(" ");
+        let swarblk = swarblock::SwarBlock::from(s);
         return Ok(Melody::SwarBlock(swarblk));
     }
 

@@ -10,8 +10,8 @@ use rand::seq::SliceRandom;
 
 impl SwarBlocks {
 
-    //return the first index of swar matched, this can be improved to pick a random
-    //index for a list of indices
+    /// Retrieve the first index of swar matched.
+    /// This can be improved to pick a random index for a list of indices
     pub fn index_swar(&self, swar: &Swar) -> Option<SwarInSwarBlock> {
         for blk in &self.0 {
             if let Some(index) =  blk.index_swar(swar) {
@@ -22,6 +22,7 @@ impl SwarBlocks {
         None
     }
 
+    /// Returns a list of swarbeats from the swarblocks.
     pub fn swarbeats(&self) -> Vec<&SwarBeat> {
         let mut swar_beats = Vec::<&SwarBeat>::new();
         for blk in &self.0 {
@@ -226,11 +227,6 @@ impl SwarBlocks {
         false
 
     }
-
-    // pub fn to_swarblock(&self) -> SwarBlockRef {
-    //     let swar_beats = self.swarbeats();
-    //     SwarBlockRef(swar_beats)
-    // }
 
     pub fn play(&self, dev: &AudioDevice) {
         for blk in &self.0 {
