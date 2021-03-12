@@ -50,6 +50,18 @@ impl Swar {
         self.pitch.as_ref().unwrap().hertz().unwrap().freq()
     }
 
+    pub fn lower(&self) -> Self {
+        let p = self.pitch.as_ref().unwrap().to_string();
+        let p_lower = format!(".{}", p);
+        Swar::new(Pitch::new(p_lower), self.beat_cnt)
+    }
+
+    pub fn higher(&self) -> Self {
+        let p = self.pitch.as_ref().unwrap().to_string();
+        let p_higher = format!("{}.", p);
+        Swar::new(Pitch::new(p_higher), self.beat_cnt)
+    }
+
     /// increment the swar beat count by inc
     pub(crate) fn inc_beat_count(&mut self, inc: f32) {
         self.beat_cnt += inc;
@@ -116,6 +128,39 @@ impl fmt::Display for Swar {
     }
 }
 
+/// Returns the index of `swar` from the list of swars `swars`
+pub fn get_swar_index(swars: &Vec<&Swar>, swar: &Swar) -> Option<usize> {
+    for (i, sw) in swars.iter().enumerate() {
+        let swar_freq = swar.freq();
+        if sw.freq() == swar_freq {
+            return Some(i);
+        }
+    }
+
+    None
+}
+
+/// Returns true if the sequence of swars `match_swars` are contained in
+/// `from_swars`.
+pub fn contains(from_swars: &Vec<&Swar>, match_swars: &Vec<&Swar>) -> bool {
+    if let Some(first_swar) = match_swars.first() {
+        if let Some(first_sw_i) = get_swar_index(&from_swars, first_swar) {
+            // there should be tail
+            let match_tail = match_swars.get(1..).unwrap();
+            for sw in match_tail {
+                if let Some(next_sw_i) = get_swar_index(&from_swars, sw) {
+                    if next_sw_i < first_sw_i {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    false
+}
+
 impl MutationOperators for Swar {
     fn operators(&self) -> Vec<&str> {
         vec![
@@ -128,7 +173,6 @@ impl MutationOperators for Swar {
          let swar_mut_type = swar_mut_operators.choose(&mut rand::thread_rng()).unwrap();
 
         swar_mut_type.to_string()
-
     }
 }
 

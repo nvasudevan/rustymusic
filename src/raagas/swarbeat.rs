@@ -15,16 +15,28 @@ pub struct SwarBeat {
 }
 
 impl SwarBeat {
+
+    /// Returns a new `SwarBeat` based on `Swars`.
     pub fn new(swars: Vec<Swar>) -> Self {
         SwarBeat {
             swars
         }
     }
 
-    /// Calculates the number of swars contained in it
-    /// A swarbeat denoted as a '-' has no swars in it.
+    /// Calculates the length (i.e. number of swars) contained in it
     pub fn len(&self) -> usize {
         self.swars.len()
+    }
+
+    /// Derive the lower octave equivalent of a swarbeat
+    pub fn lower(&self) -> SwarBeat {
+        let mut lower_swars = Vec::<Swar>::new();
+        for sw in &self.swars {
+            let lower_swar = sw.lower();
+            lower_swars.push(lower_swar);
+        }
+
+        SwarBeat::new(lower_swars)
     }
 
     pub fn random_swar(&self) -> Swar {
@@ -99,9 +111,8 @@ impl SwarBeat {
 
         None
     }
-
-
 }
+
 
 impl fmt::Display for SwarBeat {
     // there are four options: S, S:S, S:S:S:S, S/G

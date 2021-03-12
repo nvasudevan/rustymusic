@@ -1,4 +1,4 @@
-use crate::raagas::swarblock::{SwarBlocks, SwarInSwarBlock};
+use crate::raagas::swarblock::{SwarInSwarBlock, SwarBlock};
 use crate::raagas::swarbeat::SwarBeat;
 use crate::raagas::swars::Swar;
 use rand::Rng;
@@ -8,7 +8,22 @@ use crate::raagas::sound::AudioDevice;
 use std::fmt;
 use rand::seq::SliceRandom;
 
+
+#[derive(Debug, Clone)]
+pub struct SwarBlocks(pub Vec<SwarBlock>);
+
 impl SwarBlocks {
+
+    /// return the lower octave equivalent of the swars
+    pub fn lower(&self) -> SwarBlocks {
+        let mut lower_blks = Vec::<SwarBlock>::new();
+        for blk in &self.0 {
+            let lower_blk = blk.lower();
+            lower_blks.push(lower_blk);
+        }
+
+        SwarBlocks(lower_blks)
+    }
 
     /// Retrieve the first index of swar matched.
     /// This can be improved to pick a random index for a list of indices
@@ -149,6 +164,16 @@ impl SwarBlocks {
         swars
     }
 
+    pub fn to_swars_as_ref(&self) -> Vec<&Swar> {
+        let mut swars = Vec::<&Swar>::new();
+        for blk in &self.0 {
+            let mut blk_swars = blk.to_swars_as_ref();
+            swars.append(&mut blk_swars);
+        }
+
+        swars
+    }
+
     /// Returns the adjacent swars surrounding the index.
     pub fn adjacent_swars(&self, index: &SwarInSwarBlock) -> Option<Vec<&Swar>> {
         println!("index: {:?}", index);
@@ -190,44 +215,6 @@ impl SwarBlocks {
         None
     }
 
-    pub fn is_monotonic_increasing(&self, match_swars: &Vec<&Swar>) -> bool {
-        let mut swars = Vec::<&Swar>::new();
-        for blk in &self.0 {
-            for sw_bt in &blk.0 {
-                for sw in &sw_bt.swars {
-                    swars.push(sw);
-                }
-            }
-        }
-        let get_swar_index = |swars: &Vec<&Swar>, swar: &Swar| -> Option<usize> {
-            for (i, sw) in swars.iter().enumerate() {
-                let swar_freq = swar.freq();
-                if sw.freq() == swar_freq {
-                    return Some(i);
-                }
-            }
-            None
-        };
-
-        let first_swar = match_swars.first().unwrap();
-        if let Some(first_sw_i) = get_swar_index(&swars, first_swar) {
-            // there should be tail
-            let match_tail = match_swars.get(1..).unwrap();
-            for sw in match_tail {
-                if let Some(next_sw_i) = get_swar_index(&swars, sw) {
-                    if next_sw_i < first_sw_i {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        false
-
-    }
-
     pub fn play(&self, dev: &AudioDevice) {
         for blk in &self.0 {
             blk.play(&dev);
@@ -262,6 +249,16 @@ impl SwarBlocks {
                 // try the swarbeat before or after
             }
         }
+    }
+}
+
+impl From<Vec<Swar>> for SwarBlocks {
+    /// Returns a Swarblocks for a given sequence of swars
+    fn from(swars: Vec<Swar>) -> SwarBlocks {
+        let mut blks = Vec::<SwarBlock>::new();
+        blks.push(SwarBlock::from(swars));
+
+        SwarBlocks(blks)
     }
 }
 

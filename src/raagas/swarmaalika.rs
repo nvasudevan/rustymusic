@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::raagas::sound::{AudioDevice};
 
-use crate::raagas::swarblock::SwarBlocks;
+use crate::raagas::SwarBlocks;
 
 #[derive(Debug, Clone)]
 pub struct Swarmaalika {
