@@ -10,9 +10,6 @@ use rand::Rng;
 #[derive(Debug, Clone)]
 pub struct SwarBlock(pub Vec<SwarBeat>);
 
-#[derive(Debug, Clone)]
-pub struct SwarBlocks(pub Vec<SwarBlock>);
-
 #[derive(Debug)]
 pub struct SwarInSwarBlock<'a> {
     pub swarbeat_index: usize,
@@ -21,12 +18,33 @@ pub struct SwarInSwarBlock<'a> {
 }
 
 impl SwarBlock {
+    /// Returns the number of swarbeats in the swarblock
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
-    // retrieve the first (i, j) of match_swar, where
-    // i is the matched swarbeat, and j is the index of swar within it
+    pub fn lower(&self) -> SwarBlock {
+        let mut lower = Vec::<SwarBeat>::new();
+        for bt in &self.0 {
+            let lower_bt = bt.lower();
+            lower.push(lower_bt);
+        }
+
+        SwarBlock(lower)
+    }
+
+    pub fn higher(&self) -> SwarBlock {
+        let mut higher = Vec::<SwarBeat>::new();
+        for bt in &self.0 {
+            let higher_bt = bt.higher();
+            higher.push(higher_bt);
+        }
+
+        SwarBlock(higher)
+    }
+
+    /// Retrieve the first (i, j) of match_swar, where
+    /// i is the matched swarbeat, and j is the index of swar within it
     pub fn index_swar(&self, match_swar: &Swar) -> Option<SwarInSwarBlock> {
         let swar_beats = &self.0;
         for (i, sw_bt) in swar_beats.into_iter().enumerate() {
@@ -44,6 +62,27 @@ impl SwarBlock {
         None
     }
 
+    /// Return the index of the `swarbeat` with a swar (so skipping any swarbeat with
+    /// empty swars) between `start` and `end` indices; `l2r` allows the direction of
+    /// traversal.
+    pub fn next_index_with_swar(&self, start: usize, end: usize, l2r: bool) -> Option<usize> {
+        let mut from_to: Vec<usize> = (start..end).map(|v| v).collect();
+        if ! l2r {
+           from_to = (start..end).rev().map(|v| v).collect();
+        }
+        for k in from_to {
+            let sw_bt = self.0.get(k).unwrap();
+            if sw_bt.len() > 0 {
+                let sw = sw_bt.swars.first().unwrap();
+                if sw.pitch.is_some() {
+                    return Some(k);
+                }
+            }
+        }
+
+        None
+    }
+
     // this is useful when we need when checking if the swars are in
     // ascending or descending order irrespective of the beat duration
     pub fn to_swars(&self) -> Vec<Swar> {
@@ -53,6 +92,17 @@ impl SwarBlock {
                 swars.push(sw.clone());
             }
         }
+        swars
+    }
+
+    pub fn to_swars_as_ref(&self) -> Vec<&Swar> {
+        let mut swars = Vec::<&Swar>::new();
+        for sw_bt in &self.0 {
+            for sw in &sw_bt.swars {
+                swars.push(sw);
+            }
+        }
+
         swars
     }
 
@@ -145,7 +195,18 @@ impl fmt::Display for SwarBlock {
     }
 }
 
+impl From<Vec<Swar>> for SwarBlock {
+    /// Return a swarblock from a sequence of swars.
+    fn from(swars: Vec<Swar>) -> Self {
+        let mut swar_bts = Vec::<SwarBeat>::new();
+        swar_bts.push(SwarBeat::new(swars));
+
+        SwarBlock(swar_bts)
+    }
+}
+
 impl From<&str> for SwarBlock {
+    /// Return a SwarBlock from a string denoting sequence of swars
     fn from(s: &str) -> Self {
             let mut swarbeats_vec: Vec<SwarBeat> = vec![];
             let swarbeats: Vec<String> = s.trim().split(" ").map(|x| x.to_string()).collect();

@@ -6,7 +6,7 @@ use rand::prelude::ThreadRng;
 use crate::raagas::sound::Pitch;
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::{SimpleRandomiser, PureRandomiser, Mutate};
-use crate::raagas::swarblock::SwarBlocks;
+use crate::raagas::swarblocks::SwarBlocks;
 
 impl SimpleRandomiser for Raag {
     /// Based on the source swarblock, generate a mutated swarblock. For mutation,
@@ -14,8 +14,8 @@ impl SimpleRandomiser for Raag {
     fn randomise(&self, src_blks: &SwarBlocks) -> SwarBlocks {
         if let Some(rnd_swar_ind) = src_blks.random_swar_index() {
             if let Some(context_swars) = src_blks.adjacent_swars(&rnd_swar_ind) {
-               println!("swars: {:?}", context_swars);
-                if self.is_ascending(&context_swars) {
+                println!("swars: {:?}", context_swars);
+                if self.in_aroha(&context_swars) {
                     println!("\n=> swars in ascending ...");
                     let swar_picked = &rnd_swar_ind.swar;
                     if let Some(aroha_swars) = self.aroha_swars_by_context(&swar_picked) {
@@ -28,7 +28,7 @@ impl SimpleRandomiser for Raag {
                     }
                 }
 
-                if self.is_descending(&context_swars) {
+                if self.in_avroha(&context_swars) {
                     println!("\n=> swars in descending ...");
                     let swar_picked = &rnd_swar_ind.swar;
                     if let Some(avroha_swars) = self.avroha_swars_by_context(swar_picked) {
@@ -62,8 +62,8 @@ impl PureRandomiser for Raag {
     /// `n_swars` dictates the number of swars generated.
     fn randomise(&self, n_swars: usize) -> Result<Vec<Swar>, String> {
         let mut rnd = rand::thread_rng();
-        let aroha = self.aroha().as_ref().unwrap();
-        let avroha = self.avroha().as_ref().unwrap();
+        let aroha = self.aroha().aroha();
+        let avroha = self.avroha().avroha();
         let mut _swars: Vec<Swar> = Vec::new();
 
         // always start with S

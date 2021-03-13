@@ -19,6 +19,9 @@ lazy_static! {
 
 pub fn initialise_swars<'a>() -> HashMap<&'a str, Hertz> {
     let mut swars: HashMap<&str, Hertz> = HashMap::new();
+    swars.insert(".G", Hertz::new(174.61, "F".to_string()));
+    swars.insert(".M", Hertz::new(185.00, "F#".to_string()));
+    swars.insert(".M'", Hertz::new(196.00, "G".to_string()));
     swars.insert(".P", Hertz::new(207.65, "G#".to_string()));
     swars.insert(".d", Hertz::new(220.00, "A".to_string()));
     swars.insert(".D", Hertz::new(233.08, "A#".to_string()));

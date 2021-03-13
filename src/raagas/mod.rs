@@ -1,6 +1,7 @@
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::swars::Swar;
-use crate::raagas::swarblock::{SwarBlock, SwarInSwarBlock, SwarBlocks};
+use crate::raagas::swarblock::{SwarBlock, SwarInSwarBlock};
+use crate::raagas::swarblocks::SwarBlocks;
 
 pub mod utils;
 pub mod constants;
@@ -12,6 +13,8 @@ pub mod raag;
 pub(crate) mod swarblock;
 pub(crate) mod swarbeat;
 mod swarblocks;
+mod aroha;
+mod avroha;
 
 pub enum Melody {
     SwarBlocks(SwarBlocks),

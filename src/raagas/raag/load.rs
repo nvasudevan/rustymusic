@@ -13,7 +13,10 @@ use crate::raagas::constants::BEAT_MP3;
 use crate::raagas::swarmaalika::{Sthayi, Antara, Swarmaalika};
 use crate::raagas::raag::raag::Raag;
 use crate::raagas::utils;
-use crate::raagas::swarblock::{SwarBlocks, SwarBlock};
+use crate::raagas::swarblock::SwarBlock;
+use crate::raagas::swarblocks::SwarBlocks;
+use crate::raagas::aroha::Aroha;
+use crate::raagas::avroha::Avroha;
 
 fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
     let mut blk: Vec<SwarBlock> = Vec::new();
@@ -195,8 +198,8 @@ pub fn load_yaml(raag: &str, composition: &str) -> Option<Raag> {
 
             Some(Raag::new(
                 raag.to_string(),
-                Some(aroha),
-                Some(avroha),
+                Aroha::new(aroha),
+                Avroha::new(avroha),
                 Some(pakad),
                 alankars,
                 swarmaalika,

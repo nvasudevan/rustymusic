@@ -1,30 +1,32 @@
 use crate::raagas::swarmaalika::Swarmaalika;
-use crate::raagas::swars::{Swar, BeatSrc};
 use crate::raagas::sound::{AudioDevice};
 use crate::raagas::constants::{BPS, PLAY_PAUSE_DURATION};
-use crate::raagas::utils;
-use crate::raagas::swarblock::SwarBlocks;
+use crate::raagas::{utils, swars};
+use crate::raagas::swarblocks::SwarBlocks;
+use crate::raagas::swars::Swar;
+use crate::raagas::aroha::Aroha;
+use crate::raagas::avroha::Avroha;
 
 #[derive(Clone)]
 pub struct Raag {
     swarmaalika: Swarmaalika,
     name: String,
-    aroha: Option<SwarBlocks>,
-    avroha: Option<SwarBlocks>,
+    aroha: Aroha,
+    avroha: Avroha,
     pakad: Option<SwarBlocks>,
     alankars: Option<SwarBlocks>,
-    beat_src: Option<BeatSrc>,
+    beat_src: Option<swars::BeatSrc>,
 }
 
 impl Raag {
     pub fn new(
         name: String,
-        aroha: Option<SwarBlocks>,
-        avroha: Option<SwarBlocks>,
+        aroha: Aroha,
+        avroha: Avroha,
         pakad: Option<SwarBlocks>,
         alankars: Option<SwarBlocks>,
         swarmaalika: Swarmaalika,
-        beat_src: Option<BeatSrc>,
+        beat_src: Option<swars::BeatSrc>,
     ) -> Raag {
         Raag {
             name,
@@ -41,11 +43,11 @@ impl Raag {
         self.name.to_string()
     }
 
-    pub fn aroha(&self) -> &Option<SwarBlocks> {
+    pub fn aroha(&self) -> &Aroha {
         &self.aroha
     }
 
-    pub fn avroha(&self) -> &Option<SwarBlocks> {
+    pub fn avroha(&self) -> &Avroha {
         &self.avroha
     }
 
@@ -61,18 +63,18 @@ impl Raag {
         &self.swarmaalika
     }
 
-    pub fn beat_src(&self) -> &Option<BeatSrc> {
+    pub fn beat_src(&self) -> &Option<swars::BeatSrc> {
         &self.beat_src
     }
 
     fn play_aroha(&self, dev: &AudioDevice) {
-        println!("\n=> playing aroha  {}", self.aroha.as_ref().unwrap());
-        self.aroha.as_ref().unwrap().play(&dev);
+        println!("\n=> playing aroha  {}", self.aroha.aroha());
+        self.aroha.play(&dev);
     }
 
     fn play_avroha(&self, dev: &AudioDevice) {
-        println!("\n=> playing avroha  {}", self.avroha.as_ref().unwrap());
-        self.avroha.as_ref().unwrap().play(&dev);
+        println!("\n=> playing avroha  {}", self.avroha.avroha());
+        self.avroha.play(&dev);
     }
 
     fn play_pakad(&self, dev: &AudioDevice) {
@@ -90,30 +92,22 @@ impl Raag {
         self.swarmaalika.play(&dev);
     }
 
-    pub fn is_ascending(&self, swars: &Vec<&Swar>) -> bool {
-        self.aroha().as_ref().unwrap().is_monotonic_increasing(swars)
+    /// check if the `swars` are in aroha in all three octaves
+    pub fn in_aroha(&self, swars: &Vec<&Swar>) -> bool {
+        swars::contains(&self.aroha.swars_in_all_octaves(), &swars)
     }
 
-    pub fn is_descending(&self, swars: &Vec<&Swar>) -> bool {
-        self.avroha().as_ref().unwrap().is_monotonic_increasing(swars)
+    /// check if the `swars` are in avroha in all three octaves
+    pub fn in_avroha(&self, swars: &Vec<&Swar>) -> bool {
+        swars::contains(&self.avroha.swars_in_all_octaves(), &swars)
     }
 
     pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<&Swar>> {
-        let blks = self.aroha.as_ref().unwrap();
-        if let Some(index) = blks.index_swar(&swar) {
-            return blks.adjacent_swars(&index);
-        }
-
-        None
+        self.aroha.swars_by_context(swar)
     }
 
     pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<&Swar>> {
-        let blks = self.avroha.as_ref().unwrap();
-        if let Some(index) = blks.index_swar(&swar) {
-            return blks.adjacent_swars(&index);
-        }
-
-        None
+        self.avroha.swars_by_context(swar)
     }
 
     pub fn play(&self, dev: &AudioDevice) {
@@ -134,18 +128,6 @@ impl Raag {
 mod tests {
     use crate::raagas::raag::load;
 
-    /// test if raag durga composition can be loaded and if it contains aroha
-    #[test]
-    fn test_load_raag_durga_aroha_as_string() {
-        let raag = "durga";
-        let composition = "durga";
-        let raag = load::load_yaml(raag, composition).unwrap();
-        let expected = "S - R - M - P - D - S. - -";
-
-        let aroha =  raag.aroha().as_ref().unwrap();
-        assert_eq!(aroha.to_string(), expected);
-    }
-
     /// test if raag composition can be loaded and contains parts:
     /// aroha, avroha, pakad, alankars, sthayi, antara
     #[test]
@@ -154,8 +136,8 @@ mod tests {
         let composition = "durga";
         let raag = load::load_yaml(raag, composition).unwrap();
 
-        assert!(raag.aroha().is_some());
-        assert!(raag.avroha().is_some());
+        assert!(raag.aroha().aroha().0.len() > 0);
+        assert!(raag.avroha().avroha().0.len() > 0);
         assert!(raag.pakad().is_some());
         assert!(raag.alankars().is_some());
         assert_eq!(raag.swarmaalika().sam(), 1);
