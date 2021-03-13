@@ -142,7 +142,7 @@ mod tests {
         let raag = "durga";
         let composition = "durga";
         let raag = load::load_yaml(raag, composition).unwrap();
-        let expected = "S - R - M - P - D - S. - -";
+        let expected = "S. - D - P - M - R - S - -";
 
         let avroha = raag.avroha();
         assert_eq!(avroha.avroha().to_string(), expected);
