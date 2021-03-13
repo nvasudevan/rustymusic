@@ -13,7 +13,8 @@ pub mod raag;
 pub(crate) mod swarblock;
 pub(crate) mod swarbeat;
 mod swarblocks;
-mod aroha_avroha;
+mod aroha;
+mod avroha;
 
 pub enum Melody {
     SwarBlocks(SwarBlocks),

@@ -15,7 +15,8 @@ use crate::raagas::raag::raag::Raag;
 use crate::raagas::utils;
 use crate::raagas::swarblock::SwarBlock;
 use crate::raagas::swarblocks::SwarBlocks;
-use crate::raagas::aroha_avroha::{Aroha, Avroha};
+use crate::raagas::aroha::Aroha;
+use crate::raagas::avroha::Avroha;
 
 fn swar_line(doc: &Yaml) -> Option<SwarBlocks> {
     let mut blk: Vec<SwarBlock> = Vec::new();

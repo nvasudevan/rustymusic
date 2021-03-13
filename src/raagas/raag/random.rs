@@ -14,7 +14,7 @@ impl SimpleRandomiser for Raag {
     fn randomise(&self, src_blks: &SwarBlocks) -> SwarBlocks {
         if let Some(rnd_swar_ind) = src_blks.random_swar_index() {
             if let Some(context_swars) = src_blks.adjacent_swars(&rnd_swar_ind) {
-               println!("swars: {:?}", context_swars);
+                println!("swars: {:?}", context_swars);
                 if self.in_aroha(&context_swars) {
                     println!("\n=> swars in ascending ...");
                     let swar_picked = &rnd_swar_ind.swar;

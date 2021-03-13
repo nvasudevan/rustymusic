@@ -33,6 +33,16 @@ impl SwarBlock {
         SwarBlock(lower)
     }
 
+    pub fn higher(&self) -> SwarBlock {
+        let mut higher = Vec::<SwarBeat>::new();
+        for bt in &self.0 {
+            let higher_bt = bt.higher();
+            higher.push(higher_bt);
+        }
+
+        SwarBlock(higher)
+    }
+
     /// Retrieve the first (i, j) of match_swar, where
     /// i is the matched swarbeat, and j is the index of swar within it
     pub fn index_swar(&self, match_swar: &Swar) -> Option<SwarInSwarBlock> {
@@ -49,6 +59,27 @@ impl SwarBlock {
                 }
             }
         }
+        None
+    }
+
+    /// Return the index of the `swarbeat` with a swar (so skipping any swarbeat with
+    /// empty swars) between `start` and `end` indices; `l2r` allows the direction of
+    /// traversal.
+    pub fn next_index_with_swar(&self, start: usize, end: usize, l2r: bool) -> Option<usize> {
+        let mut from_to: Vec<usize> = (start..end).map(|v| v).collect();
+        if ! l2r {
+           from_to = (start..end).rev().map(|v| v).collect();
+        }
+        for k in from_to {
+            let sw_bt = self.0.get(k).unwrap();
+            if sw_bt.len() > 0 {
+                let sw = sw_bt.swars.first().unwrap();
+                if sw.pitch.is_some() {
+                    return Some(k);
+                }
+            }
+        }
+
         None
     }
 

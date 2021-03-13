@@ -25,6 +25,17 @@ impl SwarBlocks {
         SwarBlocks(lower_blks)
     }
 
+    /// return the higher octave equivalent of the swars
+    pub fn higher(&self) -> SwarBlocks {
+        let mut higher_blks = Vec::<SwarBlock>::new();
+        for blk in &self.0 {
+            let higher_blk = blk.higher();
+            higher_blks.push(higher_blk);
+        }
+
+        SwarBlocks(higher_blks)
+    }
+
     /// Retrieve the first index of swar matched.
     /// This can be improved to pick a random index for a list of indices
     pub fn index_swar(&self, swar: &Swar) -> Option<SwarInSwarBlock> {
@@ -83,7 +94,7 @@ impl SwarBlocks {
         None
     }
 
-    fn swar_index_forward(&self, from_sw_bt: usize, from_sw: usize) -> Option<SwarInSwarBlock> {
+    pub fn swar_index_forward(&self, from_sw_bt: usize, from_sw: usize) -> Option<SwarInSwarBlock> {
         let swarbeats = self.swarbeats();
 
         // first deal with current swarbeat and then traverse forwards

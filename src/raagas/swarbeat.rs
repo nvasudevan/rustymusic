@@ -39,6 +39,17 @@ impl SwarBeat {
         SwarBeat::new(lower_swars)
     }
 
+    /// Derive the higher octave equivalent of a swarbeat
+    pub fn higher(&self) -> SwarBeat {
+        let mut higher_swars = Vec::<Swar>::new();
+        for sw in &self.swars {
+            let higher_swar = sw.higher();
+            higher_swars.push(higher_swar);
+        }
+
+        SwarBeat::new(higher_swars)
+    }
+
     pub fn random_swar(&self) -> Swar {
         let mut rnd = rand::thread_rng();
         let rnd_swar = self.swars.choose(&mut rnd);

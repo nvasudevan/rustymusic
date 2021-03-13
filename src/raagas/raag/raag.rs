@@ -4,7 +4,8 @@ use crate::raagas::constants::{BPS, PLAY_PAUSE_DURATION};
 use crate::raagas::{utils, swars};
 use crate::raagas::swarblocks::SwarBlocks;
 use crate::raagas::swars::Swar;
-use crate::raagas::aroha_avroha::{Aroha, Avroha};
+use crate::raagas::aroha::Aroha;
+use crate::raagas::avroha::Avroha;
 
 #[derive(Clone)]
 pub struct Raag {
@@ -102,25 +103,11 @@ impl Raag {
     }
 
     pub fn aroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<&Swar>> {
-        let all_blks = self.aroha.all_octaves();
-        for blks in all_blks {
-            if let Some(index) = blks.index_swar(&swar) {
-                return blks.adjacent_swars(&index);
-            }
-        }
-
-        None
+        self.aroha.swars_by_context(swar)
     }
 
     pub fn avroha_swars_by_context(&self, swar: &Swar) -> Option<Vec<&Swar>> {
-        let all_blks = self.avroha.all_octaves();
-        for blks in all_blks {
-            if let Some(index) = blks.index_swar(&swar) {
-                return blks.adjacent_swars(&index);
-            }
-        }
-
-        None
+        self.avroha.swars_by_context(swar)
     }
 
     pub fn play(&self, dev: &AudioDevice) {
