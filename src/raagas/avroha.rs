@@ -89,10 +89,34 @@ impl Avroha {
     pub fn higher(&self) -> Option<&SwarBlocks> {
         self.higher.as_ref()
     }
+
     pub fn avroha(&self) -> &SwarBlocks {
         &self.avroha
     }
 
+    /// Returns all three octaves of avroha
+    pub fn all_octaves(&self) -> SwarBlocks {
+        let mut blks = Vec::<SwarBlock>::new();
+        let mut higher_blks = self.higher().unwrap().0
+            .iter()
+            .map(|blk| blk.clone())
+            .collect::<Vec<SwarBlock>>();
+        blks.append(&mut higher_blks);
+
+        let mut avroha_blks = self.avroha().0
+            .iter()
+            .map(|blk| blk.clone())
+            .collect::<Vec<SwarBlock>>();
+        blks.append(&mut avroha_blks);
+
+        let mut lower_blks = self.lower().unwrap().0
+            .iter()
+            .map(|blk| blk.clone())
+            .collect::<Vec<SwarBlock>>();
+        blks.append(&mut lower_blks);
+
+        SwarBlocks(blks)
+    }
     /// Returns avroha swars in all three octaves (in order):
     /// higher middle lower
     /// e.g.: For swars x y z, return x. y. z. x y z .x .y .z
@@ -135,6 +159,7 @@ impl Avroha {
 #[cfg(test)]
 mod tests {
     use crate::raagas::raag::load;
+    use crate::raagas::avroha::Avroha;
 
     /// test avroha as string
     #[test]
@@ -142,7 +167,7 @@ mod tests {
         let raag = "durga";
         let composition = "durga";
         let raag = load::load_yaml(raag, composition).unwrap();
-        let expected = "S. - D - P - M - R - S - -";
+        let expected = "S. - D - P - M - R - S -";
 
         let avroha = raag.avroha();
         assert_eq!(avroha.avroha().to_string(), expected);
@@ -172,4 +197,19 @@ mod tests {
         assert_eq!(avroha.higher().to_string(), expected);
     }
 
+    /// test avroha in all three octaves
+    #[test]
+    fn test_avroha_all_octaves() {
+        let raag = "durga";
+        let composition = "durga";
+        let raag = load::load_yaml(raag, composition).unwrap();
+        let expected = "D. - P. - M. - R. - S. - D - P - M - R - S - .D - .P - .M - .R -";
+
+        let mut avroha = Avroha::new(raag.avroha().avroha.clone());
+        avroha.build_lower();
+        avroha.build_higher();
+
+        let avroha_set = avroha.all_octaves();
+        assert_eq!(avroha_set.to_string(), expected);
+    }
 }

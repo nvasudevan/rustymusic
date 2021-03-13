@@ -97,6 +97,30 @@ impl Aroha {
         self.aroha.play(&dev);
     }
 
+    /// Returns all three octaves of aroha
+    pub fn all_octaves(&self) -> SwarBlocks {
+        let mut blks = Vec::<SwarBlock>::new();
+        let mut lower_blks = self.lower().unwrap().0
+            .iter()
+            .map(|blk| blk.clone())
+            .collect::<Vec<SwarBlock>>();
+        blks.append(&mut lower_blks);
+
+        let mut aroha_blks = self.aroha().0
+            .iter()
+            .map(|blk| blk.clone())
+            .collect::<Vec<SwarBlock>>();
+        blks.append(&mut aroha_blks);
+
+        let mut higher_blks = self.higher().unwrap().0
+            .iter()
+            .map(|blk| blk.clone())
+            .collect::<Vec<SwarBlock>>();
+        blks.append(&mut higher_blks);
+
+        SwarBlocks(blks)
+    }
+
     /// Returns aroha swars in all three octaves (in order):
     /// lower middle higher
     /// e.g.: For swars x y z, return .x .y .z x y z x. y. z.
@@ -135,6 +159,7 @@ impl Aroha {
 #[cfg(test)]
 mod tests {
     use crate::raagas::raag::load;
+    use crate::raagas::aroha::Aroha;
 
     /// test aroha as string
     #[test]
@@ -142,7 +167,7 @@ mod tests {
         let raag = "durga";
         let composition = "durga";
         let raag = load::load_yaml(raag, composition).unwrap();
-        let expected = "S - R - M - P - D - S. - -";
+        let expected = "S - R - M - P - D - S. -";
 
         let aroha = raag.aroha();
         assert_eq!(aroha.aroha().to_string(), expected);
@@ -170,5 +195,21 @@ mod tests {
         let aroha = raag.aroha().build(&raag.aroha().aroha.0);
 
         assert_eq!(aroha.higher().to_string(), expected);
+    }
+
+    /// test aroha in all three octaves
+    #[test]
+    fn test_aroha_all_octaves() {
+        let raag = "durga";
+        let composition = "durga";
+        let raag = load::load_yaml(raag, composition).unwrap();
+        let expected = ".R - .M - .P - .D - S - R - M - P - D - S. - R. - M. - P. - D. -";
+
+        let mut aroha = Aroha::new(raag.aroha().aroha.clone());
+        aroha.build_lower();
+        aroha.build_higher();
+
+        let aroha_set = aroha.all_octaves();
+        assert_eq!(aroha_set.to_string(), expected);
     }
 }
